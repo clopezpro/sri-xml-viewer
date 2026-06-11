@@ -1,6 +1,6 @@
 {
   "name": "@sri-xml-viewer/react",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "React viewer components for SRI Ecuador XML electronic vouchers",
   "type": "module",
   "exports": {
