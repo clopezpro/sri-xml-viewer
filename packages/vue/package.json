@@ -16,7 +16,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && vue-tsc --declaration --emitDeclarationOnly --declarationDir dist",
     "dev": "vite build --watch"
   },
   "peerDependencies": {

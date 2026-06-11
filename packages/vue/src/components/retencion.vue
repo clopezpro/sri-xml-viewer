@@ -238,7 +238,7 @@ const getDetailsV2 = computed(() => {
 
   for (let i = 0; i < data.length; i++) {
     const docSustento = data[i]
-    const obj: Record<string, string> = {}
+    const obj: Record<string, any> = {}
 
     // Extraer valores directos de docSustento
     if (!docSustento)

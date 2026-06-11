@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { toRefs, ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import JsBarcode from 'jsbarcode'
 
 const props = defineProps({
@@ -8,7 +8,7 @@ const props = defineProps({
     required: false,
   },
 })
-const { text } = toRefs(props)
+const text = computed(() => props.text)
 const canvas = ref(null)
 const options = {
   format: 'CODE128',
@@ -30,7 +30,7 @@ const options = {
   marginRight: undefined,
 }
 function generate() {
-  JsBarcode(canvas.value, text.value, options)
+  JsBarcode(canvas.value, text.value || '', options)
 }
 onMounted(() => {
   generate()
