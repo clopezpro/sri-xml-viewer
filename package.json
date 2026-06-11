@@ -9,7 +9,8 @@
     "dev": "turbo run dev --parallel",
     "test": "turbo run test",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "release": "bumpp package.json packages/*/package.json --commit --tag --push"
   },
   "devDependencies": {
     "bumpp": "^11.1.0",
