@@ -239,7 +239,7 @@ const isDark = computed({
           class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-1 shadow-md overflow-hidden"
         >
           <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200/60 dark:border-slate-800 flex justify-between items-center">
-            <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Visualización del Comprobante v</span>
+            <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Visualización del Comprobante</span>
             <!-- Print Button (uses window.print) -->
             <button 
               class="inline-flex items-center space-x-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-900/40 transition shadow-sm" 

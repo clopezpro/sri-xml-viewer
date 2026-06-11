@@ -61,7 +61,7 @@ function getEmissionName(val: string): string {
 </script>
 
 <template>
-  <div class="sri-xml-viewer w-full font-sans antialiased text-gray-800 dark:text-gray-200">
+  <div class=" w-full  ">
     <div
       v-if="error"
       class="p-6 text-center bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl"

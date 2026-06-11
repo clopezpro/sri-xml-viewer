@@ -129,7 +129,7 @@ function getColumnsTB() {
 
 <template>
   <div
-    class="max-w-6xl mx-auto print:mx-0 print:w-full bg-gray-50 text-black m-1 rounded-md p-1 printContent"
+    class="bg-white! font-sans antialiased text-gray-800 max-w-6xl mx-auto print:mx-0 print:w-full text-black m-1 rounded-md p-1 printContent"
   >
     <div
       v-if="dateAuthorization"

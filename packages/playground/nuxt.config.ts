@@ -4,4 +4,8 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxt/ui'],
   css: ['~/assets/main.css'],
+  devServer: {
+    port: 4007,
+    host: '0.0.0.0', // Allows access from other devices on the network
+  },
 })
