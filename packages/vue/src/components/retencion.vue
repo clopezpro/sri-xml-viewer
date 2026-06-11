@@ -317,14 +317,13 @@ const infoRetention = computed(() => {
 
 <template>
   <div
-
-    class="text-xs flex flex-col gap-1 max-w-5xl mx-auto  bg-gray-50 text-black m-1 rounded-md p-1 printContent print:mx-0 print:w-full"
+    class="text-xs flex flex-col gap-1 max-w-5xl mx-auto bg-default text-default m-1 rounded-md p-1 printContent print:mx-0 print:w-full"
   >
     <div
       v-if="authorization"
-      class="print:hidden flex justify-end"
+      class="print:!hidden flex justify-end"
     >
-      <div class="font-bold text-green-700">
+      <div class="font-bold text-primary">
         Documento autorizado el {{ authorization }}
       </div>
     </div>
@@ -332,10 +331,10 @@ const infoRetention = computed(() => {
       :document="document"
       :dateAuthorization="authorization"
     />
-    <div class="flex mt-5 ">
-      <div class="border rounded-lg w-full">
+    <div class="flex mt-5">
+      <div class="border border-default rounded-lg w-full p-2">
         <div class="flex-none flex">
-          <div class="font-bold pr-2">
+          <div class="font-bold pr-2 text-dimmed">
             Razón Social / Nombres y Apellidos :
           </div>
           <div>
@@ -343,13 +342,13 @@ const infoRetention = computed(() => {
           </div>
         </div>
         <div class="flex-none flex">
-          <div class="font-bold pr-2">
+          <div class="font-bold pr-2 text-dimmed">
             Identificación:
           </div>
           <div>
             {{ infoRetention.identificacionSujetoRetenido }}
           </div>
-          <div class="mx-2 font-bold">
+          <div class="mx-2 font-bold text-primary">
             ({{
               showTypeDoc(
                 infoRetention.tipoIdentificacionSujetoRetenido,
@@ -359,23 +358,23 @@ const infoRetention = computed(() => {
         </div>
 
         <div class="flex-none flex">
-          <div class="font-bold pr-2">
+          <div class="font-bold pr-2 text-dimmed">
             FECHA EMISION:
           </div>
           <div>{{ infoRetention.fechaEmision }}</div>
-          <div class="font-bold pr-2 pl-4">
-            Es obligado a llevar Contablilidad:
+          <div class="font-bold pr-2 pl-4 text-dimmed">
+            Es obligado a llevar Contabilidad:
           </div>
           <div v-if="infoRetention.obligadoContabilidad">
             {{ infoRetention.obligadoContabilidad }}
           </div>
-          <div class="font-bold pr-2 pl-4">
+          <div class="font-bold pr-2 pl-4 text-dimmed">
             Parte Relacionada:
           </div>
           <div>
             {{ infoRetention.parteRel ?? 'NO' }}
           </div>
-          <div class="font-bold pr-2 pl-4">
+          <div class="font-bold pr-2 pl-4 text-dimmed">
             Periodo Fiscal:
           </div>
           <div v-if="infoRetention.periodoFiscal">
@@ -387,20 +386,20 @@ const infoRetention = computed(() => {
           <div
             v-for="(docSustento, key) in getDetailsV2"
             :key="key"
-            class="border border-gray-500 mt-4"
+            class="border border-default rounded-lg p-2 mt-4"
           >
-            <div class="text-center font-bold italic">
-              DATOS DOCUMENTOS DE SUSTENTO  V2.0.0
+            <div class="text-center font-bold italic text-primary">
+              DATOS DOCUMENTOS DE SUSTENTO V2.0.0
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 mb-2">
               <div class="flex gap-2">
                 <div class="flex gap-2">
-                  <div class="font-bold">
+                  <div class="font-bold text-dimmed">
                     {{
                       showTypeDoc(docSustento.codDocSustento, 1)
                     }}
                   </div>
-                  <div class=" px-2 rounded-md border bg-gray-300">
+                  <div class="px-2 rounded-md border border-default bg-muted">
                     {{
                       showMeNumber(docSustento.numDocSustento as string)
                     }}
@@ -410,7 +409,7 @@ const infoRetention = computed(() => {
                   v-if="docSustento.numAutDocSustento"
                   class="flex mx-4"
                 >
-                  <div class="font-bold">
+                  <div class="font-bold text-dimmed">
                     Numero Autorización:
                   </div>
                   <div>
@@ -419,9 +418,9 @@ const infoRetention = computed(() => {
                 </div>
               </div>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-4 mb-2">
               <div>
-                <div class="font-bold">
+                <div class="font-bold text-dimmed">
                   Fecha Emisión:
                 </div>
                 <div class="text-center">
@@ -429,7 +428,7 @@ const infoRetention = computed(() => {
                 </div>
               </div>
               <div v-if="docSustento.fechaRegistroContable">
-                <div class="font-bold">
+                <div class="font-bold text-dimmed">
                   Fecha Registro Contable:
                 </div>
                 <div class="text-center">
@@ -437,7 +436,7 @@ const infoRetention = computed(() => {
                 </div>
               </div>
               <div>
-                <div class="font-bold">
+                <div class="font-bold text-dimmed">
                   Pago a Residente:
                 </div>
                 <div class="text-center">
@@ -446,7 +445,7 @@ const infoRetention = computed(() => {
               </div>
 
               <div>
-                <div class="font-bold">
+                <div class="font-bold text-dimmed">
                   Total Sin impuestos:
                 </div>
                 <div class="text-center">
@@ -454,7 +453,7 @@ const infoRetention = computed(() => {
                 </div>
               </div>
               <div>
-                <div class="font-bold">
+                <div class="font-bold text-dimmed">
                   Importe Total:
                 </div>
                 <div class="text-center">
@@ -462,27 +461,27 @@ const infoRetention = computed(() => {
                 </div>
               </div>
             </div>
-            <div class=" hidden">
+            <div class="hidden">
               <div class="w-full">
-                <div class="text-center">
+                <div class="text-center font-bold">
                   FORMAS DE PAGOS
                 </div>
                 <table
                   v-if="docSustento.pagos.pago"
-                  class="w-full text-xs"
+                  class="w-full text-xs border border-default"
                 >
                   <thead>
-                    <tr>
-                      <th class="border">
+                    <tr class="bg-muted">
+                      <th class="border border-default p-1 text-left">
                         TIPO
                       </th>
-                      <th class="border">
+                      <th class="border border-default p-1 text-right">
                         VALOR
                       </th>
-                      <th class="border">
-                        PAZO
+                      <th class="border border-default p-1 text-right">
+                        PLAZO
                       </th>
-                      <th class="border">
+                      <th class="border border-default p-1">
                         TIEMPO
                       </th>
                     </tr>
@@ -494,16 +493,16 @@ const infoRetention = computed(() => {
                       )"
                       :key="index"
                     >
-                      <td class="border text-center">
+                      <td class="border border-default p-1 text-center">
                         {{ dt.formaPago }}
                       </td>
-                      <td class="border text-right">
+                      <td class="border border-default p-1 text-right">
                         {{ dt.total }}
                       </td>
-                      <td class="border text-right">
+                      <td class="border border-default p-1 text-right">
                         {{ dt.plazo }}
                       </td>
-                      <td class="border">
+                      <td class="border border-default p-1">
                         {{ dt.unidadTiempo }}
                       </td>
                     </tr>
@@ -511,12 +510,12 @@ const infoRetention = computed(() => {
                 </table>
               </div>
               <div class="w-full">
-                <div class="text-center">
+                <div class="text-center font-bold">
                   Detalle Impuestos Doc de Sustento
                 </div>
                 <table
                   v-if="docSustento?.pagos?.pago"
-                  class="w-full text-xs"
+                  class="w-full text-xs border border-default"
                 >
                   <tbody>
                     <tr
@@ -526,13 +525,13 @@ const infoRetention = computed(() => {
                       )"
                       :key="index"
                     >
-                      <td class="border text-right">
+                      <td class="border border-default p-1 text-right">
                         {{ dt.typePor }}
                       </td>
-                      <td class="border text-right">
+                      <td class="border border-default p-1 text-right">
                         {{ dt.baseImponible }}
                       </td>
-                      <td class="border text-right">
+                      <td class="border border-default p-1 text-right">
                         {{ dt.valor }}
                       </td>
                     </tr>
@@ -541,27 +540,23 @@ const infoRetention = computed(() => {
               </div>
             </div>
             <div>
-              <div class="px-4 pt-4 ">
-                <div
-                  border
-                  border-gray-500
-                  mb-2
-                >
-                  <table class="w-full table-bordered text-xs ">
+              <div class="px-2 pt-2">
+                <div class="border border-default rounded-lg mb-2 p-1">
+                  <table class="w-full table-bordered text-xs">
                     <thead>
-                      <tr>
+                      <tr class="bg-muted">
                         <td
-                          class="text-center font-bold"
+                          class="text-center font-bold border border-default p-1 text-primary"
                           :colspan="getColumsDT().length"
                         >
                           DETALLES DE LA RETENCION
                         </td>
                       </tr>
-                      <tr>
+                      <tr class="bg-muted">
                         <th
                           v-for="(tag, index) in getColumsDT()"
                           :key="index"
-                          class="border"
+                          class="border border-default p-1 text-left"
                         >
                           {{ tag }}
                         </th>
@@ -572,32 +567,31 @@ const infoRetention = computed(() => {
                         v-for="(dt, index) in docSustento.retenciones"
                         :key="index"
                       >
-                        <td class="break-words border">
+                        <td class="break-words border border-default p-1">
                           {{ index + 1 }}
                         </td>
-                        <td class="break-words border text-center">
+                        <td class="break-words border border-default p-1 text-center">
                           {{ showTypeDoc(dt.codigo, 2) }}
                         </td>
-                        <td class="break-words border">
+                        <td class="break-words border border-default p-1">
                           {{ nameCode(dt.codigoRetencion) }}
                         </td>
-                        <td class="break-words border text-right">
+                        <td class="break-words border border-default p-1 text-right">
                           %{{ dt.porcentajeRetener }}
                         </td>
-                        <td class="break-words border text-right">
+                        <td class="break-words border border-default p-1 text-right">
                           {{ dt.baseImponible }}
                         </td>
-                        <td class="break-words border text-right">
+                        <td class="break-words border border-default p-1 text-right">
                           {{ dt.valorRetenido }}
                         </td>
                       </tr>
-                      <tr>
-                        <td colspan="5" />
-                        <td class="text-right">
+                      <tr class="bg-muted">
+                        <td colspan="5" class="border border-default" />
+                        <td class="text-right border border-default p-1 font-bold">
                           TOTAL RETENIDO
-                          <span class="px-2  bg-gray-300">
+                          <span class="px-2 py-0.5 rounded bg-primary/15 text-primary ml-1 font-bold">
                             {{ formatToMoney(getTotalRtV2) }}
-
                           </span>
                         </td>
                       </tr>
@@ -607,41 +601,27 @@ const infoRetention = computed(() => {
               </div>
             </div>
           </div>
-          <!-- <div
-
-            class="text-right font-bold p-4"
-          >
-            TOTAL
-            <span class="px-2 rounded-md border bg-gray-300">
-              {{ showTotalRTV2() }}
-
-            </span>
-          </div> -->
         </div>
         <div
           v-if="getVersion === '1.0.0'"
-          class="border border-gray-500 mt-4"
+          class="border border-default rounded-lg p-2 mt-4"
         >
-          <div
-            border
-            border-gray-500
-            mb-2
-          >
-            <table class="w-full table-bordered text-xs ">
+          <div class="border border-default rounded-lg mb-2 p-1">
+            <table class="w-full table-bordered text-xs">
               <thead>
-                <tr>
+                <tr class="bg-muted text-primary">
                   <td
-                    class="text-center font-bold"
+                    class="text-center font-bold border border-default p-1"
                     :colspan="getColumsDTV1().length"
                   >
-                    DETALLES DE LA RETENCION  V1
+                    DETALLES DE LA RETENCION V1
                   </td>
                 </tr>
-                <tr>
+                <tr class="bg-muted">
                   <th
                     v-for="(tag, index) in getColumsDTV1()"
                     :key="index"
-                    class="border"
+                    class="border border-default p-1 text-left"
                   >
                     {{ tag }}
                   </th>
@@ -652,44 +632,43 @@ const infoRetention = computed(() => {
                   v-for="(dt, index) in getDetailsV1"
                   :key="index"
                 >
-                  <td class="break-words border text-center">
+                  <td class="break-words border border-default p-1 text-center">
                     {{
                       showTypeDoc(dt.codDocSustento, 1)
                     }}
                   </td>
 
-                  <td class="break-words border text-center">
+                  <td class="break-words border border-default p-1 text-center">
                     {{ showMeNumber(dt.numDocSustento as string) }}
                   </td>
-                  <td class="break-words border">
+                  <td class="break-words border border-default p-1">
                     {{ dt.fechaEmisionDocSustento }}
                   </td>
-                  <td class="break-words border">
+                  <td class="break-words border border-default p-1">
                     {{ infoRetention.periodoFiscal }}
                   </td>
-                  <td class="break-words border text-right">
+                  <td class="break-words border border-default p-1 text-right">
                     {{ dt.baseImponible }}
                   </td>
-                  <td class="break-words border text-right">
+                  <td class="break-words border border-default p-1 text-right">
                     {{
                       showTypeDoc(dt.codigo, 2)
                     }}
                     {{ dt.codigoRetencion }}
                   </td>
-                  <td class="break-words border text-right">
+                  <td class="break-words border border-default p-1 text-right">
                     %{{ dt.porcentajeRetener }}
                   </td>
-                  <td class="break-words border text-right">
+                  <td class="break-words border border-default p-1 text-right">
                     {{ dt.valorRetenido }}
                   </td>
                 </tr>
-                <tr>
-                  <td colspan="7" />
-                  <td class="text-right">
+                <tr class="bg-muted">
+                  <td colspan="7" class="border border-default" />
+                  <td class="text-right border border-default p-1 font-bold">
                     TOTAL RETENIDO
-                    <span class="px-2  bg-gray-300">
+                    <span class="px-2 py-0.5 rounded bg-primary/15 text-primary ml-1 font-bold">
                       {{ getTotalRtV1 }}
-
                     </span>
                   </td>
                 </tr>
@@ -697,25 +676,25 @@ const infoRetention = computed(() => {
             </table>
           </div>
         </div>
-        <div class="p-8">
-          <div class="border rounded-lg w-full mt-2">
-            <div class="text-center text-lg font-bold">
+        <div class="p-4">
+          <div class="border border-default rounded-lg w-full mt-2 p-2">
+            <div class="text-center text-sm font-bold text-primary mb-1">
               INFORMACIÓN ADICIONAL
             </div>
             <div>
               <table
                 v-if="infoAdicional"
-                class="text-xs w-full table-fixed"
+                class="text-xs w-full table-fixed border border-default"
               >
                 <tbody>
                   <tr
                     v-for="(dt, index) in infoAdicional"
                     :key="index"
                   >
-                    <td class="w-1/3 break-words">
+                    <td class="w-1/3 break-words p-1 border border-default font-bold bg-muted">
                       {{ dt.name }}
                     </td>
-                    <td class="w-full break-words">
+                    <td class="w-full break-words p-1 border border-default">
                       {{ dt.value }}
                     </td>
                   </tr>

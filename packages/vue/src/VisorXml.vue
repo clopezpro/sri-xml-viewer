@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import { getFullInvoiceDataFromXml } from '@sri-xml-viewer/core'
-import headDoc from './components/headDoc.vue'
 import FacturaComponent from './components/factura.vue'
 import NotaCreditoComponent from './components/notaCredito.vue'
 import GuiaRemisionComponent from './components/guiaRemision.vue'
@@ -61,7 +60,7 @@ function getEmissionName(val: string): string {
 </script>
 
 <template>
-  <div class=" w-full  ">
+  <div class="w-full visor-xml-container">
     <div
       v-if="error"
       class="p-6 text-center bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl"
@@ -89,7 +88,9 @@ function getEmissionName(val: string): string {
       </p>
     </div>
 
-    <div v-else-if="data">
+    <div
+      v-else-if="data"
+    >
       <!-- Specialized SRI Document Component Views -->
       <template v-if="data.typeDoc === '01'">
         <FacturaComponent
@@ -121,3 +122,71 @@ function getEmissionName(val: string): string {
     </div>
   </div>
 </template>
+
+<style>
+@media print {
+  /* Force exact background and color rendering in browser print engine */
+  .visor-xml-container,
+  .visor-xml-container * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force Light Mode CSS Variables specifically for the VisorXml component on print */
+  html,
+  body,
+  .dark,
+  :root,
+  .visor-xml-container,
+  .visor-xml-container * {
+    --ui-bg: white !important;
+    --ui-bg-muted: #f9fafb !important;
+    --ui-bg-elevated: #f3f4f6 !important;
+    --ui-bg-accented: #e5e7eb !important;
+    --ui-bg-inverted: #111827 !important;
+    
+    --ui-text-dimmed: #9ca3af !important;
+    --ui-text-muted: #6b7280 !important;
+    --ui-text-toned: #4b5563 !important;
+    --ui-text: #374151 !important;
+    --ui-text-highlighted: #111827 !important;
+    --ui-text-inverted: white !important;
+
+    --ui-border: #e5e7eb !important;
+    --ui-border-muted: #f3f4f6 !important;
+    --ui-border-accented: #d1d5db !important;
+
+    /* Primary green theme color for printing */
+    --ui-primary: #15803d !important; 
+  }
+
+  /* Force text colors to dark shades inside the viewer to guarantee readability */
+  .visor-xml-container,
+  .visor-xml-container th, 
+  .visor-xml-container td, 
+  .visor-xml-container div, 
+  .visor-xml-container span, 
+  .visor-xml-container p, 
+  .visor-xml-container strong,
+  .visor-xml-container label,
+  .visor-xml-container a,
+  .visor-xml-container strong *,
+  .visor-xml-container div * {
+    color: #111827 !important;
+  }
+
+  /* Ensure printed tables display with clean borders and collapse spacing */
+  .visor-xml-container table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  .visor-xml-container th, 
+  .visor-xml-container td {
+    border: 1px solid #e5e7eb !important;
+    padding: 4px 6px !important;
+  }
+}
+</style>
+
+

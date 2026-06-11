@@ -97,12 +97,12 @@ const mode = computed(() => {
 </script>
 
 <template>
-  <div class="flex gap-2 ">
-    <div class="flex flex-col justify-between w-full m-1 ">
-      <div class="flex items-center p-1 flex-1 ">
+  <div class="grid grid-cols-2 gap-2">
+    <div class="flex flex-col justify-between  m-1">
+      <div class="flex items-center p-1 flex-1">
         <div
           v-if="!logoUrl"
-          class="  text-red-600 font-bold text-4xl text-center w-full"
+          class="text-error font-bold text-4xl text-center w-full"
         >
           NO TIENE LOGO
         </div>
@@ -110,10 +110,10 @@ const mode = computed(() => {
           v-else
           :src="logoUrl"
           alt="Logo"
-          class="w-full  h-full object-contain"
+          class="w-full h-full object-contain"
         >
       </div>
-      <div class="w-full border  rounded-lg">
+      <div class="w-full border border-default rounded-lg">
         <div
           v-if="infoTributaria.nombreComercial"
           class="text-center"
@@ -171,7 +171,7 @@ const mode = computed(() => {
             class="text-center w-full"
           >
             <span class="pr-1 font-bold">Agente de Retencion</span>
-            <span class="pr-1 font-bold text-red-800">
+            <span class="pr-1 font-bold text-error">
               Nº {{ infoTributaria.agenteRetencion }}
             </span>
           </div>
@@ -179,7 +179,7 @@ const mode = computed(() => {
             v-if="infoTributaria.contribuyenteRimpe"
             class="flex w-full justify-center bg-accented p-2 mb-1"
           >
-            <span class="pr-1 font-bold ">
+            <span class="pr-1 font-bold">
               <template
                 v-if="infoTributaria.contribuyenteRimpe === 'CONTRIBUYENTE RÉGIMEN RIMPE'"
               >
@@ -196,14 +196,14 @@ const mode = computed(() => {
             v-else-if="!infoTributaria.contribuyenteEspecial"
             class="flex w-full justify-center bg-accented rounded-lg p-2 mb-1"
           >
-            <span class="pr-1 font-bold ">
+            <span class="pr-1 font-bold">
               CONTRIBUYENTE RÉGIMEN GENERAL
             </span>
           </div>
         </div>
       </div>
     </div>
-    <div class="border rounded-lg w-full  m-1 overflow-x-auto p-1">
+    <div class="border border-default rounded-lg  m-1  p-2">
       <div>
         <strong> <span class="text-2xl"> R.U.C </span> <span class="mx-4 text-2xl">{{ infoTributaria.ruc }}</span></strong>
       </div>
@@ -215,7 +215,7 @@ const mode = computed(() => {
           <div class="font-bold">
             NUMERO COMPROBANTE
           </div>
-          <div class="text-center text-2xl ">
+          <div class="text-center text-2xl">
             {{ infoTributaria.estab }}-{{ infoTributaria.ptoEmi }}-{{ infoTributaria.secuencial }}
           </div>
         </div>
@@ -226,7 +226,7 @@ const mode = computed(() => {
           {{ infoTributaria.claveAcceso }}
         </div>
         <div
-          v-if=" dateAuthorization"
+          v-if="dateAuthorization"
           class="flex"
         >
           <div class="font-bold pr-2">
@@ -258,7 +258,7 @@ const mode = computed(() => {
         <div class="text-center text-clave text-xs">
           {{ infoTributaria.claveAcceso }}
         </div>
-        <div class="w-full  p-2 ">
+        <div class="w-full p-2">
           <BarCode
             class="flex-1 barcode"
             :text="infoTributaria.claveAcceso"

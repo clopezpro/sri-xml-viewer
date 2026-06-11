@@ -230,12 +230,12 @@ function showTypeDocSustento(code: string) {
 </script>
 
 <template>
-  <div class="text-xs flex flex-col gap-2 max-w-5xl mx-auto bg-gray-50 text-black m-1 rounded-md p-1 printContent print:mx-0 print:w-full">
+  <div class="text-xs flex flex-col gap-2 max-w-5xl mx-auto bg-default text-default m-1 rounded-md p-1 printContent print:mx-0 print:w-full">
     <div
       v-if="authorization"
-      class="print:hidden flex justify-end"
+      class="print:!hidden flex justify-end"
     >
-      <div class="font-bold text-green-700">
+      <div class="font-bold text-primary">
         Documento autorizado el {{ authorization }}
       </div>
     </div>
@@ -248,25 +248,25 @@ function showTypeDocSustento(code: string) {
     />
 
     <!-- Datos de Movilización / Transporte -->
-    <div class="border rounded-lg p-2 mt-2">
+    <div class="border border-default rounded-lg p-2 mt-2">
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <span class="font-bold">Transportista (Razón Social):</span> {{ infoGuiaRemision.razonSocialTransportista }}
+          <span class="font-bold text-dimmed">Transportista (Razón Social):</span> {{ infoGuiaRemision.razonSocialTransportista }}
         </div>
         <div>
-          <span class="font-bold">R.U.C. / C.I.:</span> {{ infoGuiaRemision.rucTransportista }}
+          <span class="font-bold text-dimmed">R.U.C. / C.I.:</span> {{ infoGuiaRemision.rucTransportista }}
         </div>
         <div>
-          <span class="font-bold">Placa del Vehículo:</span> <span class="bg-gray-200 px-2 py-0.5 rounded font-mono font-bold">{{ infoGuiaRemision.placa }}</span>
+          <span class="font-bold text-dimmed">Placa del Vehículo:</span> <span class="bg-muted px-2 py-0.5 rounded font-mono font-bold">{{ infoGuiaRemision.placa }}</span>
         </div>
         <div>
-          <span class="font-bold">Punto de Partida:</span> {{ infoGuiaRemision.dirPartida }}
+          <span class="font-bold text-dimmed">Punto de Partida:</span> {{ infoGuiaRemision.dirPartida }}
         </div>
         <div>
-          <span class="font-bold">Fecha Inicio Transporte:</span> {{ infoGuiaRemision.fechaIniTransporte }}
+          <span class="font-bold text-dimmed">Fecha Inicio Transporte:</span> {{ infoGuiaRemision.fechaIniTransporte }}
         </div>
         <div>
-          <span class="font-bold">Fecha Fin Transporte:</span> {{ infoGuiaRemision.fechaFinTransporte }}
+          <span class="font-bold text-dimmed">Fecha Fin Transporte:</span> {{ infoGuiaRemision.fechaFinTransporte }}
         </div>
       </div>
     </div>
@@ -275,22 +275,22 @@ function showTypeDocSustento(code: string) {
     <div
       v-for="(dest, index) in destinatarios"
       :key="index"
-      class="border rounded-lg p-2 mt-2"
+      class="border border-default rounded-lg p-2 mt-2"
     >
-      <div class="grid grid-cols-[200px_1fr]  ">
+      <div class="grid grid-cols-[200px_1fr] gap-y-1">
         <template
           v-if="dest.numDocSustento"
         >
-          <div>
+          <div class="text-dimmed">
             Comprobante de venta:
           </div>
           <div>
-            <span class="font-bold uppercase">{{ showTypeDocSustento(dest.codDocSustento ?? '') }} {{ dest.numDocSustento }}</span>
+            <span class="font-bold uppercase text-primary">{{ showTypeDocSustento(dest.codDocSustento ?? '') }} {{ dest.numDocSustento }}</span>
             <span class="ml-5">
               Fecha de emisión: <span class="font-bold">{{ dest.fechaEmisionDocSustento }}</span>
             </span>
           </div>
-          <div>
+          <div class="text-dimmed">
             Numero de autorización:
           </div>
           <div>
@@ -298,32 +298,32 @@ function showTypeDocSustento(code: string) {
           </div>
         </template>
 
-        <div>
+        <div class="text-dimmed">
           Motivo de Traslado:
         </div>
         <div class="font-bold">
           {{ dest.motivoTraslado }}
         </div>
-        <div>
+        <div class="text-dimmed">
           DESTINO (punto de llegada) :
         </div>
         <div class="font-bold">
           {{ dest.dirDestinatario }}
         </div>
-        <div>
+        <div class="text-dimmed">
           Identificación(Destinatario) :
         </div>
         <div class="font-bold">
           {{ dest.identificacionDestinatario }}
         </div>
-        <div>
+        <div class="text-dimmed">
           Nombre / Razón Social
         </div>
         <div class="font-bold">
           {{ dest.razonSocialDestinatario }}
         </div>
 
-        <div>
+        <div class="text-dimmed">
           Ruta:
         </div>
         <div class="font-bold">
@@ -332,14 +332,14 @@ function showTypeDocSustento(code: string) {
       </div>
 
       <!-- Tabla Dinámica de Productos del Destinatario -->
-      <div class="p-4">
-        <table class="w-full border border-accented text-xs">
+      <div class="p-2 mt-2">
+        <table class="w-full border border-default text-xs">
           <thead>
-            <tr class="bg-accented text-left text-gray-700">
+            <tr class="bg-muted text-left text-default">
               <th
                 v-for="(tag, colIdx) in getColumnsDT(dest.detalles)"
                 :key="colIdx"
-                class=" p-1  font-bold"
+                class="border border-default p-1 font-bold"
                 :class="tag.headerClassName ? tag.headerClassName : ''"
               >
                 {{ tag.label }}
@@ -354,7 +354,7 @@ function showTypeDocSustento(code: string) {
               <td
                 v-for="(cell, cellIdx) in row"
                 :key="cellIdx"
-                class="border border-accented p-1 break-words"
+                class="border border-default p-1 break-words"
                 :class="cell.clase ? cell.clase : ''"
               >
                 {{ cell.valor }}
@@ -368,14 +368,14 @@ function showTypeDocSustento(code: string) {
     <!-- Campos Adicionales Generales -->
     <div
       v-if="infoAdicional && infoAdicional.length > 0"
-      class=" mx-20"
+      class="mx-20 mt-2"
     >
-      <table class="text-xs w-full table-fixed border border-accented">
-        <thead class="border">
-          <tr class="bg-gray-100 text-gray-700">
+      <table class="text-xs w-full table-fixed border border-default">
+        <thead>
+          <tr class="bg-muted text-default">
             <th
               colspan="2"
-              class=" p-1 text-center font-bold"
+              class="p-1 text-center font-bold border border-default"
             >
               INFORMACIÓN ADICIONAL
             </th>
@@ -386,10 +386,10 @@ function showTypeDocSustento(code: string) {
             v-for="(dt, idx) in infoAdicional"
             :key="idx"
           >
-            <td class="w-1/3 break-words !p-1 border  font-bold bg-gray-50">
+            <td class="w-1/3 break-words !p-1 border border-default font-bold bg-muted">
               {{ dt.name }}
             </td>
-            <td class="w-2/3 break-words !p-1 border ">
+            <td class="w-2/3 break-words !p-1 border border-default">
               {{ dt.value }}
             </td>
           </tr>

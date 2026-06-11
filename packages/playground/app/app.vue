@@ -47,158 +47,91 @@ const isDark = computed({
     colorMode.preference = colorMode.value === 'dark' ? 'light' : 'dark'
   }
 })
+
+const print = () => {
+  window.print()
+}
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-100 dark:bg-slate-950 transition-colors duration-300 font-sans antialiased">
-    <!-- Navigation Header -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-slate-900/70 border-b border-slate-200/60 dark:border-slate-800/80 px-6 py-4 flex items-center justify-between shadow-sm">
-      <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white shadow-md shadow-blue-500/20 font-black text-lg">
-          SRI
-        </div>
-        <div>
-          <h1 class="text-base font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-            Visor XML SRI Ecuador
-          </h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            Parsea y visualiza comprobantes electrónicos del SRI
-          </p>
-        </div>
-      </div>
-
-      <div class="flex items-center space-x-4">
-        <!-- Live Demo Badge -->
-        <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-green-100 dark:bg-green-950/40 text-green-800 dark:text-green-400 border border-green-200 dark:border-green-800/50">
-          Demo Pública
-        </span>
-        <!-- Dark Mode Toggle Button -->
-        <button 
-          class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 dark:text-slate-300 transition-all shadow-sm" 
-          aria-label="Toggle theme"
-          @click="isDark = !isDark"
-        >
-          <svg
-            v-if="isDark"
-            class="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364-3.364l-.707.707M6.343 17.657l-.707.707m2.828 0l-.707-.707m12.022-12.022l-.707-.707M12 5a7 7 0 00-7 7 7 7 0 007 7 7 7 0 007-7 7 7 0 00-7-7z"
-            />
-          </svg>
-          <svg
-            v-else
-            class="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-            />
-          </svg>
-        </button>
-      </div>
-    </header>
-
+  <div class="min-h-screen bg-muted transition-colors duration-300 font-sans antialiased">
     <main class="max-w-7xl mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       <!-- Input Panel (Left, 4 columns) -->
-      <section class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-md space-y-6">
+      <section class="lg:col-span-4 bg-default border border-default rounded-3xl p-6 shadow-md space-y-6">
         <div>
-          <h2 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">
-            Cargar Comprobante
+          <h2 class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
+            Cargar Comprobante XML
           </h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">
-            Sube un archivo .xml descargado del SRI o pega el contenido directamente.
+          <p class="text-xs text-muted">
+            Sube un archivo .xml descargado del SRI o pega el contenido directamente en Contenido XML más abajo.
           </p>
         </div>
 
         <!-- File Upload Area -->
-        <div class="relative border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-blue-500 dark:hover:border-blue-500 rounded-2xl p-6 transition-all text-center bg-slate-50/50 dark:bg-slate-950/20 group">
-          <input 
-            type="file" 
-            accept=".xml" 
-            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
-            @change="handleFileUpload" 
-          >
-          <div class="space-y-2">
-            <div class="inline-flex p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200/60 dark:border-slate-800 text-slate-400 group-hover:text-blue-500 transition-colors shadow-sm">
-              <svg
-                class="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-            </div>
-            <div class="text-xs font-bold text-slate-700 dark:text-slate-300">
-              Seleccionar o soltar archivo .xml
-            </div>
-            <div class="text-[10px] text-slate-400">
-              Tamaño máximo 5MB
-            </div>
-          </div>
-        </div>
+        <UFileUpload
+          :preview="false"
+          accept=".xml"
+          color="primary"
+          label="Seleccionar o soltar archivo .xml"
+          description="Tamaño máximo 5MB"
+          @change="handleFileUpload"
+        />
 
         <div
           v-if="fileError"
-          class="text-xs text-red-500 font-bold bg-red-50 dark:bg-red-950/20 p-3 border border-red-200 dark:border-red-800 rounded-xl"
+          class="text-xs text-error font-bold bg-error/10 p-3 border border-error/20 rounded-xl"
         >
           {{ fileError }}
         </div>
 
         <!-- Mock Loader Buttons -->
         <div>
-          <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+          <p class="text-[10px] font-black text-dimmed uppercase tracking-wider mb-2">
             Comprobantes de Ejemplo
           </p>
           <div class="flex gap-2">
-            <button 
-              class="flex-1 text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition" 
+            <UButton 
+              class="flex-1 justify-center"
+              variant="outline"
+              color="neutral"
               @click="loadMock('factura')"
             >
               📄 Factura
-            </button>
-            <button 
-              class="flex-1 text-xs font-bold py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 shadow-sm transition" 
+            </UButton>
+            <UButton 
+              class="flex-1 justify-center"
+              variant="outline"
+              color="neutral"
               @click="loadMock('notaCredito')"
             >
               📄 Nota de Crédito
-            </button>
+            </UButton>
           </div>
         </div>
 
         <!-- Raw Textarea Input -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <label class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Contenido XML Raw</label>
-            <button 
+            <label class="text-[10px] font-black text-dimmed uppercase tracking-wider">Contenido XML Raw</label>
+            <UButton 
               v-if="xmlInput" 
-              class="text-[10px] font-bold text-red-500 hover:text-red-600 dark:text-red-400 flex items-center transition" 
+              size="sm"
+              icon="i-carbon-close"
+              variant="soft"
+              color="error"
               @click="clearXml"
             >
               Limpiar
-            </button>
+            </UButton>
           </div>
-          <textarea 
+          <UTextarea 
             v-model="xmlInput" 
             placeholder="Pega el contenido XML de tu comprobante aquí..." 
-            class="w-full h-80 p-4 font-mono text-[10px] bg-slate-950 text-slate-300 rounded-2xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y shadow-inner"
+            color="neutral"
+            variant="outline"
+            class="font-mono text-[10px] w-full"
+            :rows="15"
+            size="md"
           />
         </div>
       </section>
@@ -208,9 +141,9 @@ const isDark = computed({
         <!-- Welcome Card if input is empty -->
         <div
           v-if="!xmlInput"
-          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-10 text-center shadow-md"
+          class="bg-default border border-default rounded-3xl p-10 text-center shadow-md"
         >
-          <div class="w-16 h-16 bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
               class="w-8 h-8"
               fill="none"
@@ -225,10 +158,10 @@ const isDark = computed({
               />
             </svg>
           </div>
-          <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">
+          <h3 class="text-lg font-black text-highlighted mb-2">
             Visor Listo
           </h3>
-          <p class="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          <p class="text-sm text-muted max-w-md mx-auto">
             Por favor, pega el contenido XML de un comprobante en el panel de la izquierda o carga un archivo XML para visualizarlo de forma estructurada.
           </p>
         </div>
@@ -236,39 +169,34 @@ const isDark = computed({
         <!-- Render SRI XML Component -->
         <div
           v-else
-          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-1 shadow-md overflow-hidden"
+          class="sri-xml-viewer bg-default border border-default rounded-3xl  shadow-md overflow-hidden"
         >
-          <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200/60 dark:border-slate-800 flex justify-between items-center">
-            <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Visualización del Comprobante</span>
-            <!-- Print Button (uses window.print) -->
-            <button 
-              class="inline-flex items-center space-x-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-950/40 px-3 py-1.5 rounded-lg border border-blue-100 dark:border-blue-900/40 transition shadow-sm" 
-              @click="window?.print()"
-            >
-              <svg
-                class="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h10a2 2 0 022-2v-3a2 2 0 00-2-2H5a2 2 0 00-2 2v3a2 2 0 022 2zm0-11V4a2 2 0 012-2h4a2 2 0 012 2v3m-6 0h6"
-                />
-              </svg>
-              <span>Imprimir / PDF</span>
-            </button>
+          <div class="title-panel p-2 border-b border-default flex justify-between items-center">
+            <span class="text-xs font-black text-dimmed uppercase tracking-widest">Visualización del Comprobante</span>
+            <div class="flex items-center gap-2">
+              <UColorModeButton />
+              <ClientOnly>
+                <UButton
+                  icon="i-carbon-printer" 
+                  color="primary"
+                  @click="print"
+                >                  
+                  <span>Imprimir / PDF</span>
+                </UButton>
+              </ClientOnly>
+            </div>
           </div>
-          <div class="p-6">
-            <VisorXml :xml="xmlInput" />
+          <div class="p-6  ">
+            <VisorXml
+             
+              :xml="xmlInput"
+            />
           </div>
         </div>
       </section>
     </main>
 
-    <footer class="border-t border-slate-200/60 dark:border-slate-800/80 mt-12 py-6 px-6 text-center text-xs text-slate-400 font-medium">
+    <footer class="border-t border-default mt-12 py-6 px-6 text-center text-xs text-muted font-medium">
       <p>Visor XML SRI Ecuador © 2026. Construido con Nuxt 4, Nuxt UI y Tailwind CSS.</p>
     </footer>
   </div>
@@ -277,28 +205,119 @@ const isDark = computed({
 <style>
 /* Print Styles to output just the invoice viewer */
 @media print {
+  /* Force exact color reproduction of backgrounds and borders */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force light mode color tokens globally during print, overriding any dark mode states */
+  html,
+  body,
+  .dark,
+  :root,
+  * {
+    --ui-bg: white !important;
+    --ui-bg-muted: #f9fafb !important;
+    --ui-bg-elevated: #f3f4f6 !important;
+    --ui-bg-accented: #e5e7eb !important;
+    --ui-bg-inverted: #111827 !important;
+    
+    --ui-text-dimmed: #9ca3af !important;
+    --ui-text-muted: #6b7280 !important;
+    --ui-text-toned: #4b5563 !important;
+    --ui-text: #374151 !important;
+    --ui-text-highlighted: #111827 !important;
+    --ui-text-inverted: white !important;
+
+    --ui-border: #e5e7eb !important;
+    --ui-border-muted: #f3f4f6 !important;
+    --ui-border-accented: #d1d5db !important;
+
+    /* Override primary theme color for high contrast print output (e.g. dark green) */
+    --ui-primary: #15803d !important; 
+  }
+
   body {
     background-color: white !important;
     color: black !important;
+    font-size: 11px !important;
   }
-  header, footer, section:first-of-type, button, .px-6.py-4.bg-slate-50 {
+
+  /* Force all texts to be dark/black to ensure readable print contrast on white paper */
+  .dark th, 
+  .dark td, 
+  .dark div, 
+  .dark span, 
+  .dark p, 
+  .dark strong,
+  .dark label,
+  .dark strong,
+  .dark strong *,
+  .dark div * {
+    color: #111827 !important;
+  }
+
+  /* Hide playground shell elements (header, footer, buttons, left panel, card header) */
+  header, 
+  footer, 
+  button, 
+  .px-6.py-4, /* card header wrapper */
+  .border-b, 
+  section:first-of-type, /* input panel */
+  nav, 
+  aside {
     display: none !important;
   }
+
+  /* Reset main layouts to block, utilizing full A4 width */
   main {
+    display: block !important;
+    width: 100% !important;
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
   }
+
   section:last-of-type {
-    grid-column: span 12 / span 12 !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
-  .sri-xml-viewer {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 0 !important;
     border: none !important;
     box-shadow: none !important;
-    background-color: white !important;
+  }
+
+  /* Strip all card container decoration and padding */
+  section:last-of-type > div {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  section:last-of-type > div > div:last-child {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Enhance printed tables borders and contrast */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  th, td {
+    border: 1px solid #000 !important;
+    padding: 4px 6px !important;
+  }
+
+  /* Hide print-specific sections if any */
+  .print-hidden {
+    display: none !important;
   }
 }
 </style>

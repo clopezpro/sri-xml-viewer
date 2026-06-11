@@ -129,13 +129,13 @@ function getColumnsTB() {
 
 <template>
   <div
-    class="bg-white! font-sans antialiased text-gray-800 max-w-6xl mx-auto print:mx-0 print:w-full text-black m-1 rounded-md p-1 printContent"
+    class=" font-sans antialiased text-default max-w-6xl mx-auto print:mx-0 print:w-full m-1 rounded-md p-1 printContent"
   >
     <div
       v-if="dateAuthorization"
-      class="print:hidden flex justify-end"
+      class="print:!hidden flex justify-end"
     >
-      <div class="font-bold text-green-700">
+      <div class="font-bold text-primary">
         Documento autorizado el {{ dateAuthorization ?? 'SIN FECHA' }}
       </div>
     </div>
@@ -145,7 +145,7 @@ function getColumnsTB() {
       :dateAuthorization="dateAuthorization"
     />
     <div class="flex mt-2 text-sm">
-      <div class="border rounded-lg w-full px-1">
+      <div class="border border-default rounded-lg w-full px-1">
         <div class="flex-none flex">
           <div class="font-bold pr-2">
             Razón Social / Nombres y Apellidos :
@@ -155,7 +155,7 @@ function getColumnsTB() {
           </div>
         </div>
         <div class="flex-none flex gap-x-2">
-          <div class="font-bold ">
+          <div class="font-bold">
             Identificación:
           </div>
           <div>
@@ -189,13 +189,13 @@ function getColumnsTB() {
       </div>
     </div>
     <div class="overflow-x-auto mt-1">
-      <table class="w-full table-bordered text-xs">
+      <table class="w-full table-bordered text-xs border border-default">
         <thead>
           <tr>
             <th
               v-for="(tag, index) in getColumnsDT()"
               :key="index"
-              class="border"
+              class="border border-default"
             >
               {{ tag }}
             </th>
@@ -209,7 +209,7 @@ function getColumnsTB() {
             <td
               v-for="(valor, i) in dt"
               :key="i"
-              class="break-words border"
+              class="break-words border border-default"
               :class="valor.clase ? valor.clase : ''"
             >
               {{ valor.valor }}
@@ -218,31 +218,30 @@ function getColumnsTB() {
         </tbody>
       </table>
     </div>
-    <div class="flex justify-between  gap-2">
-      <div class=" flex-1">
+    <div class="flex justify-between gap-2 mt-2">
+      <div class="flex-1">
         <div
           v-if="infoAdicional"
-          class="text-center"
+          class="text-center font-bold mb-1"
         >
           Información Adicional
         </div>
         <div
           v-if="infoAdicional"
-          class="mb-1"
+          class="mb-2"
         >
           <table
-
-            class="text-xs w-full table-fixed border border-accented"
+            class="text-xs w-full table-fixed border border-default"
           >
             <tbody>
               <tr
                 v-for="(dt, index) in infoAdicional"
                 :key="index"
               >
-                <td class="w-[100px] break-words !p-0 !pr-1 border border-accented">
+                <td class="w-[100px] break-words !p-1 border border-default ">
                   {{ dt.name }}
                 </td>
-                <td class="break-words !p-0 !pl-1 border-b border-accented">
+                <td class="break-words !p-1 border border-default">
                   {{ dt.value }}
                 </td>
               </tr>
@@ -251,20 +250,20 @@ function getColumnsTB() {
         </div>
         <table
           v-if="pagos"
-          class="w-full text-xs  border border-accented"
+          class="w-full text-xs border border-default"
         >
           <thead>
-            <tr>
-              <th class="">
+            <tr class=" text-left">
+              <th class="p-1 border border-default">
                 Forma de pago
               </th>
-              <th class="">
+              <th class="p-1 border border-default text-right">
                 Valor
               </th>
-              <th class="">
-                PAZO
+              <th class="p-1 border border-default text-right">
+                PLAZO
               </th>
-              <th class="">
+              <th class="p-1 border border-default">
                 TIEMPO
               </th>
             </tr>
@@ -274,23 +273,23 @@ function getColumnsTB() {
               v-for="(dt, index) in pagos"
               :key="index"
             >
-              <td class=" text-center">
+              <td class="p-1 border border-default text-center">
                 {{ dt.formaPago }}
               </td>
-              <td class=" text-right">
+              <td class="p-1 border border-default text-right">
                 {{ dt.total }}
               </td>
-              <td class=" text-right">
+              <td class="p-1 border border-default text-right">
                 {{ dt.plazo }}
               </td>
-              <td class="">
+              <td class="p-1 border border-default">
                 {{ dt.unidadTiempo }}
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="rounded-lg mt-1 min-w-[400px]">
+      <div class="rounded-lg mt-1 w-[320px] shrink-0">
         <table class="w-full text-xs">
           <tableSubtotals :data="document" />
         </table>
