@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { VisorXml } from '@sri-xml-viewer/vue'
+import '@sri-xml-viewer/vue/style.css'
 import { mockFactura, mockNotaCredito } from './mocks'
 
 const xmlInput = ref(mockFactura)

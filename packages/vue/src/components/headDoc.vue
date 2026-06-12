@@ -97,7 +97,7 @@ const mode = computed(() => {
 </script>
 
 <template>
-  <div class="grid grid-cols-2 gap-2">
+  <div class="grid grid-cols-2 gap-1">
     <div class="flex flex-col justify-between  m-1">
       <div class="flex items-center p-1 flex-1">
         <div

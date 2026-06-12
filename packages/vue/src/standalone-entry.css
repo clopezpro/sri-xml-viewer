@@ -1,0 +1,25 @@
+/*
+ * @sri-xml-viewer/vue - Standalone CSS
+ *
+ * This file is the entry point for building the standalone CSS bundle.
+ * Use this ONLY if you do NOT have Tailwind CSS installed.
+ *
+ * Import in your JS entry:
+ *   import '@sri-xml-viewer/vue/standalone.css'
+ *
+ * Build command:
+ *   npx @tailwindcss/cli -i src/standalone-entry.css -o dist/standalone.css --minify
+ */
+
+@import "tailwindcss";
+
+/* Scan component source files for Tailwind utility class names */
+@source "./";
+
+@theme {
+  /* Scope all utilities to work inside .visor-xml-container */
+  --important: .visor-xml-container;
+}
+
+/* Include our semantic variables, classes, and print styles */
+@import "./theme.css";

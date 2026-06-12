@@ -1,0 +1,220 @@
+/*
+ * @sri-xml-viewer/vue - Theme CSS
+ *
+ * Import this file in your main.css if you use Tailwind CSS 4 (without Nuxt UI):
+ *   @import "tailwindcss";
+ *   @import "@sri-xml-viewer/vue/theme.css";
+ *
+ * If you use Nuxt UI, these variables and utilities are already provided by Nuxt UI.
+ * Importing this file is still safe — Nuxt UI's utilities will take precedence.
+ *
+ * If you do NOT use Tailwind at all, import `standalone.css` instead:
+ *   import '@sri-xml-viewer/vue/standalone.css'
+ */
+
+/* ============================================================
+   1. CSS Variables — Fallback for non-Nuxt-UI environments
+   These apply ONLY inside .visor-xml-container so they don't
+   leak into the host app. They redirect to standard --ui-*
+   variables if defined (e.g. by Nuxt UI), falling back to
+   defaults if they are not defined.
+   ============================================================ */
+.visor-xml-container {
+  --visor-primary: var(--ui-primary, #16a34a);
+  --visor-error: var(--ui-error, #dc2626);
+
+  --visor-text: var(--ui-text, #374151);
+  --visor-text-highlighted: var(--ui-text-highlighted, #111827);
+  --visor-text-dimmed: var(--ui-text-dimmed, #9ca3af);
+  --visor-text-muted: var(--ui-text-muted, #6b7280);
+  --visor-text-toned: var(--ui-text-toned, #4b5563);
+  --visor-text-inverted: var(--ui-text-inverted, #ffffff);
+
+  --visor-bg: var(--ui-bg, #ffffff);
+  --visor-bg-muted: var(--ui-bg-muted, #f9fafb);
+  --visor-bg-elevated: var(--ui-bg-elevated, #f3f4f6);
+  --visor-bg-accented: var(--ui-bg-accented, #e5e7eb);
+  --visor-bg-inverted: var(--ui-bg-inverted, #111827);
+
+  --visor-border: var(--ui-border, #e5e7eb);
+  --visor-border-muted: var(--ui-border-muted, #f3f4f6);
+  --visor-border-accented: var(--ui-border-accented, #d1d5db);
+}
+
+/* Dark mode fallback (only applies when Nuxt UI or host is NOT defining them) */
+@media (prefers-color-scheme: dark) {
+  .visor-xml-container {
+    --visor-primary: var(--ui-primary, #22c55e);
+    --visor-error: var(--ui-error, #ef4444);
+
+    --visor-text: var(--ui-text, #e5e7eb);
+    --visor-text-highlighted: var(--ui-text-highlighted, #ffffff);
+    --visor-text-dimmed: var(--ui-text-dimmed, #6b7280);
+    --visor-text-muted: var(--ui-text-muted, #9ca3af);
+    --visor-text-toned: var(--ui-text-toned, #d1d5db);
+    --visor-text-inverted: var(--ui-text-inverted, #111827);
+
+    --visor-bg: var(--ui-bg, #0f172a);
+    --visor-bg-muted: var(--ui-bg-muted, #1e293b);
+    --visor-bg-elevated: var(--ui-bg-elevated, #334155);
+    --visor-bg-accented: var(--ui-bg-accented, #475569);
+    --visor-bg-inverted: var(--ui-bg-inverted, #f8fafc);
+
+    --visor-border: var(--ui-border, #334155);
+    --visor-border-muted: var(--ui-border-muted, #1e293b);
+    --visor-border-accented: var(--ui-border-accented, #475569);
+  }
+}
+
+/* Also support .dark class toggle on ancestor elements for dark mode */
+.dark .visor-xml-container {
+  --visor-primary: var(--ui-primary, #22c55e);
+  --visor-error: var(--ui-error, #ef4444);
+
+  --visor-text: var(--ui-text, #e5e7eb);
+  --visor-text-highlighted: var(--ui-text-highlighted, #ffffff);
+  --visor-text-dimmed: var(--ui-text-dimmed, #6b7280);
+  --visor-text-muted: var(--ui-text-muted, #9ca3af);
+  --visor-text-toned: var(--ui-text-toned, #d1d5db);
+  --visor-text-inverted: var(--ui-text-inverted, #111827);
+
+  --visor-bg: var(--ui-bg, #0f172a);
+  --visor-bg-muted: var(--ui-bg-muted, #1e293b);
+  --visor-bg-elevated: var(--ui-bg-elevated, #334155);
+  --visor-bg-accented: var(--ui-bg-accented, #475569);
+  --visor-bg-inverted: var(--ui-bg-inverted, #f8fafc);
+
+  --visor-border: var(--ui-border, #334155);
+  --visor-border-muted: var(--ui-border-muted, #1e293b);
+  --visor-border-accented: var(--ui-border-accented, #475569);
+}
+
+/* ============================================================
+   2. Semantic Utility Classes
+   Placed in @layer components so they CAN be overridden by
+   Tailwind utilities (including Nuxt UI's utilities).
+   When Nuxt UI is present, its @utility definitions in the
+   utilities layer take precedence automatically.
+   ============================================================ */
+@layer components {
+  /* --- Text Colors --- */
+  .text-primary {
+    color: var(--visor-primary);
+  }
+  .text-error {
+    color: var(--visor-error);
+  }
+  .text-default {
+    color: var(--visor-text);
+  }
+  .text-dimmed {
+    color: var(--visor-text-dimmed);
+  }
+  .text-muted {
+    color: var(--visor-text-muted);
+  }
+  .text-toned {
+    color: var(--visor-text-toned);
+  }
+  .text-highlighted {
+    color: var(--visor-text-highlighted);
+  }
+  .text-inverted {
+    color: var(--visor-text-inverted);
+  }
+
+  /* --- Background Colors --- */
+  .bg-default {
+    background-color: var(--visor-bg);
+  }
+  .bg-muted {
+    background-color: var(--visor-bg-muted);
+  }
+  .bg-elevated {
+    background-color: var(--visor-bg-elevated);
+  }
+  .bg-accented {
+    background-color: var(--visor-bg-accented);
+  }
+  .bg-inverted {
+    background-color: var(--visor-bg-inverted);
+  }
+  .bg-primary\/15 {
+    background-color: color-mix(in oklab, var(--visor-primary) 15%, transparent);
+  }
+
+  /* --- Border Colors --- */
+  .border-default {
+    border-color: var(--visor-border);
+  }
+  .border-muted {
+    border-color: var(--visor-border-muted);
+  }
+  .border-accented {
+    border-color: var(--visor-border-accented);
+  }
+}
+
+/* ============================================================
+   3. Print Styles
+   Forces light-mode rendering and clean table formatting
+   when printing the visor component.
+   ============================================================ */
+@media print {
+  /* Force exact background and color rendering */
+  .visor-xml-container,
+  .visor-xml-container * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Force Light Mode variables for print */
+  .visor-xml-container,
+  .visor-xml-container * {
+    --ui-bg: white !important;
+    --ui-bg-muted: #f9fafb !important;
+    --ui-bg-elevated: #f3f4f6 !important;
+    --ui-bg-accented: #e5e7eb !important;
+    --ui-bg-inverted: #111827 !important;
+
+    --ui-text-dimmed: #9ca3af !important;
+    --ui-text-muted: #6b7280 !important;
+    --ui-text-toned: #4b5563 !important;
+    --ui-text: #374151 !important;
+    --ui-text-highlighted: #111827 !important;
+    --ui-text-inverted: white !important;
+
+    --ui-border: #e5e7eb !important;
+    --ui-border-muted: #f3f4f6 !important;
+    --ui-border-accented: #d1d5db !important;
+
+    --ui-primary: #15803d !important;
+  }
+
+  /* Force text colors to dark for readability on white paper */
+  .visor-xml-container,
+  .visor-xml-container th,
+  .visor-xml-container td,
+  .visor-xml-container div,
+  .visor-xml-container span,
+  .visor-xml-container p,
+  .visor-xml-container strong,
+  .visor-xml-container label,
+  .visor-xml-container a,
+  .visor-xml-container strong *,
+  .visor-xml-container div * {
+    color: #111827 !important;
+  }
+
+  /* Clean table rendering for print */
+  .visor-xml-container table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  .visor-xml-container th,
+  .visor-xml-container td {
+    border: 1px solid #e5e7eb !important;
+    padding: 4px 6px !important;
+  }
+}
