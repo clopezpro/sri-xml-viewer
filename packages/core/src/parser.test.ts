@@ -121,4 +121,22 @@ describe('SRI XML Parser core tests', () => {
     expect(data.accessKey).toBe('0106202601112345678900120010010000001739257787819')
     expect(data.typeDoc).toBe('01')
   })
+
+  it('should resolve typeDoc from codDoc tag when claveAcceso type is mock or non-standard', () => {
+    const mockXmlWithMockKey = `<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1234567891111111111111111111111111111111111111111</numeroAutorizacion>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<factura id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <claveAcceso>1234567891111111111111111111111111111111111111111</claveAcceso>
+    <codDoc>01</codDoc>
+  </infoTributaria>
+</factura>
+]]></comprobante>
+</autorizacion>`
+    const data = getFullInvoiceDataFromXml(mockXmlWithMockKey)
+    expect(data.typeDoc).toBe('01')
+  })
 })

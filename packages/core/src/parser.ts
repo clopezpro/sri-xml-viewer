@@ -202,9 +202,8 @@ export function getTotals(doc: Document): { name: string, valor: string | number
   const accessKey = doc?.getElementsByTagName('claveAcceso')[0]?.textContent || ''
 
   const datakey = getDataAccessKey(accessKey)
-  if (!datakey)
-    return []
-  switch (datakey.type) {
+  const codDoc = doc?.getElementsByTagName('codDoc')[0]?.textContent || datakey?.type || ''
+  switch (codDoc) {
     case '01': {
       return getTotalInvoice(doc)
     }
@@ -269,12 +268,13 @@ export function parseXml(xml: string) {
     }
 
     const dataKey = getDataAccessKey(accessKey)
+    const codDoc = dataComprobante.getElementsByTagName('codDoc')[0]?.textContent || dataKey.type
     const data = {
       numAuto: accessKey,
       dateAuto: fechaAutorizacion || undefined,
       documentData: dataComprobante,
       numberDocument: dataKey.numberDoc,
-      typeDoc: dataKey.type,
+      typeDoc: codDoc || dataKey.type,
       emissionDate: dataKey.emissionDate,
     }
     return data
