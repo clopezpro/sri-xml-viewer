@@ -2,7 +2,8 @@
 import { computed } from 'vue'
 import headDoc from './headDoc.vue'
 import tableSubtotals from './tableSubtotals.vue'
-import { getInfoTributaria, getInfoAdicional, getDetailsFc } from '@sri-xml-viewer/core'
+import { getInfoTributaria, getInfoAdicional, getDetailsInvoiceNc } from '@sri-xml-viewer/core'
+import { showAuthorizationDate } from '../utils'
 
 const props = defineProps({
   document: {
@@ -23,7 +24,7 @@ const props = defineProps({
 
 const infoTributaria = computed(() => getInfoTributaria(props.document))
 const infoAdicional = computed(() => getInfoAdicional(props.document))
-const detalles = computed(() => getDetailsFc(props.document))
+const detalles = computed(() => getDetailsInvoiceNc(props.document))
 
 const infoNotaCredito = computed(() => {
   const nodes = props.document.getElementsByTagName('infoNotaCredito')
@@ -140,13 +141,13 @@ function getColumnsTB() {
       class="print:!hidden flex justify-end"
     >
       <div class="font-bold text-primary">
-        Documento autorizado el {{ authorization }}
+        Documento autorizado el {{ showAuthorizationDate(authorization) }}
       </div>
     </div>
     <headDoc
       :document="document"
       :logoUrl="logoUrl"
-      :dateAuthorization="authorization"
+      :dateAuthorization="showAuthorizationDate(authorization)"
     />
     <div class="border border-default rounded-lg w-full mt-8 p-2">
       <div class="flex-none flex">

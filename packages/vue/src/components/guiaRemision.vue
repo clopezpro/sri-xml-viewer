@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import headDoc from './headDoc.vue'
 import { getInfoAdicional } from '@sri-xml-viewer/core'
+import { showAuthorizationDate } from '../utils'
 
 interface DetalleAdicional {
   nombre: string
@@ -236,14 +237,14 @@ function showTypeDocSustento(code: string) {
       class="print:!hidden flex justify-end"
     >
       <div class="font-bold text-primary">
-        Documento autorizado el {{ authorization }}
+        Documento autorizado el {{ showAuthorizationDate(authorization) }}
       </div>
     </div>
 
     <!-- Encabezado General del SRI -->
     <headDoc
       :document="document"
-      :dateAuthorization="authorization"
+      :dateAuthorization="showAuthorizationDate(authorization)"
       :logoUrl="logoUrl"
     />
 

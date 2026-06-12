@@ -16,3 +16,16 @@ export function showDateFormat(dateStr: any, format?: string): string {
   if (!dateStr) return ''
   return String(dateStr)
 }
+export function showAuthorizationDate(datStr: string | undefined | null) {
+  if (!datStr) return undefined
+  /* check format */
+  const match = datStr.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
+  if (match) {
+    const [_, year, month, day, hour, minute, second] = match
+    return `${day}/${month}/${year} ${hour}:${minute}:${second} EC`
+  }
+  if (datStr.includes('T')) {
+    return datStr.split('T')[0] + ' ' + datStr.split('T')[1] + ' ' + 'EC'
+  }
+  return datStr
+}

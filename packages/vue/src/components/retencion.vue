@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getInfoAdicional, nameCodeRetention } from '@sri-xml-viewer/core'
-import { formatToMoney, roundTo } from '../utils'
+import { formatToMoney, roundTo, showAuthorizationDate } from '../utils'
 import headDoc from './headDoc.vue'
 
 const props = defineProps({
@@ -324,12 +324,12 @@ const infoRetention = computed(() => {
       class="print:!hidden flex justify-end"
     >
       <div class="font-bold text-primary">
-        Documento autorizado el {{ authorization }}
+        Documento autorizado el {{ showAuthorizationDate(authorization) }}
       </div>
     </div>
     <headDoc
       :document="document"
-      :dateAuthorization="authorization"
+      :dateAuthorization="showAuthorizationDate(authorization)"
     />
     <div class="flex mt-5">
       <div class="border border-default rounded-lg w-full p-2">

@@ -4,11 +4,12 @@ import headDoc from './headDoc.vue'
 import tableSubtotals from './tableSubtotals.vue'
 import {
   TYPE_IDENTITY,
-  getInfoFactura,
+  getInfoInvoice,
   getInfoAdicional,
   getPagos,
-  getDetailsFc,
+  getDetailsInvoiceNc,
 } from '@sri-xml-viewer/core'
+import { showAuthorizationDate } from '../utils.js'
 
 const props = defineProps({
   document: {
@@ -27,7 +28,7 @@ const props = defineProps({
   },
 })
 
-const infoFactura = getInfoFactura(props.document)
+const infoFactura = getInfoInvoice(props.document)
 const infoAdicional = getInfoAdicional(props.document)
 const pagos = getPagos(props.document)
 const nameTypeDocument = computed(() => {
@@ -37,7 +38,7 @@ const nameTypeDocument = computed(() => {
   }
   return 'NO ENCONTRADO'
 })
-const detalles = getDetailsFc(props.document)
+const detalles = getDetailsInvoiceNc(props.document)
 function getColumnsDT() {
   if (detalles.length === 0)
     return []
@@ -135,14 +136,17 @@ function getColumnsTB() {
       v-if="dateAuthorization"
       class="print:!hidden flex justify-end"
     >
-      <div class="font-bold text-primary">
-        Documento autorizado el {{ dateAuthorization ?? 'SIN FECHA' }}
+      <div class="">
+        Documento autorizado el <span
+          class="font-bold text-primary  text-sm"
+          :title="'Fecha de XML es ' + dateAuthorization"
+        >{{ showAuthorizationDate(dateAuthorization) }}</span>
       </div>
     </div>
     <headDoc
       :document="document"
       :logoUrl="logoUrl"
-      :dateAuthorization="dateAuthorization"
+      :dateAuthorization="showAuthorizationDate(dateAuthorization)"
     />
     <div class="flex mt-2 text-sm">
       <div class="border border-default rounded-lg w-full px-1">
