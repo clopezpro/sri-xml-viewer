@@ -1,5 +1,8 @@
 # SRI XML Viewer 🇪🇨
 
+[![CI/CD Status](https://github.com/clopezpro/sri-xml-viewer/actions/workflows/ci.yml/badge.svg)](https://github.com/clopezpro/sri-xml-viewer/actions/workflows/ci.yml)
+[![Versión](https://img.shields.io/badge/versión-1.1.0-blue.svg)](CHANGELOG.md)
+
 Monorepo con herramientas y componentes en **Vue 3** y **React** para procesar, validar, renderizar e imprimir comprobantes electrónicos autorizados por el **SRI (Servicio de Rentas Internas de Ecuador)**. 
 
 Soporta comprobantes de tipo:
