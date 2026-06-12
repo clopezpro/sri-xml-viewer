@@ -153,6 +153,17 @@
   .border-accented {
     border-color: var(--visor-border-accented);
   }
+
+  /* --- Text Alignment Fallbacks (prevents JIT purging) --- */
+  .text-right {
+    text-align: right;
+  }
+  .text-center {
+    text-align: center;
+  }
+  .text-left {
+    text-align: left;
+  }
 }
 
 /* ============================================================
