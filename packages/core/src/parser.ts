@@ -4,9 +4,14 @@ import type { IDataKey, Detail, Taxes, Tax, AdditionalDetails, Payment, IFullInv
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined'
 
 export function parseXmlString(xml: string): Document {
+  let cleanXml = (xml || '').trim()
+  const firstLT = cleanXml.indexOf('<')
+  if (firstLT > 0) {
+    cleanXml = cleanXml.substring(firstLT)
+  }
   if (isBrowser) {
     const parser = new DOMParser()
-    const doc = parser.parseFromString(xml, 'text/xml')
+    const doc = parser.parseFromString(cleanXml, 'text/xml')
     if (doc.getElementsByTagName('parsererror').length > 0) {
       throw new Error(doc.getElementsByTagName('parsererror')[0]?.textContent || 'Error de parseo de XML')
     }
@@ -15,7 +20,7 @@ export function parseXmlString(xml: string): Document {
     const GlobalDOMParser = (globalThis as any).DOMParser
     if (GlobalDOMParser) {
       const parser = new GlobalDOMParser()
-      return parser.parseFromString(xml, 'text/xml')
+      return parser.parseFromString(cleanXml, 'text/xml')
     }
     throw new Error('DOMParser no está disponible globalmente. Para entornos SSR / Node.js, por favor define globalThis.DOMParser usando una librería como @xmldom/xmldom.')
   }
@@ -64,7 +69,7 @@ export function getPagos(doc: Document): Payment[] {
     const child = firstElement[i]
     if (child?.tagName) {
       const codePago = child.getElementsByTagName('formaPago')[0]?.textContent || ''
-      const namePago = typesPaymentSRI.find(rs => rs.value === codePago)?.label || ''
+      const namePago = typesPaymentSRI.find(rs => rs.value === codePago)?.label || (codePago ? `CÓDIGO ${codePago}` : 'OTROS')
       const obj = {
         formaPago: namePago,
         total: child.getElementsByTagName('total')[0]?.textContent || '',
@@ -90,7 +95,7 @@ export function getInfoAdicional(doc: Document): { name: string, value: string }
       const child = firstElement[i]
       if (child?.tagName) {
         const obj = {
-          name: child.getAttribute('nombre') || '',
+          name: child.getAttribute('nombre') || child.getAttribute('name') || '',
           value: child.textContent || '',
         }
         result.push(obj)
@@ -167,8 +172,8 @@ export function getDetailsInvoiceNc(doc: Document): Detail[] {
         for (let k = 0; k < detAdicionalElement.length; k++) {
           const detAdicionalElementItem = detAdicionalElement[k]
           const item = {
-            '@nombre': detAdicionalElementItem?.getElementsByTagName('nombre')[0]?.textContent || '',
-            '@valor': detAdicionalElementItem?.getElementsByTagName('valor')[0]?.textContent || '',
+            '@nombre': detAdicionalElementItem?.getElementsByTagName('nombre')[0]?.textContent || detAdicionalElementItem?.getAttribute('nombre') || detAdicionalElementItem?.getAttribute('name') || '',
+            '@valor': detAdicionalElementItem?.getElementsByTagName('valor')[0]?.textContent || detAdicionalElementItem?.getAttribute('valor') || detAdicionalElementItem?.getAttribute('value') || '',
           }
           detallesAdicionales.detAdicional.push(item)
         }
@@ -234,7 +239,7 @@ export function parseXml(xml: string) {
   }
   try {
     const dataOfSri = parseXmlString(xml)
-    const fechaAutorizacion = dataOfSri.getElementsByTagName('fechaAutorizacion')[0]?.innerHTML
+    const fechaAutorizacion = dataOfSri.getElementsByTagName('fechaAutorizacion')[0]?.textContent || dataOfSri.getElementsByTagName('fechaAutorizacion')[0]?.innerHTML
     const comprobante = dataOfSri.getElementsByTagName('comprobante')[0]
     let accessKey = ''
     let dataComprobante: Document
@@ -252,18 +257,21 @@ export function parseXml(xml: string) {
           }
         }
       }
+      if (!cdataContent) {
+        cdataContent = comprobante.textContent?.trim() || ''
+      }
       dataComprobante = parseXmlString(cdataContent)
-      accessKey = dataComprobante.getElementsByTagName('claveAcceso')[0]?.innerHTML || ''
+      accessKey = dataComprobante.getElementsByTagName('claveAcceso')[0]?.textContent || dataComprobante.getElementsByTagName('claveAcceso')[0]?.innerHTML || ''
     }
     else {
-      accessKey = dataOfSri.getElementsByTagName('claveAcceso')[0]?.innerHTML || ''
+      accessKey = dataOfSri.getElementsByTagName('claveAcceso')[0]?.textContent || dataOfSri.getElementsByTagName('claveAcceso')[0]?.innerHTML || ''
       dataComprobante = dataOfSri
     }
 
     const dataKey = getDataAccessKey(accessKey)
     const data = {
       numAuto: accessKey,
-      dateAuto: fechaAutorizacion,
+      dateAuto: fechaAutorizacion || undefined,
       documentData: dataComprobante,
       numberDocument: dataKey.numberDoc,
       typeDoc: dataKey.type,

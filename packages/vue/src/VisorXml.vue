@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, onMounted } from 'vue'
 import { getFullInvoiceDataFromXml } from '@sri-xml-viewer/core'
 import FacturaComponent from './components/factura.vue'
 import NotaCreditoComponent from './components/notaCredito.vue'
@@ -13,6 +13,11 @@ const props = defineProps<{
 
 const data = ref<any>(null)
 const error = ref<string>('')
+const isMounted = ref(false)
+
+onMounted(() => {
+  isMounted.value = true
+})
 
 watchEffect(() => {
   if (typeof window === 'undefined') return
@@ -60,12 +65,17 @@ function getEmissionName(val: string): string {
 </script>
 
 <template>
-  <div class="w-full visor-xml-container">
+  <div
+    v-if="isMounted"
+    class="w-full visor-xml-container"
+  >
     <div
       v-if="error"
       class="p-6 text-center bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl"
     >
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 mb-3">
+      <div
+        class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400 mb-3"
+      >
         <svg
           class="w-6 h-6"
           fill="none"

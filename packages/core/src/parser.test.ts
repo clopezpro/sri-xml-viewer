@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, it, expect } from 'vitest'
 import { getFullInvoiceDataFromXml } from './parser'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const mockXml = `<?xml version="1.0" encoding="utf-8"?>
 <autorizacion>
@@ -106,5 +112,13 @@ describe('SRI XML Parser core tests', () => {
     expect(data.payments).toHaveLength(1)
     expect(data.payments[0]?.formaPago).toBe('OTROS CON UTILIZACIÓN DEL SISTEMA FINANCIERO') // formaPago 20 is OTROS CON UTILIZACIÓN...
     expect(data.payments[0]?.total).toBe('123.20')
+  })
+
+  it('should successfully parse invoice.xml asset', () => {
+    const xmlPath = path.resolve(__dirname, '../../playground/app/assets/invoice.xml')
+    const xml = fs.readFileSync(xmlPath, 'utf8')
+    const data = getFullInvoiceDataFromXml(xml)
+    expect(data.accessKey).toBe('0106202601112345678900120010010000001739257787819')
+    expect(data.typeDoc).toBe('01')
   })
 })
