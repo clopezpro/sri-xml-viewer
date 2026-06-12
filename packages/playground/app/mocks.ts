@@ -11,7 +11,7 @@ export const mockFactura = `<?xml version="1.0" encoding="UTF-8" standalone="yes
     <razonSocial>Christian Manuel Lopez Camacho</razonSocial>
     <nombreComercial>clopezpro</nombreComercial>
     <ruc>0931048003001</ruc>
-    <claveAcceso>0106202601093104800300120010010000001739257787819</claveAcceso>
+    <claveAcceso>1234567891111111111111111111111111111111111111111</claveAcceso>
     <codDoc>01</codDoc>
     <estab>001</estab>
     <ptoEmi>001</ptoEmi>
