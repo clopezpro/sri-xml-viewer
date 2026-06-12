@@ -227,20 +227,20 @@ const mode = computed(() => {
         </div>
         <div
           v-if="dateAuthorization"
-          class="flex"
+          class="flex gap-2"
         >
           <div class="font-bold pr-2">
             FECHA AUTORIZACIÓN
           </div>
-          <div>{{ showDateFormat(dateAuthorization, 'dd/mm/yyyy HH:mm:ss') || 'SRI' }}</div>
+          <div>{{ dateAuthorization }}</div>
         </div>
-        <div class="flex">
+        <div class="flex gap-2">
           <div class="font-bold pr-2">
             AMBIENTE
           </div>
           <div>{{ mode }}</div>
         </div>
-        <div class="flex">
+        <div class="flex gap-2">
           <div class="font-bold pr-2">
             EMISIÓN
           </div>

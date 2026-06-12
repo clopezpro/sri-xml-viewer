@@ -1,4 +1,3 @@
-import Decimal from 'decimal.js'
 import { typesIvaFee, typesPaymentSRI, typeDocument, typeRtFee } from './constants'
 import type { IDataKey, Detail, Taxes, Tax, AdditionalDetails, Payment, IFullInvoiceData, ITotal } from './types/general'
 
@@ -101,7 +100,7 @@ export function getInfoAdicional(doc: Document): { name: string, value: string }
   return result
 }
 
-export function getInfoFactura(doc: Document): Record<string, string> {
+export function getInfoInvoice(doc: Document): Record<string, string> {
   const data = doc?.getElementsByTagName('infoFactura') as HTMLCollectionOf<HTMLElement>
   if (!data)
     return {}
@@ -129,7 +128,7 @@ export function getInfoFactura(doc: Document): Record<string, string> {
   return result
 }
 
-export function getDetailsFc(doc: Document): Detail[] {
+export function getDetailsInvoiceNc(doc: Document): Detail[] {
   const data = doc?.getElementsByTagName('detalles') as HTMLCollectionOf<HTMLElement>
   const result: Detail[] = []
   if (!data)
@@ -202,10 +201,10 @@ export function getTotals(doc: Document): { name: string, valor: string | number
     return []
   switch (datakey.type) {
     case '01': {
-      return totalF(doc)
+      return getTotalInvoice(doc)
     }
     case '04': {
-      return totalNC(doc)
+      return getTotalCreditNote(doc)
     }
     default:
       return []
@@ -273,11 +272,11 @@ export function parseXml(xml: string) {
     return data
   }
   catch (e: any) {
-    throw new TypeError(`Error al parsear el XML: ${e.message}`)
+    throw new TypeError(`Error al obtener datos del XML: ${e.message}`)
   }
 }
 
-function totalF(doc: Document) {
+function getTotalInvoice(doc: Document) {
   const dataTable: { name: string, valor: string | number }[] = []
   const allTypes = typesIvaFee.map((data) => {
     return {
@@ -365,7 +364,7 @@ function totalF(doc: Document) {
   return dataTable
 }
 
-function totalNC(doc: Document) {
+function getTotalCreditNote(doc: Document) {
   const dataTable: { name: string, valor: string | number }[] = []
   const allTypes = typesIvaFee.map((data) => {
     return {
@@ -461,8 +460,8 @@ export function getFullInvoiceDataFromXml(xmlString: string): IFullInvoiceData {
     emissionDate: parsed.emissionDate ?? '',
     documentData: doc,
     infoTributaria: getInfoTributaria(doc),
-    infoFactura: getInfoFactura(doc),
-    details: getDetailsFc(doc),
+    infoFactura: getInfoInvoice(doc),
+    details: getDetailsInvoiceNc(doc),
     totals: getTotals(doc),
     payments: getPagos(doc),
     additionalInfo: getInfoAdicional(doc),
