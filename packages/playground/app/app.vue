@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { VisorXml } from '@sri-xml-viewer/vue'
 import '@sri-xml-viewer/vue/style.css'
 import { mockFactura, mockNotaCredito } from './mocks'
@@ -52,7 +52,46 @@ const isDark = computed({
 const print = () => {
   window.print()
 }
+
+const logoUrl = ref('')
+const logoInputRef = ref<HTMLInputElement | null>(null)
+
+onMounted(() => {
+  const savedLogo = localStorage.getItem('sri_visor_logo')
+  if (savedLogo) {
+    logoUrl.value = savedLogo
+  }
+})
+
+function handleLogoClick() {
+  if (logoUrl.value) {
+    logoUrl.value = ''
+    localStorage.removeItem('sri_visor_logo')
+    if (logoInputRef.value) {
+      logoInputRef.value.value = ''
+    }
+  } else {
+    logoInputRef.value?.click()
+  }
+}
+
+function onLogoChange(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    const base64 = e.target?.result
+    if (typeof base64 === 'string') {
+      logoUrl.value = base64
+      localStorage.setItem('sri_visor_logo', base64)
+    }
+  }
+  reader.readAsDataURL(file)
+}
 </script>
+
 
 <template>
   <div class="min-h-screen bg-muted transition-colors duration-300 font-sans antialiased">
@@ -177,6 +216,20 @@ const print = () => {
             <div class="flex items-center gap-2">
               <UColorModeButton />
               <ClientOnly>
+                <input
+                  ref="logoInputRef"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="onLogoChange"
+                >
+                <UButton
+                  :icon="logoUrl ? 'i-carbon-trash-can' : 'i-carbon-image'"
+                  :color="logoUrl ? 'error' : 'neutral'"
+                  :variant="logoUrl ? 'solid' : 'ghost'"
+                  :title="logoUrl ? 'Quitar logo cargado' : 'Cargar logo de la empresa'"
+                  @click="handleLogoClick"
+                />
                 <UButton
                   icon="i-carbon-printer" 
                   color="primary"
@@ -187,11 +240,13 @@ const print = () => {
               </ClientOnly>
             </div>
           </div>
-          <div class="p-6  ">
-            <VisorXml
-             
-              :xml="xmlInput"
-            />
+          <div class="p-6 overflow-x-auto w-full">
+            <div class="min-w-[800px] lg:min-w-0 print:min-w-0">
+              <VisorXml
+                :xml="xmlInput"
+                :logoUrl="logoUrl"
+              />
+            </div>
           </div>
         </div>
       </section>
