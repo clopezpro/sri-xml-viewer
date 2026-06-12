@@ -3,6 +3,16 @@ import pluginVue from 'eslint-plugin-vue'
 import pluginReact from 'eslint-plugin-react'
 
 export default tseslint.config(
+  {
+    ignores: [
+      '**/.nuxt/**',
+      '**/.output/**',
+      '**/dist/**',
+      '**/.turbo/**',
+      '**/node_modules/**',
+      '**/scratch/**'
+    ]
+  },
   ...tseslint.configs.recommended,
   ...pluginVue.configs['flat/recommended'],
   {

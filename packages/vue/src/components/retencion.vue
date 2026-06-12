@@ -587,7 +587,10 @@ const infoRetention = computed(() => {
                         </td>
                       </tr>
                       <tr class="bg-muted">
-                        <td colspan="5" class="border border-default" />
+                        <td
+                          colspan="5"
+                          class="border border-default"
+                        />
                         <td class="text-right border border-default p-1 font-bold">
                           TOTAL RETENIDO
                           <span class="px-2 py-0.5 rounded bg-primary/15 text-primary ml-1 font-bold">
@@ -664,7 +667,10 @@ const infoRetention = computed(() => {
                   </td>
                 </tr>
                 <tr class="bg-muted">
-                  <td colspan="7" class="border border-default" />
+                  <td
+                    colspan="7"
+                    class="border border-default"
+                  />
                   <td class="text-right border border-default p-1 font-bold">
                     TOTAL RETENIDO
                     <span class="px-2 py-0.5 rounded bg-primary/15 text-primary ml-1 font-bold">

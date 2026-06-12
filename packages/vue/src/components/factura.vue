@@ -32,9 +32,9 @@ const infoFactura = getInfoInvoice(props.document)
 const infoAdicional = getInfoAdicional(props.document)
 const pagos = getPagos(props.document)
 const nameTypeDocument = computed(() => {
-  const nameTypeDocument = TYPE_IDENTITY.find(a => a.value == infoFactura.tipoIdentificacionComprador)?.label
-  if (nameTypeDocument) {
-    return nameTypeDocument
+  const label = TYPE_IDENTITY.find(a => a.value === infoFactura.tipoIdentificacionComprador)?.label
+  if (label) {
+    return label
   }
   return 'NO ENCONTRADO'
 })
@@ -70,8 +70,8 @@ function getColumnsDT() {
   if (firstItem?.descuento)
     columns.push('DESC')
 
-  if (firstItem?.detallesAdicionales) {
-    firstItem?.detallesAdicionales.detAdicional.forEach((rs) => {
+  if (firstItem?.detallesAdicionales?.detAdicional) {
+    firstItem.detallesAdicionales.detAdicional.forEach((rs) => {
       columns.push(rs['@nombre'])
     })
   }
@@ -81,18 +81,16 @@ function getColumnsDT() {
   return columns
 }
 function getColumnsTB() {
-  let item = []
+  const item = detalles
   const itemArray: {
     valor: string | number
     clase?: string
   }[][] = []
-  let columns = []
 
-  item = detalles
   const isAux = item.some(rs => rs.codigoAuxiliar)
   const isUnidadMedida = item.some(rs => rs.unidadMedida)
   item.forEach((itemFirst, index) => {
-    columns = []
+    const columns: { valor: string | number, clase?: string }[] = []
     columns.push({ valor: index + 1, clase: 'text-center' })
     if (itemFirst.codigoPrincipal)
       columns.push({ valor: itemFirst.codigoPrincipal })
@@ -111,7 +109,7 @@ function getColumnsTB() {
       columns.push({ valor: itemFirst.precioUnitario, clase: 'text-right' })
     if (itemFirst.descuento)
       columns.push({ valor: itemFirst.descuento, clase: 'text-right' })
-    if (itemFirst.detallesAdicionales) {
+    if (itemFirst.detallesAdicionales?.detAdicional) {
       itemFirst.detallesAdicionales.detAdicional.forEach((rs) => {
         columns.push({ valor: rs['@valor'] })
       })

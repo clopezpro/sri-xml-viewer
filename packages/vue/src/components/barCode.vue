@@ -6,6 +6,7 @@ const props = defineProps({
   text: {
     type: String,
     required: false,
+    default: undefined
   },
 })
 const text = computed(() => props.text)

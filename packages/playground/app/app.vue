@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { VisorXml } from '@sri-xml-viewer/vue'
 import '@sri-xml-viewer/vue/style.css'
 import { mockFactura, mockNotaCredito } from './mocks'
 
 const xmlInput = ref(mockFactura)
+const claveAcceso = ref('')
 const fileError = ref('')
+const loading = ref(false)
+const toast = useToast()
 
 function loadMock(type: 'factura' | 'notaCredito') {
   if (type === 'factura') {
@@ -37,6 +40,110 @@ function handleFileUpload(event: Event) {
 function clearXml() {
   xmlInput.value = ''
   fileError.value = ''
+}
+
+async function searchByClave() {
+  const cleanClave = claveAcceso.value.trim()
+  if (!cleanClave) {
+    toast.add({
+      title: 'Clave de acceso requerida',
+      description: 'Por favor ingresa una clave de acceso de 49 dígitos.',
+      color: 'warning'
+    })
+    return
+  }
+
+  if (cleanClave.length !== 49 || !/^\d+$/.test(cleanClave)) {
+    toast.add({
+      title: 'Clave de acceso inválida',
+      description: 'La clave de acceso debe contener exactamente 49 dígitos numéricos.',
+      color: 'warning'
+    })
+    return
+  }
+
+  loading.value = true
+  fileError.value = ''
+
+  try {
+    const response = await $fetch<{
+      success: boolean
+      estado: string
+      xml?: string
+      ambiente?: string
+      numeroAutorizacion?: string
+      fechaAutorizacion?: string
+      mensajes?: Array<{
+        identificador?: string
+        mensaje?: string
+        tipo?: string
+        informacionAdicional?: string
+      }>
+    }>('/api/sri', {
+      method: 'POST',
+      body: { claveAcceso: cleanClave }
+    })
+
+    if (response.success && response.xml) {
+      xmlInput.value = response.xml
+      toast.add({
+        title: 'Comprobante obtenido',
+        description: `El comprobante se obtuvo correctamente del ambiente de ${response.ambiente}.`,
+        color: 'success'
+      })
+    } else {
+      const errors = response.mensajes?.map((m: any) => `[${m.identificador || 'SRI'}] ${m.mensaje}`).join('\n') || 'No se pudo obtener el comprobante.'
+      toast.add({
+        title: `Error del SRI - ${response.estado}`,
+        description: errors,
+        color: 'error',
+        duration: 8000
+      })
+    }
+  } catch (error: any) {
+    console.error('Error al buscar clave de acceso:', error)
+    toast.add({
+      title: 'Error de red / API',
+      description: error.data?.message || 'Ocurrió un error inesperado al conectar con el servidor local.',
+      color: 'error'
+    })
+  } finally {
+    loading.value = false
+  }
+}
+
+function downloadXml() {
+  if (!xmlInput.value) return
+
+  const blob = new Blob([xmlInput.value], { type: 'text/xml;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+
+  let filename = 'comprobante.xml'
+  if (claveAcceso.value && claveAcceso.value.trim().length === 49) {
+    filename = `${claveAcceso.value.trim()}.xml`
+  } else {
+    const match = xmlInput.value.match(/<claveAcceso>(\d{49})<\/claveAcceso>/)
+    if (match) {
+      filename = `${match[1]}.xml`
+    } else {
+      const numAutMatch = xmlInput.value.match(/<numeroAutorizacion>(\d{49})<\/numeroAutorizacion>/)
+      if (numAutMatch) {
+        filename = `${numAutMatch[1]}.xml`
+      }
+    }
+  }
+
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+
+  toast.add({
+    title: 'Descarga iniciada',
+    description: `El archivo ${filename} se ha descargado correctamente.`,
+    color: 'success'
+  })
 }
 
 const colorMode = useColorMode()
@@ -94,168 +201,217 @@ function onLogoChange(event: Event) {
 
 
 <template>
-  <div class="min-h-screen bg-muted transition-colors duration-300 font-sans antialiased">
-    <main class="max-w-7xl mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <!-- Input Panel (Left, 4 columns) -->
-      <section class="lg:col-span-4 bg-default border border-default rounded-3xl p-6 shadow-md space-y-6">
-        <div>
-          <h2 class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
-            Cargar Comprobante XML
-          </h2>
-          <p class="text-xs text-muted">
-            Sube un archivo .xml descargado del SRI o pega el contenido directamente en Contenido XML más abajo.
-          </p>
-        </div>
-
-        <!-- File Upload Area -->
-        <UFileUpload
-          :preview="false"
-          accept=".xml"
-          color="primary"
-          label="Seleccionar o soltar archivo .xml"
-          description="Tamaño máximo 5MB"
-          @change="handleFileUpload"
-        />
-
-        <div
-          v-if="fileError"
-          class="text-xs text-error font-bold bg-error/10 p-3 border border-error/20 rounded-xl"
-        >
-          {{ fileError }}
-        </div>
-
-        <!-- Mock Loader Buttons -->
-        <div>
-          <p class="text-[10px] font-black text-dimmed uppercase tracking-wider mb-2">
-            Comprobantes de Ejemplo
-          </p>
-          <div class="flex gap-2">
-            <UButton 
-              class="flex-1 justify-center"
-              variant="outline"
-              color="neutral"
-              @click="loadMock('factura')"
-            >
-              📄 Factura
-            </UButton>
-            <UButton 
-              class="flex-1 justify-center"
-              variant="outline"
-              color="neutral"
-              @click="loadMock('notaCredito')"
-            >
-              📄 Nota de Crédito
-            </UButton>
-          </div>
-        </div>
-
-        <!-- Raw Textarea Input -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between">
-            <label class="text-[10px] font-black text-dimmed uppercase tracking-wider">Contenido XML Raw</label>
-            <UButton 
-              v-if="xmlInput" 
-              size="sm"
-              icon="i-carbon-close"
-              variant="soft"
-              color="error"
-              @click="clearXml"
-            >
-              Limpiar
-            </UButton>
-          </div>
-          <UTextarea 
-            v-model="xmlInput" 
-            placeholder="Pega el contenido XML de tu comprobante aquí..." 
-            color="neutral"
-            variant="outline"
-            class="font-mono text-[10px] w-full"
-            :rows="15"
-            size="md"
-          />
-        </div>
-      </section>
-
-      <!-- View Panel (Right, 8 columns) -->
-      <section class="lg:col-span-8 space-y-6">
-        <!-- Welcome Card if input is empty -->
-        <div
-          v-if="!xmlInput"
-          class="bg-default border border-default rounded-3xl p-10 text-center shadow-md"
-        >
-          <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg
-              class="w-8 h-8"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+  <UApp>
+    <div class="min-h-screen bg-muted transition-colors duration-300 font-sans antialiased">
+      <main class="max-w-7xl mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- Input Panel (Left, 4 columns) -->
+        <section class="lg:col-span-4 bg-default border border-default rounded-3xl p-6 shadow-md space-y-6">
+          <div>
+            <p class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
+              Con clave de Acceso
+            </p>
+            <div class="flex gap-2">
+              <UInput
+                v-model="claveAcceso"
+                class="w-full"
+                icon="i-carbon-virtual-column-key" 
+                placeholder="0101010101010101010101010101010101010101 49 dígitos"
+                :disabled="loading"
+                @keydown.enter="searchByClave"
               />
-            </svg>
-          </div>
-          <h3 class="text-lg font-black text-highlighted mb-2">
-            Visor Listo
-          </h3>
-          <p class="text-sm text-muted max-w-md mx-auto">
-            Por favor, pega el contenido XML de un comprobante en el panel de la izquierda o carga un archivo XML para visualizarlo de forma estructurada.
-          </p>
-        </div>
-
-        <!-- Render SRI XML Component -->
-        <div
-          v-else
-          class="sri-xml-viewer bg-default border border-default rounded-3xl  shadow-md overflow-hidden"
-        >
-          <div class="title-panel p-2 border-b border-default flex justify-between items-center">
-            <span class="text-xs font-black text-dimmed uppercase tracking-widest">Visualización del Comprobante</span>
-            <div class="flex items-center gap-2">
-              <UColorModeButton />
-              <ClientOnly>
-                <input
-                  ref="logoInputRef"
-                  type="file"
-                  accept="image/*"
-                  class="hidden"
-                  @change="onLogoChange"
-                >
+              <div class="flex gap-1">
                 <UButton
-                  :icon="logoUrl ? 'i-carbon-trash-can' : 'i-carbon-image'"
-                  :color="logoUrl ? 'error' : 'neutral'"
-                  :variant="logoUrl ? 'solid' : 'ghost'"
-                  :title="logoUrl ? 'Quitar logo cargado' : 'Cargar logo de la empresa'"
-                  @click="handleLogoClick"
+                  icon="i-carbon-search"
+                  variant="solid"
+                  color="primary"
+                  aria-label="Buscar"
+                  :loading="loading"
+                  @click="searchByClave"
                 />
                 <UButton
-                  icon="i-carbon-printer" 
-                  color="primary"
-                  @click="print"
-                >                  
-                  <span>Imprimir / PDF</span>
-                </UButton>
-              </ClientOnly>
+                  v-if="claveAcceso.length > 0 && !loading"
+                  icon="i-carbon-close"
+                  variant="solid"
+                  color="error"
+                  aria-label="Limpiar"
+                  @click="claveAcceso = ''"
+                />
+              </div>
             </div>
           </div>
-          <div class="p-6 overflow-x-auto w-full">
-            <div class="min-w-[800px] lg:min-w-0 print:min-w-0">
-              <VisorXml
-                :xml="xmlInput"
-                :logoUrl="logoUrl"
-              />
-            </div>
+       
+       
+          <div>
+            <h2 class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
+              Con Comprobante XML
+            </h2>
+            <p class="text-xs text-muted">
+              Sube un archivo .xml descargado del SRI o pega el contenido directamente en Contenido XML más abajo.
+            </p>
           </div>
-        </div>
-      </section>
-    </main>
 
-    <footer class="border-t border-default mt-12 py-6 px-6 text-center text-xs text-muted font-medium">
-      <p>Visor XML SRI Ecuador © 2026. Construido con Nuxt 4, Nuxt UI y Tailwind CSS.</p>
-    </footer>
-  </div>
+          <!-- File Upload Area -->
+          <UFileUpload
+            :preview="false"
+            accept=".xml"
+            color="primary"
+            label="Seleccionar o soltar archivo .xml"
+            description="Tamaño máximo 5MB"
+            @change="handleFileUpload"
+          />
+
+          <div
+            v-if="fileError"
+            class="text-xs text-error font-bold bg-error/10 p-3 border border-error/20 rounded-xl"
+          >
+            {{ fileError }}
+          </div>
+
+          <!-- Mock Loader Buttons -->
+          <div>
+            <p class="text-[10px] font-black text-dimmed uppercase tracking-wider mb-2">
+              Comprobantes de Ejemplo
+            </p>
+            <div class="flex gap-2">
+              <UButton 
+                class="flex-1 justify-center"
+                variant="outline"
+                color="neutral"
+                @click="loadMock('factura')"
+              >
+                📄 Factura
+              </UButton>
+              <UButton 
+                class="flex-1 justify-center"
+                variant="outline"
+                color="neutral"
+                @click="loadMock('notaCredito')"
+              >
+                📄 Nota de Crédito
+              </UButton>
+            </div>
+          </div>
+
+          <!-- Raw Textarea Input -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-[10px] font-black text-dimmed uppercase tracking-wider">Contenido XML Raw</label>
+              <div class="flex gap-2">
+                <UButton 
+                  v-if="xmlInput" 
+                  size="sm"
+                  icon="i-carbon-download"
+                  variant="soft"
+                  color="primary"
+                  @click="downloadXml"
+                >
+                  Descargar XML
+                </UButton>
+                <UButton 
+                  v-if="xmlInput" 
+                  size="sm"
+                  icon="i-carbon-close"
+                  variant="soft"
+                  color="error"
+                  @click="clearXml"
+                >
+                  Limpiar
+                </UButton>
+              </div>
+            </div>
+            <UTextarea 
+              v-model="xmlInput" 
+              placeholder="Pega el contenido XML de tu comprobante aquí..." 
+              color="neutral"
+              variant="outline"
+              class="font-mono text-[10px] w-full"
+              :rows="15"
+              size="md"
+            />
+          </div>
+        </section>
+
+        <!-- View Panel (Right, 8 columns) -->
+        <section class="lg:col-span-8 space-y-6">
+          <!-- Welcome Card if input is empty -->
+          <div
+            v-if="!xmlInput"
+            class="bg-default border border-default rounded-3xl p-10 text-center shadow-md"
+          >
+            <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <h3 class="text-lg font-black text-highlighted mb-2">
+              Visor Listo
+            </h3>
+            <p class="text-sm text-muted max-w-md mx-auto">
+              Por favor, pega el contenido XML de un comprobante en el panel de la izquierda o carga un archivo XML para visualizarlo de forma estructurada.
+            </p>
+          </div>
+
+          <!-- Render SRI XML Component -->
+          <div
+            v-else
+            class="sri-xml-viewer bg-default border border-default rounded-3xl  shadow-md overflow-hidden"
+          >
+            <div class="title-panel p-2 border-b border-default flex justify-between items-center">
+              <span class="text-xs font-black text-dimmed uppercase tracking-widest">Visualización del Comprobante</span>
+              <div class="flex items-center gap-2">
+                <UColorModeButton />
+                <ClientOnly>
+                  <input
+                    ref="logoInputRef"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="onLogoChange"
+                  >
+                  <UButton
+                    :icon="logoUrl ? 'i-carbon-trash-can' : 'i-carbon-image'"
+                    :color="logoUrl ? 'error' : 'neutral'"
+                    :variant="logoUrl ? 'solid' : 'ghost'"
+                    :title="logoUrl ? 'Quitar logo cargado' : 'Cargar logo de la empresa'"
+                    @click="handleLogoClick"
+                  />
+                  <UButton
+                    icon="i-carbon-printer" 
+                    color="primary"
+                    @click="print"
+                  >                  
+                    <span>Imprimir / PDF</span>
+                  </UButton>
+                </ClientOnly>
+              </div>
+            </div>
+            <div class="p-6 overflow-x-auto w-full">
+              <div class="min-w-[800px] lg:min-w-0 print:min-w-0">
+                <VisorXml
+                  :xml="xmlInput"
+                  :logoUrl="logoUrl"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="border-t border-default mt-12 py-6 px-6 text-center text-xs text-muted font-medium">
+        <p>Visor XML SRI Ecuador © 2026. Construido con Nuxt 4, Nuxt UI y Tailwind CSS.</p>
+      </footer>
+    </div>
+  </UApp>
 </template>
 
 <style>
