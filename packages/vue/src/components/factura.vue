@@ -292,9 +292,7 @@ function getColumnsTB() {
         </table>
       </div>
       <div class="rounded-lg mt-1 w-[320px] shrink-0">
-        <table class="w-full text-xs">
-          <tableSubtotals :data="document" />
-        </table>
+        <tableSubtotals :data="document" />
       </div>
     </div>
   </div>

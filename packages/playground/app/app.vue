@@ -434,11 +434,11 @@ function onLogoChange(event: Event) {
     --ui-bg-accented: #e5e7eb !important;
     --ui-bg-inverted: #111827 !important;
     
-    --ui-text-dimmed: #9ca3af !important;
-    --ui-text-muted: #6b7280 !important;
-    --ui-text-toned: #4b5563 !important;
-    --ui-text: #374151 !important;
-    --ui-text-highlighted: #111827 !important;
+    --ui-text-dimmed: #000000 !important;
+    --ui-text-muted: #000000 !important;
+    --ui-text-toned: #000000 !important;
+    --ui-text: #000000 !important;
+    --ui-text-highlighted: #000000 !important;
     --ui-text-inverted: white !important;
 
     --ui-border: #e5e7eb !important;
@@ -447,26 +447,13 @@ function onLogoChange(event: Event) {
 
     /* Override primary theme color for high contrast print output (e.g. dark green) */
     --ui-primary: #15803d !important; 
+    --ui-error: #dc2626 !important;
   }
 
   body {
     background-color: white !important;
     color: black !important;
     font-size: 11px !important;
-  }
-
-  /* Force all texts to be dark/black to ensure readable print contrast on white paper */
-  .dark th, 
-  .dark td, 
-  .dark div, 
-  .dark span, 
-  .dark p, 
-  .dark strong,
-  .dark label,
-  .dark strong,
-  .dark strong *,
-  .dark div * {
-    color: #111827 !important;
   }
 
   /* Hide playground shell elements (header, footer, buttons, left panel, card header) */

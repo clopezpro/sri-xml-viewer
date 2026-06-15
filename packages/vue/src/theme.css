@@ -179,42 +179,51 @@
     print-color-adjust: exact !important;
   }
 
-  /* Force Light Mode variables for print */
+  /* Force Light Mode variables and pure black text for print */
   .visor-xml-container,
-  .visor-xml-container * {
+  .visor-xml-container *,
+  .dark .visor-xml-container,
+  .dark .visor-xml-container * {
     --ui-bg: white !important;
     --ui-bg-muted: #f9fafb !important;
     --ui-bg-elevated: #f3f4f6 !important;
     --ui-bg-accented: #e5e7eb !important;
-    --ui-bg-inverted: #111827 !important;
+    --ui-bg-inverted: black !important;
 
-    --ui-text-dimmed: #9ca3af !important;
-    --ui-text-muted: #6b7280 !important;
-    --ui-text-toned: #4b5563 !important;
-    --ui-text: #374151 !important;
-    --ui-text-highlighted: #111827 !important;
+    /* Force all text colors to be solid 100% black for high-contrast print readability */
+    --ui-text-dimmed: #000000 !important;
+    --ui-text-muted: #000000 !important;
+    --ui-text-toned: #000000 !important;
+    --ui-text: #000000 !important;
+    --ui-text-highlighted: #000000 !important;
     --ui-text-inverted: white !important;
 
-    --ui-border: #e5e7eb !important;
-    --ui-border-muted: #f3f4f6 !important;
-    --ui-border-accented: #d1d5db !important;
+    --ui-border: #d1d5db !important;
+    --ui-border-muted: #e5e7eb !important;
+    --ui-border-accented: #9ca3af !important;
 
     --ui-primary: #15803d !important;
-  }
+    --ui-error: #dc2626 !important;
 
-  /* Force text colors to dark for readability on white paper */
-  .visor-xml-container,
-  .visor-xml-container th,
-  .visor-xml-container td,
-  .visor-xml-container div,
-  .visor-xml-container span,
-  .visor-xml-container p,
-  .visor-xml-container strong,
-  .visor-xml-container label,
-  .visor-xml-container a,
-  .visor-xml-container strong *,
-  .visor-xml-container div * {
-    color: #111827 !important;
+    /* Directly override visor variables to ensure dark mode class (.dark) doesn't bypass them */
+    --visor-primary: #15803d !important;
+    --visor-error: #dc2626 !important;
+    --visor-text: #000000 !important;
+    --visor-text-highlighted: #000000 !important;
+    --visor-text-dimmed: #000000 !important;
+    --visor-text-muted: #000000 !important;
+    --visor-text-toned: #000000 !important;
+    --visor-text-inverted: white !important;
+
+    --visor-bg: white !important;
+    --visor-bg-muted: #f9fafb !important;
+    --visor-bg-elevated: #f3f4f6 !important;
+    --visor-bg-accented: #e5e7eb !important;
+    --visor-bg-inverted: black !important;
+
+    --visor-border: #d1d5db !important;
+    --visor-border-muted: #e5e7eb !important;
+    --visor-border-accented: #9ca3af !important;
   }
 
   /* Clean table rendering for print */
@@ -227,5 +236,12 @@
   .visor-xml-container td {
     border: 1px solid #e5e7eb !important;
     padding: 4px 6px !important;
+  }
+
+  /* Utility classes to hide elements during print */
+  .visor-xml-container .print-hidden,
+  .visor-xml-container .print\:hidden,
+  .visor-xml-container .print\:\!hidden {
+    display: none !important;
   }
 }
