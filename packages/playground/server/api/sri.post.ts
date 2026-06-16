@@ -139,12 +139,17 @@ export default defineEventHandler(async (event) => {
 
   } catch (error: any) {
     console.error('Error al consultar SOAP del SRI:', error)
+    const rawMsg = error.message || String(error)
+    let mensaje = `No se pudo conectar con el servidor del SRI: ${rawMsg}`
+    if (rawMsg.includes("does not match certificate's altnames") || rawMsg.includes("is not in the cert's list") || rawMsg.includes("altnames")) {
+      mensaje = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente (Error de certificado SSL/IP). Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
+    }
     return {
       success: false,
       estado: 'ERROR_CONEXION',
       mensajes: [{
         identificador: 'CONN-500',
-        mensaje: `No se pudo conectar con el servidor del SRI: ${error.message || error}`,
+        mensaje,
         tipo: 'ERROR'
       }]
     }

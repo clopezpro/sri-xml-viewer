@@ -91,7 +91,10 @@ async function searchByClave() {
         color: 'success'
       })
     } else {
-      const errors = response.mensajes?.map((m: any) => `[${m.identificador || 'SRI'}] ${m.mensaje}`).join('\n') || 'No se pudo obtener el comprobante.'
+      let errors = response.mensajes?.map((m: any) => `[${m.identificador || 'SRI'}] ${m.mensaje}`).join('\n') || 'No se pudo obtener el comprobante.'
+      if (errors.includes("does not match certificate's altnames") || errors.includes("is not in the cert's list") || errors.includes("altnames")) {
+        errors = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente (Error de certificado SSL/IP). Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
+      }
       toast.add({
         title: `Error del SRI - ${response.estado}`,
         description: errors,
@@ -101,10 +104,15 @@ async function searchByClave() {
     }
   } catch (error: any) {
     console.error('Error al buscar clave de acceso:', error)
+    let errMsg = error.data?.message || error.message || 'Ocurrió un error inesperado al conectar con el servidor local.'
+    if (errMsg.includes("does not match certificate's altnames") || errMsg.includes("is not in the cert's list") || errMsg.includes("altnames")) {
+      errMsg = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente (Error de certificado SSL/IP). Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
+    }
     toast.add({
       title: 'Error de red / API',
-      description: error.data?.message || 'Ocurrió un error inesperado al conectar con el servidor local.',
-      color: 'error'
+      description: errMsg,
+      color: 'error',
+      duration: 8000
     })
   } finally {
     loading.value = false
