@@ -18,7 +18,7 @@ const props = defineProps({
 const getVersion = computed(() => {
   return props.document?.getElementsByTagName('comprobanteRetencion').item(0)?.getAttribute('version')
 })
-const infoAdicional = getInfoAdicional(props.document)
+const infoAdicional = computed(() => getInfoAdicional(props.document))
 function nameCode(code: string) {
   return nameCodeRetention(code)
 }

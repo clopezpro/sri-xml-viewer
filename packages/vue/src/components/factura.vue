@@ -28,25 +28,25 @@ const props = defineProps({
   },
 })
 
-const infoFactura = getInfoInvoice(props.document)
-const infoAdicional = getInfoAdicional(props.document)
-const pagos = getPagos(props.document)
+const infoFactura = computed(() => getInfoInvoice(props.document))
+const infoAdicional = computed(() => getInfoAdicional(props.document))
+const pagos = computed(() => getPagos(props.document))
 const nameTypeDocument = computed(() => {
-  const label = TYPE_IDENTITY.find(a => a.value === infoFactura.tipoIdentificacionComprador)?.label
+  const label = TYPE_IDENTITY.find(a => a.value === infoFactura.value.tipoIdentificacionComprador)?.label
   if (label) {
     return label
   }
   return 'NO ENCONTRADO'
 })
-const detalles = getDetailsInvoiceNc(props.document)
+const detalles = computed(() => getDetailsInvoiceNc(props.document))
 function getColumnsDT() {
-  if (detalles.length === 0)
+  if (detalles.value.length === 0)
     return []
   /* check si alguno tiene codigoAuxiliar */
 
-  const isAux = detalles.some(rs => rs.codigoAuxiliar)
-  const isUnidadMedida = detalles.some(rs => rs.unidadMedida)
-  const firstItem = detalles[0]
+  const isAux = detalles.value.some(rs => rs.codigoAuxiliar)
+  const isUnidadMedida = detalles.value.some(rs => rs.unidadMedida)
+  const firstItem = detalles.value[0]
 
   const columns = ['#']
   if (firstItem?.codigoPrincipal)
@@ -81,7 +81,7 @@ function getColumnsDT() {
   return columns
 }
 function getColumnsTB() {
-  const item = detalles
+  const item = detalles.value
   const itemArray: {
     valor: string | number
     clase?: string

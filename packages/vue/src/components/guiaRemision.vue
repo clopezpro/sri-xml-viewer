@@ -115,7 +115,7 @@ const destinatarios = computed<Destinatario[]>(() => {
 })
 
 // Extraer campos adicionales generales
-const infoAdicional = getInfoAdicional(props.document)
+const infoAdicional = computed(() => getInfoAdicional(props.document))
 
 // Nombres únicos de detalles adicionales en los detalles de este destinatario
 function getUniqueAdditionalDetailNames(detalles: DetalleProducto[]): string[] {
