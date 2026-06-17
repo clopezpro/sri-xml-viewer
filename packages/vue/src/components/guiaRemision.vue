@@ -278,7 +278,10 @@ function showTypeDocSustento(code: string) {
       :key="index"
       class="border border-default rounded-lg p-2 mt-2"
     >
-      <div class="grid grid-cols-[200px_1fr] gap-y-1">
+      <div
+        class="grid gap-y-1"
+        style="grid-template-columns: 200px 1fr;"
+      >
         <template
           v-if="dest.numDocSustento"
         >
@@ -369,9 +372,9 @@ function showTypeDocSustento(code: string) {
     <!-- Campos Adicionales Generales -->
     <div
       v-if="infoAdicional && infoAdicional.length > 0"
-      class="mx-20 mt-2"
+      style="margin: 20px; display: flex; justify-content: center;"
     >
-      <table class="text-xs w-full table-fixed border border-default">
+      <table class="text-xs  table-fixed ">
         <thead>
           <tr class="bg-muted text-default">
             <th
@@ -387,10 +390,13 @@ function showTypeDocSustento(code: string) {
             v-for="(dt, idx) in infoAdicional"
             :key="idx"
           >
-            <td class="w-1/3 break-words !p-1 border border-default font-bold bg-muted">
+            <td
+              class="break-words  border border-default"
+              style="max-width: 200px;"
+            >
               {{ dt.name }}
             </td>
-            <td class="w-2/3 break-words !p-1 border border-default">
+            <td class=" break-words  border border-default">
               {{ dt.value }}
             </td>
           </tr>

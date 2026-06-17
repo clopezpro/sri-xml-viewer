@@ -260,7 +260,7 @@ function getColumnsTB() {
                   v-for="(dt, index) in infoAdicional"
                   :key="index"
                 >
-                  <td class="break-words font-bold bg-muted p-1 border border-default w-[120px]">
+                  <td class="break-words font-bold bg-muted p-1 border border-default" style="width: 120px;">
                     {{ dt.name }}
                   </td>
                   <td class="break-words p-1 border border-default">

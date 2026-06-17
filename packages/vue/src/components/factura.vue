@@ -240,7 +240,10 @@ function getColumnsTB() {
                 v-for="(dt, index) in infoAdicional"
                 :key="index"
               >
-                <td class="w-[100px] break-words !p-1 border border-default ">
+                <td
+                  class="break-words !p-1 border border-default"
+                  style="max-width: 100px;"
+                >
                   {{ dt.name }}
                 </td>
                 <td class="break-words !p-1 border border-default">
@@ -291,7 +294,10 @@ function getColumnsTB() {
           </tbody>
         </table>
       </div>
-      <div class="rounded-lg mt-1 w-[320px] shrink-0">
+      <div
+        class="rounded-lg mt-1 shrink-0"
+        style="width: 320px;"
+      >
         <tableSubtotals :data="document" />
       </div>
     </div>
