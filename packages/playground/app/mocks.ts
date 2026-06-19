@@ -231,3 +231,70 @@ export const mockNotaCredito = `<?xml version="1.0" encoding="utf-8"?>
 </notaCredito>
 ]]></comprobante>
 </autorizacion>`
+
+export const mockGuiaRemision = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1806202606093104800300120010010000001859257787812</numeroAutorizacion>
+  <fechaAutorizacion>2026-06-18T15:30:22-05:00</fechaAutorizacion>
+  <ambiente>PRODUCCIÓN</ambiente>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?><guiaRemision xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>Christian Manuel Lopez Camacho</razonSocial>
+    <nombreComercial>clopezpro</nombreComercial>
+    <ruc>0931048003001</ruc>
+    <claveAcceso>1806202606093104800300120010010000001859257787812</claveAcceso>
+    <codDoc>06</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000185</secuencial>
+    <dirMatriz>ECUADOR-GUAYAQUIL</dirMatriz>
+  </infoTributaria>
+  <infoGuiaRemision>
+    <dirPartida>AV. GENERAL CORDOVA 1024 Y ESCALINATA</dirPartida>
+    <dirLlegada>AV. 9 DE OCTUBRE Y MALECON</dirLlegada>
+    <razonSocialTransportista>TRANSPORTE RAPIDO S.A.</razonSocialTransportista>
+    <rucTransportista>0990001234001</rucTransportista>
+    <fechaIniTransporte>18/06/2026</fechaIniTransporte>
+    <fechaFinTransporte>19/06/2026</fechaFinTransporte>
+    <placa>GYE-9876</placa>
+  </infoGuiaRemision>
+  <destinatarios>
+    <destinatario>
+      <identificacionDestinatario>0921234567</identificacionDestinatario>
+      <razonSocialDestinatario>JUAN CRISTOBAL PEREZ</razonSocialDestinatario>
+      <dirDestinatario>AV. FRANCISCO DE ORELLANA Y PLAZA DAÑIN</dirDestinatario>
+      <motivoTraslado>TRASLADO POR VENTA</motivoTraslado>
+      <docSustento>01</docSustento>
+      <numDocSustento>001-001-000012345</numDocSustento>
+      <fechaEmisionDocSustento>18/06/2026</fechaEmisionDocSustento>
+      <numAutDocSustento>1806202601093104800300120010010000001231234567818</numAutDocSustento>
+      <ruta>GUAYAQUIL-SAMANES</ruta>
+      <codDocSustento>01</codDocSustento>
+      <detalles>
+        <detalle>
+          <codigoInterno>PROD-005</codigoInterno>
+          <codigoAdicional>AUX-005</codigoAdicional>
+          <descripcion>Monitor Gamer UltraWide 34 Pulgadas Curved</descripcion>
+          <cantidad>2</cantidad>
+          <detallesAdicionales>
+            <detAdicional nombre="Garantia" valor="3 anos" />
+            <detAdicional nombre="Color" valor="Negro Mate" />
+          </detallesAdicionales>
+        </detalle>
+        <detalle>
+          <codigoInterno>PROD-012</codigoInterno>
+          <descripcion>Silla Ergonomica de Oficina Premium</descripcion>
+          <cantidad>1</cantidad>
+        </detalle>
+      </detalles>
+    </destinatario>
+  </destinatarios>
+  <infoAdicional>
+    <campoAdicional nombre="Observaciones">Entregar en el departamento 402 en horas de la tarde.</campoAdicional>
+    <campoAdicional nombre="Contacto">Juan Perez - 0998877665</campoAdicional>
+  </infoAdicional>
+</guiaRemision>]]></comprobante>
+</autorizacion>`

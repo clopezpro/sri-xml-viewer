@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { VisorXml } from '@sri-xml-viewer/vue'
-import { mockFactura, mockNotaCredito } from './mocks'
+import { mockFactura, mockNotaCredito, mockGuiaRemision } from './mocks'
 
 const xmlInput = ref(mockFactura)
 const claveAcceso = ref('')
@@ -9,17 +9,19 @@ const fileError = ref('')
 const loading = ref(false)
 const toast = useToast()
 
-function loadMock(type: 'factura' | 'notaCredito') {
+function loadMock(type: 'factura' | 'notaCredito' | 'guiaRemision') {
   if (type === 'factura') {
     xmlInput.value = mockFactura
   } else if (type === 'notaCredito') {
     xmlInput.value = mockNotaCredito
+  } else if (type === 'guiaRemision') {
+    xmlInput.value = mockGuiaRemision
   }
 }
 
-function handleFileUpload(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
+function handleFileUpload(files: File | File[] | null | undefined) {
+  if (!files) return
+  const file = Array.isArray(files) ? files[0] : files
   if (!file) return
 
   const reader = new FileReader()
@@ -264,7 +266,7 @@ function onLogoChange(event: Event) {
             color="primary"
             label="Seleccionar o soltar archivo .xml"
             description="Tamaño máximo 5MB"
-            @change="handleFileUpload"
+            @update:model-value="handleFileUpload"
           />
 
           <div
@@ -279,7 +281,7 @@ function onLogoChange(event: Event) {
             <p class="text-[10px] font-black text-dimmed uppercase tracking-wider mb-2">
               Comprobantes de Ejemplo
             </p>
-            <div class="flex gap-2">
+            <div class="flex flex-col gap-2 sm:flex-row">
               <UButton 
                 class="flex-1 justify-center"
                 variant="outline"
@@ -295,6 +297,14 @@ function onLogoChange(event: Event) {
                 @click="loadMock('notaCredito')"
               >
                 📄 Nota de Crédito
+              </UButton>
+              <UButton 
+                class="flex-1 justify-center"
+                variant="outline"
+                color="neutral"
+                @click="loadMock('guiaRemision')"
+              >
+                📄 Guía Remisión
               </UButton>
             </div>
           </div>
