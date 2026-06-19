@@ -57,6 +57,11 @@ function getColumnsDT() {
 
   if (firstItem?.descripcion)
     columns.push('Descripcion')
+  if (firstItem?.detallesAdicionales?.detAdicional) {
+    firstItem.detallesAdicionales.detAdicional.forEach((rs) => {
+      columns.push(rs['@nombre'])
+    })
+  }
 
   if (firstItem?.cantidad)
     columns.push('CANT')
@@ -70,11 +75,7 @@ function getColumnsDT() {
   if (firstItem?.descuento)
     columns.push('DESC')
 
-  if (firstItem?.detallesAdicionales?.detAdicional) {
-    firstItem.detallesAdicionales.detAdicional.forEach((rs) => {
-      columns.push(rs['@nombre'])
-    })
-  }
+  
   if (firstItem?.precioTotalSinImpuesto)
     columns.push('TOTAL')
 
@@ -99,6 +100,12 @@ function getColumnsTB() {
 
     if (itemFirst.descripcion)
       columns.push({ valor: itemFirst.descripcion })
+
+    if (itemFirst.detallesAdicionales?.detAdicional) {
+      itemFirst.detallesAdicionales.detAdicional.forEach((rs) => {
+        columns.push({ valor: rs['@valor'] })
+      })
+    }
     if (itemFirst.cantidad)
       columns.push({ valor: itemFirst.cantidad, clase: 'text-right' })
 
@@ -109,11 +116,7 @@ function getColumnsTB() {
       columns.push({ valor: itemFirst.precioUnitario, clase: 'text-right' })
     if (itemFirst.descuento)
       columns.push({ valor: itemFirst.descuento, clase: 'text-right' })
-    if (itemFirst.detallesAdicionales?.detAdicional) {
-      itemFirst.detallesAdicionales.detAdicional.forEach((rs) => {
-        columns.push({ valor: rs['@valor'] })
-      })
-    }
+   
     if (itemFirst.precioTotalSinImpuesto) {
       columns.push({
         valor: itemFirst.precioTotalSinImpuesto,
