@@ -142,6 +142,11 @@ function getColumnsDT(detalles: DetalleProducto[]) {
   }]
   columns.push({ label: 'CANT', headerClassName: 'text-center' })
   columns.push({ label: 'Descripción' })
+  const extraDetailNames = getUniqueAdditionalDetailNames(detalles)
+  extraDetailNames.forEach((name) => {
+    columns.push({ label: name })
+  })
+
   const hasCodInterno = detalles.some(item => item.codigoInterno)
   if (hasCodInterno) {
     columns.push({ label: 'Còdigo Princial' })
@@ -152,11 +157,7 @@ function getColumnsDT(detalles: DetalleProducto[]) {
     columns.push({ label: 'COD.aux' })
   }
 
-  const extraDetailNames = getUniqueAdditionalDetailNames(detalles)
-  extraDetailNames.forEach((name) => {
-    columns.push({ label: name })
-  })
-
+ 
   return columns
 }
 
@@ -174,6 +175,17 @@ function getColumnsTB(detalles: DetalleProducto[]) {
     row.push({ valor: index + 1, clase: 'text-center' })
     row.push({ valor: item.cantidad || '0', clase: 'text-right font-bold' })
     row.push({ valor: item.descripcion || '' })
+     // 5. Detalles adicionales dinámicos
+    extraDetailNames.forEach((name) => {
+      let val = ''
+      if (item.detallesAdicionales && Array.isArray(item.detallesAdicionales)) {
+        const found = item.detallesAdicionales.find(ad => ad.nombre === name)
+        if (found) {
+          val = found.valor
+        }
+      }
+      row.push({ valor: val })
+    })
 
     // 2. Código Principal
     if (hasCodInterno) {
@@ -187,17 +199,7 @@ function getColumnsTB(detalles: DetalleProducto[]) {
 
     // 4. Descripción
 
-    // 5. Detalles adicionales dinámicos
-    extraDetailNames.forEach((name) => {
-      let val = ''
-      if (item.detallesAdicionales && Array.isArray(item.detallesAdicionales)) {
-        const found = item.detallesAdicionales.find(ad => ad.nombre === name)
-        if (found) {
-          val = found.valor
-        }
-      }
-      row.push({ valor: val })
-    })
+   
 
     // 6. Cantidad
 

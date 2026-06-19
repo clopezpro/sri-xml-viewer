@@ -20,12 +20,18 @@ onMounted(() => {
 })
 
 watchEffect(() => {
+  const xml = props.xml
   if (typeof window === 'undefined') return
-  if (!props.xml) return
+  if (!xml) {
+    data.value = null
+    error.value = ''
+    return
+  }
   try {
-    data.value = getFullInvoiceDataFromXml(props.xml)
+    data.value = getFullInvoiceDataFromXml(xml)
     error.value = ''
   } catch (e: any) {
+    data.value = null
     error.value = e.message || 'Error al procesar el XML'
     console.error(e)
   }

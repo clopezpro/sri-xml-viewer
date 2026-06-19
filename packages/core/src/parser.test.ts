@@ -139,4 +139,61 @@ describe('SRI XML Parser core tests', () => {
     const data = getFullInvoiceDataFromXml(mockXmlWithMockKey)
     expect(data.typeDoc).toBe('01')
   })
+
+  it('should successfully parse a mock remission guide (Guia de Remision) XML', () => {
+    const mockGuiaXml = `<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1806202606093104800300120010010000001859257787812</numeroAutorizacion>
+  <fechaAutorizacion>2026-06-18T15:30:22-05:00</fechaAutorizacion>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<guiaRemision id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>Christian Manuel Lopez Camacho</razonSocial>
+    <ruc>0931048003001</ruc>
+    <claveAcceso>1806202606093104800300120010010000001859257787812</claveAcceso>
+    <codDoc>06</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000185</secuencial>
+  </infoTributaria>
+  <infoGuiaRemision>
+    <dirPartida>AV. GENERAL CORDOVA 1024 Y ESCALINATA</dirPartida>
+    <dirLlegada>AV. 9 DE OCTUBRE Y MALECON</dirLlegada>
+    <razonSocialTransportista>TRANSPORTE RAPIDO S.A.</razonSocialTransportista>
+    <rucTransportista>0990001234001</rucTransportista>
+    <fechaIniTransporte>18/06/2026</fechaIniTransporte>
+    <fechaFinTransporte>19/06/2026</fechaFinTransporte>
+    <placa>GYE-9876</placa>
+  </infoGuiaRemision>
+  <destinatarios>
+    <destinatario>
+      <identificacionDestinatario>0921234567</identificacionDestinatario>
+      <razonSocialDestinatario>JUAN CRISTOBAL PEREZ</razonSocialDestinatario>
+      <dirDestinatario>AV. FRANCISCO DE ORELLANA Y PLAZA DAÑIN</dirDestinatario>
+      <motivoTraslado>TRASLADO POR VENTA</motivoTraslado>
+      <docSustento>01</docSustento>
+      <numDocSustento>001-001-000012345</numDocSustento>
+      <fechaEmisionDocSustento>18/06/2026</fechaEmisionDocSustento>
+      <numAutDocSustento>1806202601093104800300120010010000001231234567818</numAutDocSustento>
+      <ruta>GUAYAQUIL-SAMANES</ruta>
+      <codDocSustento>01</codDocSustento>
+      <detalles>
+        <detalle>
+          <codigoInterno>PROD-005</codigoInterno>
+          <descripcion>Monitor Gamer UltraWide 34 Pulgadas Curved</descripcion>
+          <cantidad>2</cantidad>
+        </detalle>
+      </detalles>
+    </destinatario>
+  </destinatarios>
+</guiaRemision>
+]]></comprobante>
+</autorizacion>`
+    const data = getFullInvoiceDataFromXml(mockGuiaXml)
+    expect(data.accessKey).toBe('1806202606093104800300120010010000001859257787812')
+    expect(data.typeDoc).toBe('06')
+  })
 })
