@@ -172,11 +172,30 @@
    when printing the visor component.
    ============================================================ */
 @media print {
-  /* Force exact background and color rendering */
+  /* Force exact background and color rendering and black borders */
   .visor-xml-container,
   .visor-xml-container * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    border-color: #000000 !important;
+  }
+
+  .visor-xml-container .border,
+  .visor-xml-container .border-default,
+  .visor-xml-container .border-accented {
+    border: 1px solid #000000 !important;
+  }
+  .visor-xml-container .border-t {
+    border-top: 1px solid #000000 !important;
+  }
+  .visor-xml-container .border-b {
+    border-bottom: 1px solid #000000 !important;
+  }
+  .visor-xml-container .border-l {
+    border-left: 1px solid #000000 !important;
+  }
+  .visor-xml-container .border-r {
+    border-right: 1px solid #000000 !important;
   }
 
   /* Force Light Mode variables and pure black text for print */
@@ -198,9 +217,9 @@
     --ui-text-highlighted: #000000 !important;
     --ui-text-inverted: white !important;
 
-    --ui-border: #d1d5db !important;
-    --ui-border-muted: #e5e7eb !important;
-    --ui-border-accented: #9ca3af !important;
+    --ui-border: #000000 !important;
+    --ui-border-muted: #000000 !important;
+    --ui-border-accented: #000000 !important;
 
     --ui-primary: #15803d !important;
     --ui-error: #dc2626 !important;
@@ -221,9 +240,9 @@
     --visor-bg-accented: #e5e7eb !important;
     --visor-bg-inverted: black !important;
 
-    --visor-border: #d1d5db !important;
-    --visor-border-muted: #e5e7eb !important;
-    --visor-border-accented: #9ca3af !important;
+    --visor-border: #000000 !important;
+    --visor-border-muted: #000000 !important;
+    --visor-border-accented: #000000 !important;
   }
 
   /* Clean table rendering for print */
@@ -234,7 +253,7 @@
 
   .visor-xml-container th,
   .visor-xml-container td {
-    border: 1px solid #e5e7eb !important;
+    border: 1px solid #000000 !important;
     padding: 4px 6px !important;
   }
 
