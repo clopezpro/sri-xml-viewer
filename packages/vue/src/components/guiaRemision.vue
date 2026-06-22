@@ -405,5 +405,17 @@ function showTypeDocSustento(code: string) {
         </tbody>
       </table>
     </div>
+
+    <!-- Sección de Firmas (Recibo) -->
+    <div class="mt-12 grid grid-cols-2 gap-8 text-center px-12 pb-4">
+      <div class="flex flex-col items-center">
+        <div class="w-64 border-t border-default mb-2" />
+        <span class="font-bold text-default">Entregado Conforme</span>
+      </div>
+      <div class="flex flex-col items-center">
+        <div class="w-64 border-t border-default mb-2" />
+        <span class="font-bold text-default">Recibí Conforme</span>
+      </div>
+    </div>
   </div>
 </template>
