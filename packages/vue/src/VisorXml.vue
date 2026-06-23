@@ -17,6 +17,41 @@ const isMounted = ref(false)
 
 onMounted(() => {
   isMounted.value = true
+  if (typeof window !== 'undefined' && !document.getElementById('sri-xml-viewer-print-styles')) {
+    const style = document.createElement('style')
+    style.id = 'sri-xml-viewer-print-styles'
+    style.textContent = `
+      @media print {
+        .visor-xml-container,
+        .visor-xml-container * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          border-color: #000000 !important;
+        }
+        .visor-xml-container .border,
+        .visor-xml-container .border-default,
+        .visor-xml-container .border-accented {
+          border: 1px solid #000000 !important;
+        }
+        .visor-xml-container .border-t { border-top: 1px solid #000000 !important; }
+        .visor-xml-container .border-b { border-bottom: 1px solid #000000 !important; }
+        .visor-xml-container .border-l { border-left: 1px solid #000000 !important; }
+        .visor-xml-container .border-r { border-right: 1px solid #000000 !important; }
+        
+        .visor-xml-container th,
+        .visor-xml-container td {
+          border: 1px solid #000000 !important;
+          padding: 4px 6px !important;
+        }
+        .visor-xml-container .print-hidden,
+        .visor-xml-container .print\\:hidden,
+        .visor-xml-container .print\\:\\!hidden {
+          display: none !important;
+        }
+      }
+    `
+    document.head.appendChild(style)
+  }
 })
 
 watchEffect(() => {
