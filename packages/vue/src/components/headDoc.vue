@@ -99,7 +99,9 @@ const mode = computed(() => {
 <template>
   <div class="grid grid-cols-2 gap-1">
     <div class="flex flex-col justify-between  m-1">
-      <div class="flex items-center p-1 flex-1">
+      <div
+        style="display: flex; align-items: center; justify-content: center;"
+      >
         <div
           v-if="!logoUrl"
           class="text-error font-bold text-4xl text-center w-full"
@@ -110,7 +112,7 @@ const mode = computed(() => {
           v-else
           :src="logoUrl"
           alt="Logo"
-          class="w-full h-full object-contain"
+          style="max-width: 210px; max-height: 210px; object-fit: cover"
         >
       </div>
       <div class="w-full border border-default rounded-lg">
