@@ -48,36 +48,35 @@ function getColumnsDT() {
   const isUnidadMedida = detalles.value.some(rs => rs.unidadMedida)
   const firstItem = detalles.value[0]
 
-  const columns = ['#']
+  const columns: { valor: string, style?: string }[] = [{ valor: '#', style: 'text-align: center;' }]
   if (firstItem?.codigoPrincipal)
-    columns.push('COD')
+    columns.push({ valor: 'COD' })
 
   if (isAux)
-    columns.push('COD.aux')
+    columns.push({ valor: 'COD.aux' })
 
   if (firstItem?.descripcion)
-    columns.push('Descripcion')
+    columns.push({ valor: 'Descripcion' })
   if (firstItem?.detallesAdicionales?.detAdicional) {
     firstItem.detallesAdicionales.detAdicional.forEach((rs) => {
-      columns.push(rs['@nombre'])
+      columns.push({ valor: rs['@nombre'] })
     })
   }
 
   if (firstItem?.cantidad)
-    columns.push('CANT')
+    columns.push({ valor: 'CANT', style: 'text-align: right;' })
 
   if (isUnidadMedida)
-    columns.push('UNIDAD')
+    columns.push({ valor: 'UNIDAD', style: 'text-align: right;' })
 
   if (firstItem?.precioUnitario)
-    columns.push('PVP')
+    columns.push({ valor: 'PVP', style: 'text-align: right;' })
 
   if (firstItem?.descuento)
-    columns.push('DESC')
+    columns.push({ valor: 'DESC', style: 'text-align: right;' })
 
-  
   if (firstItem?.precioTotalSinImpuesto)
-    columns.push('TOTAL')
+    columns.push({ valor: 'TOTAL', style: 'text-align: right;' })
 
   return columns
 }
@@ -201,8 +200,9 @@ function getColumnsTB() {
               v-for="(tag, index) in getColumnsDT()"
               :key="index"
               class="border border-default"
+              :style="tag.style || 'text-align: left;'"
             >
-              {{ tag }}
+              {{ tag.valor }}
             </th>
           </tr>
         </thead>
@@ -216,6 +216,7 @@ function getColumnsTB() {
               :key="i"
               class="break-words border border-default"
               :class="valor.clase ? valor.clase : ''"
+              :style="(valor.clase || '').includes('right') ? 'text-align: right;' : ((valor.clase || '').includes('center') ? 'text-align: center;' : 'text-align: left;')"
             >
               {{ valor.valor }}
             </td>

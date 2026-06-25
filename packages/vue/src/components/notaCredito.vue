@@ -85,21 +85,21 @@ function showTypeDoc(type: string, mode = 0) {
 function getColumnsDT() {
   if (detalles.value.length === 0) return []
   const firstItem = detalles.value[0]
-  const columns = ['#']
+  const columns: { valor: string, style?: string }[] = [{ valor: '#', style: 'text-align: center;' }]
   if (firstItem.codigoPrincipal)
-    columns.push('COD')
+    columns.push({ valor: 'COD' })
   if (firstItem.codigoAuxiliar)
-    columns.push('COD.aux')
+    columns.push({ valor: 'COD.aux' })
   if (firstItem.descripcion)
-    columns.push('Descripcion')
+    columns.push({ valor: 'Descripcion' })
   if (firstItem.cantidad)
-    columns.push('CANT')
+    columns.push({ valor: 'CANT', style: 'text-align: right;' })
   if (firstItem.precioUnitario)
-    columns.push('PVP')
+    columns.push({ valor: 'PVP', style: 'text-align: right;' })
   if (firstItem.descuento)
-    columns.push('DESC')
+    columns.push({ valor: 'DESC', style: 'text-align: right;' })
   if (firstItem.precioTotalSinImpuesto)
-    columns.push('TOTAL')
+    columns.push({ valor: 'TOTAL', style: 'text-align: right;' })
   return columns
 }
 
@@ -222,9 +222,10 @@ function getColumnsTB() {
               <th
                 v-for="(tag, index) in getColumnsDT()"
                 :key="index"
-                class="border border-default p-1 text-left"
+                class="border border-default p-1"
+                :style="tag.style || 'text-align: left;'"
               >
-                {{ tag }}
+                {{ tag.valor }}
               </th>
             </tr>
           </thead>
@@ -238,6 +239,7 @@ function getColumnsTB() {
                 :key="i"
                 class="break-words border border-default p-1"
                 :class="valor.clase ? valor.clase : ''"
+                :style="(valor.clase || '').includes('right') ? 'text-align: right;' : ((valor.clase || '').includes('center') ? 'text-align: center;' : 'text-align: left;')"
               >
                 {{ valor.valor }}
               </td>

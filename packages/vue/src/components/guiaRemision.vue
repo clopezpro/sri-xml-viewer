@@ -28,6 +28,8 @@ interface Destinatario {
   numAutDocSustento?: string
   ruta?: string
   codDocSustento?: string
+  docAduaneroUnico?: string
+  codEstabDestino?: string
   detalles: DetalleProducto[]
 }
 
@@ -328,6 +330,24 @@ function showTypeDocSustento(code: string) {
         <div class="font-bold">
           {{ dest.razonSocialDestinatario }}
         </div>
+        
+        <template v-if="dest.docAduaneroUnico">
+          <div class="text-dimmed">
+            Documento Aduanero:
+          </div>
+          <div class="font-bold">
+            {{ dest.docAduaneroUnico }}
+          </div>
+        </template>
+
+        <template v-if="dest.codEstabDestino">
+          <div class="text-dimmed">
+            Cod. Estab. Destino:
+          </div>
+          <div class="font-bold">
+            {{ dest.codEstabDestino }}
+          </div>
+        </template>
 
         <div class="text-dimmed">
           Ruta:
@@ -362,6 +382,7 @@ function showTypeDocSustento(code: string) {
                 :key="cellIdx"
                 class="border border-default p-1 break-words"
                 :class="cell.clase ? cell.clase : ''"
+                :style="(cell.clase || '').includes('right') ? 'text-align: right;' : ((cell.clase || '').includes('center') ? 'text-align: center;' : 'text-align: left;')"
               >
                 {{ cell.valor }}
               </td>
