@@ -10,11 +10,12 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "nuxt": "^4.4.8",
-    "vue": "^3.5.35",
-    "vue-router": "^5.1.0",
     "@nuxt/ui": "^4.4.0",
+    "@sri-xml-viewer/core": "workspace:*",
     "@sri-xml-viewer/vue": "workspace:*",
-    "@sri-xml-viewer/core": "workspace:*"
+    "nuxt": "^4.4.8",
+    "soap": "^1.9.3",
+    "vue": "^3.5.35",
+    "vue-router": "^5.1.0"
   }
 }

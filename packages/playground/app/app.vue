@@ -94,27 +94,67 @@ async function searchByClave() {
       })
     } else {
       let errors = response.mensajes?.map((m: any) => `[${m.identificador || 'SRI'}] ${m.mensaje}`).join('\n') || 'No se pudo obtener el comprobante.'
-      if (errors.includes("does not match certificate's altnames") || errors.includes("is not in the cert's list") || errors.includes("altnames")) {
-        errors = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente (Error de certificado SSL/IP). Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
+      if (
+        errors.includes("does not match certificate's altnames") ||
+        errors.includes("is not in the cert's list") ||
+        errors.includes("altnames") ||
+        errors.includes("no respondió") ||
+        errors.includes("reintente")
+      ) {
+        errors = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente. Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
       }
+
+      const isConnectionError = response.estado === 'ERROR_CONEXION' || response.estado === 'ERROR_SRI_CONEXION' || errors.includes('no respondió') || errors.includes('disponible') || errors.includes('reintente')
+
       toast.add({
         title: `Error del SRI - ${response.estado}`,
         description: errors,
         color: 'error',
-        duration: 8000
+        duration: isConnectionError ? 12000 : 8000,
+        actions: isConnectionError ? [
+          {
+            label: 'Reintentar',
+            color: 'primary',
+            onClick: () => {
+              searchByClave()
+            }
+          }
+        ] : undefined
       })
     }
   } catch (error: any) {
     console.error('Error al buscar clave de acceso:', error)
     let errMsg = error.data?.message || error.message || 'Ocurrió un error inesperado al conectar con el servidor local.'
-    if (errMsg.includes("does not match certificate's altnames") || errMsg.includes("is not in the cert's list") || errMsg.includes("altnames")) {
-      errMsg = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente (Error de certificado SSL/IP). Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
+    if (
+      errMsg.includes("does not match certificate's altnames") ||
+      errMsg.includes("is not in the cert's list") ||
+      errMsg.includes("altnames") ||
+      errMsg.includes("no respondió") ||
+      errMsg.includes("reintente") ||
+      errMsg.includes("ECONNRESET") ||
+      errMsg.includes("ETIMEDOUT") ||
+      errMsg.includes("ENOTFOUND") ||
+      errMsg.includes("hang up")
+    ) {
+      errMsg = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente. Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
     }
+
+    const isConnectionError = errMsg.includes('no respondió') || errMsg.includes('disponible') || errMsg.includes('reintente')
+
     toast.add({
       title: 'Error de red / API',
       description: errMsg,
       color: 'error',
-      duration: 8000
+      duration: isConnectionError ? 12000 : 8000,
+      actions: isConnectionError ? [
+        {
+          label: 'Reintentar',
+          color: 'primary',
+          onClick: () => {
+            searchByClave()
+          }
+        }
+      ] : undefined
     })
   } finally {
     loading.value = false
@@ -219,7 +259,7 @@ function onLogoChange(event: Event) {
             <p class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
               Con clave de Acceso
             </p>
-            <div class="flex gap-2">
+            <div class="flex gap-1">
               <UInput
                 v-model="claveAcceso"
                 class="w-full"
@@ -230,14 +270,6 @@ function onLogoChange(event: Event) {
               />
               <div class="flex gap-1">
                 <UButton
-                  icon="i-carbon-search"
-                  variant="solid"
-                  color="primary"
-                  aria-label="Buscar"
-                  :loading="loading"
-                  @click="searchByClave"
-                />
-                <UButton
                   v-if="claveAcceso.length > 0 && !loading"
                   icon="i-carbon-close"
                   variant="solid"
@@ -245,29 +277,38 @@ function onLogoChange(event: Event) {
                   aria-label="Limpiar"
                   @click="claveAcceso = ''"
                 />
+                <UButton
+                  icon="i-carbon-search"
+                  variant="solid"
+                  color="primary"
+                  aria-label="Buscar"
+                  :loading="loading"
+                  @click="searchByClave"
+                />
               </div>
             </div>
           </div>
        
-       
-          <div>
-            <h2 class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
-              Con Comprobante XML
-            </h2>
-            <p class="text-xs text-muted">
-              Sube un archivo .xml descargado del SRI o pega el contenido directamente en Contenido XML más abajo.
-            </p>
-          </div>
-
-          <!-- File Upload Area -->
-          <UFileUpload
-            :preview="false"
-            accept=".xml"
-            color="primary"
-            label="Seleccionar o soltar archivo .xml"
-            description="Tamaño máximo 5MB"
-            @update:model-value="handleFileUpload"
-          />
+          <template v-if="claveAcceso.length==0">
+            <div>
+              <h2 class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
+                Con Comprobante XML
+              </h2>
+              <p class="text-xs text-muted">
+                Sube un archivo .xml descargado del SRI o pega el contenido directamente en Contenido XML más abajo.
+              </p>
+            </div>
+  
+            <!-- File Upload Area -->
+            <UFileUpload
+              :preview="false"
+              accept=".xml"
+              color="primary"
+              label="Seleccionar o soltar archivo .xml"
+              description="Tamaño máximo 5MB"
+              @update:model-value="handleFileUpload"
+            />
+          </template>
 
           <div
             v-if="fileError"

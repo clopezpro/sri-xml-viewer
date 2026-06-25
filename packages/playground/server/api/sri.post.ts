@@ -1,4 +1,57 @@
 import { defineEventHandler, readBody, createError } from 'h3'
+import { createClient } from 'soap'
+
+interface IMensaje {
+  identificador?: string
+  mensaje?: string
+  informacionAdicional?: string
+  tipo?: string
+}
+
+interface IAutorizacion {
+  estado?: string
+  numeroAutorizacion?: string
+  fechaAutorizacion?: string
+  ambiente?: string
+  comprobante?: string
+  mensajes?: {
+    mensaje?: IMensaje | IMensaje[]
+  }
+}
+
+interface IAutorizarComprobanteResponse {
+  RespuestaAutorizacionComprobante?: {
+    claveAccesoConsultada?: string
+    numeroComprobantes?: string
+    autorizaciones?: {
+      autorizacion?: IAutorizacion | IAutorizacion[]
+    }
+  }
+}
+
+function documentAuthorization(
+  accessKey: string,
+  authorizationUrl: string
+): Promise<IAutorizarComprobanteResponse> {
+  const params = { claveAccesoComprobante: accessKey }
+
+  return new Promise((resolve, reject) => {
+    createClient(authorizationUrl, (err: any, client: any) => {
+      if (err) {
+        reject(err)
+        return
+      }
+
+      client.autorizacionComprobante(params, (err: any, result: IAutorizarComprobanteResponse) => {
+        if (err) {
+          reject(err)
+          return
+        }
+        resolve(result)
+      })
+    })
+  })
+}
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -16,40 +69,26 @@ export default defineEventHandler(async (event) => {
   const ambienteDigit = claveAcceso.charAt(23)
   const isProd = ambienteDigit === '2'
   const endpoint = isProd
-    ? 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline'
-    : 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline'
-
-  const soapEnvelope = `
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ec="http://ec.gob.sri.ws.autorizacion">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <ec:autorizacionComprobante>
-         <claveAccesoComprobante>${claveAcceso}</claveAccesoComprobante>
-      </ec:autorizacionComprobante>
-   </soapenv:Body>
-</soapenv:Envelope>
-  `.trim()
+    ? 'https://cel.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
+    : 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
 
   try {
-    // Desactivar validación estricta de SSL en Node para los endpoints del SRI
+    const resp = await documentAuthorization(claveAcceso, endpoint)
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/xml;charset=UTF-8',
-      },
-      body: soapEnvelope
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
+    if (!resp || !resp.RespuestaAutorizacionComprobante) {
+      return {
+        success: false,
+        estado: 'ERROR_SRI_CONEXION',
+        mensajes: [{
+          identificador: 'SRI-EMPTY',
+          mensaje: 'El SRI devolvió una respuesta vacía o no respondió. Por favor, reintente la consulta.',
+          tipo: 'ERROR'
+        }]
+      }
     }
 
-    const responseText = await response.text()
-
-    // Buscamos el bloque <autorizacion>
-    const autorizacionBlockMatch = responseText.match(/<autorizacion>([\s\S]*?)<\/autorizacion>/)
-    if (!autorizacionBlockMatch) {
+    const autorizaciones = resp.RespuestaAutorizacionComprobante?.autorizaciones?.autorizacion
+    if (!autorizaciones) {
       return {
         success: false,
         estado: 'NO REGISTRADO',
@@ -61,27 +100,29 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const autorizacionBlock = autorizacionBlockMatch[1] || ''
+    const authList = Array.isArray(autorizaciones) ? autorizaciones : [autorizaciones]
+    const auth = authList.find(a => a.estado === 'AUTORIZADO') || authList[0]
 
-    // Extraemos campos principales
-    const estado = (autorizacionBlock.match(/<estado>([\s\S]*?)<\/estado>/)?.[1] || '').trim()
-    const numeroAutorizacion = (autorizacionBlock.match(/<numeroAutorizacion>([\s\S]*?)<\/numeroAutorizacion>/)?.[1] || '').trim()
-    const fechaAutorizacion = (autorizacionBlock.match(/<fechaAutorizacion>([\s\S]*?)<\/fechaAutorizacion>/)?.[1] || '').trim()
-
-    // Extraemos el comprobante CDATA
-    let rawComprobanteXML = ''
-    const comprobanteMatch = autorizacionBlock.match(/<comprobante>([\s\S]*?)<\/comprobante>/)
-    if (comprobanteMatch) {
-      let content = (comprobanteMatch[1] || '').trim()
-
-      // Si está envuelto en CDATA, extraemos el contenido interior
-      const cdataMatch = content.match(/<!\[CDATA\[([\s\S]*?)\]\]>/)
-      if (cdataMatch) {
-        content = (cdataMatch[1] || '').trim()
+    const estado = typeof auth.estado === 'string' ? auth.estado.trim() : String(auth.estado || '')
+    const numeroAutorizacion = typeof auth.numeroAutorizacion === 'string' ? auth.numeroAutorizacion.trim() : String(auth.numeroAutorizacion || '')
+    
+    let fechaAutorizacion = ''
+    if (auth.fechaAutorizacion) {
+      if (typeof auth.fechaAutorizacion === 'string') {
+        fechaAutorizacion = auth.fechaAutorizacion.trim()
+      } else if (auth.fechaAutorizacion instanceof Date) {
+        fechaAutorizacion = auth.fechaAutorizacion.toISOString()
+      } else {
+        fechaAutorizacion = String(auth.fechaAutorizacion)
       }
+    }
 
-      // Decodificamos entidades HTML para obtener el XML real y limpio
-      rawComprobanteXML = content
+    const comprobanteXML = auth.comprobante || ''
+
+    // Decodificamos entidades HTML para obtener el XML real y limpio si es necesario
+    let rawComprobanteXML = typeof comprobanteXML === 'string' ? comprobanteXML.trim() : String(comprobanteXML)
+    if (rawComprobanteXML.includes('&lt;')) {
+      rawComprobanteXML = rawComprobanteXML
         .replace(/&lt;/g, '<')
         .replace(/&gt;/g, '>')
         .replace(/&quot;/g, '"')
@@ -91,14 +132,16 @@ export default defineEventHandler(async (event) => {
 
     // Extraemos mensajes (si los hay)
     const mensajes: any[] = []
-    const mensajesMatch = autorizacionBlock.match(/<mensajes>([\s\S]*?)<\/mensajes>/)
-    if (mensajesMatch) {
-      const mensajeBlocks = mensajesMatch[1]?.match(/<mensaje>([\s\S]*?)<\/mensaje>/g) || []
-      for (const block of mensajeBlocks) {
-        const identificador = (block.match(/<identificador>([\s\S]*?)<\/identificador>/)?.[1] || '').trim()
-        const msgText = (block.match(/<mensaje>([\s\S]*?)<\/mensaje>/)?.[1] || '').trim()
-        const tipo = (block.match(/<tipo>([\s\S]*?)<\/tipo>/)?.[1] || '').trim()
-        const informacionAdicional = (block.match(/<informacionAdicional>([\s\S]*?)<\/informacionAdicional>/)?.[1] || '').trim()
+    if (auth.mensajes && auth.mensajes.mensaje) {
+      const msgList = Array.isArray(auth.mensajes.mensaje)
+        ? auth.mensajes.mensaje
+        : [auth.mensajes.mensaje]
+
+      for (const block of msgList) {
+        const identificador = typeof block.identificador === 'string' ? block.identificador.trim() : String(block.identificador || '')
+        const msgText = typeof block.mensaje === 'string' ? block.mensaje.trim() : String(block.mensaje || '')
+        const tipo = typeof block.tipo === 'string' ? block.tipo.trim() : String(block.tipo || '')
+        const informacionAdicional = typeof block.informacionAdicional === 'string' ? block.informacionAdicional.trim() : String(block.informacionAdicional || '')
 
         mensajes.push({ identificador, mensaje: msgText, tipo, informacionAdicional })
       }
@@ -116,7 +159,7 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    const ambienteName = isProd ? 'PRODUCCIÓN' : 'PRUEBAS'
+    const ambienteName = auth.ambiente || (isProd ? 'PRODUCCIÓN' : 'PRUEBAS')
 
     // Reconstruir el XML en el formato exacto del SRI
     const rebuiltXml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -141,8 +184,16 @@ export default defineEventHandler(async (event) => {
     console.error('Error al consultar SOAP del SRI:', error)
     const rawMsg = error.message || String(error)
     let mensaje = `No se pudo conectar con el servidor del SRI: ${rawMsg}`
-    if (rawMsg.includes("does not match certificate's altnames") || rawMsg.includes("is not in the cert's list") || rawMsg.includes("altnames")) {
-      mensaje = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente (Error de certificado SSL/IP). Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
+    if (
+      rawMsg.includes("does not match certificate's altnames") ||
+      rawMsg.includes("is not in the cert's list") ||
+      rawMsg.includes("altnames") ||
+      rawMsg.includes("ECONNRESET") ||
+      rawMsg.includes("ETIMEDOUT") ||
+      rawMsg.includes("ENOTFOUND") ||
+      rawMsg.includes("socket hang up")
+    ) {
+      mensaje = "El servidor del SRI no respondió adecuadamente o no está disponible temporalmente. Por favor, reintente la consulta; es muy probable que funcione en el segundo intento."
     }
     return {
       success: false,
