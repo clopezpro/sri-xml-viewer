@@ -22,7 +22,10 @@ const props = defineProps({
         <td class="text-right border pr-1 border-accented">
           {{ dt.name }}
         </td>
-        <td class="text-right  w-24 border border-accented">
+        <td
+          class="w-24 border border-accented"
+          style="text-align: right; padding-right: .25rem;"
+        >
           {{
             formatToMoney(dt.valor, 'decimal')
           }}

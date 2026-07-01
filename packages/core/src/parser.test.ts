@@ -112,6 +112,30 @@ describe('SRI XML Parser core tests', () => {
     expect(data.payments).toHaveLength(1)
     expect(data.payments[0]?.formaPago).toBe('OTROS CON UTILIZACIÓN DEL SISTEMA FINANCIERO') // formaPago 20 is OTROS CON UTILIZACIÓN...
     expect(data.payments[0]?.total).toBe('123.20')
+
+    // Verify totals including PROPINA
+    expect(data.totals).toContainEqual({ name: 'PROPINA', valor: 0 })
+    const valorTotalIndex = data.totals.findIndex(t => t.name === 'VALOR TOTAL')
+    const propinaIndex = data.totals.findIndex(t => t.name === 'PROPINA')
+    expect(propinaIndex).toBe(valorTotalIndex - 1)
+  })
+
+  it('should parse non-zero propina and place it above VALOR TOTAL', () => {
+    const xmlWithPropina = mockXml.replace('<propina>0.00</propina>', '<propina>10.50</propina>')
+    const data = getFullInvoiceDataFromXml(xmlWithPropina)
+    expect(data.totals).toContainEqual({ name: 'PROPINA', valor: 10.5 })
+    const valorTotalIndex = data.totals.findIndex(t => t.name === 'VALOR TOTAL')
+    const propinaIndex = data.totals.findIndex(t => t.name === 'PROPINA')
+    expect(propinaIndex).toBe(valorTotalIndex - 1)
+  })
+
+  it('should parse missing propina as 0 and place it above VALOR TOTAL', () => {
+    const xmlWithoutPropina = mockXml.replace('<propina>0.00</propina>', '')
+    const data = getFullInvoiceDataFromXml(xmlWithoutPropina)
+    expect(data.totals).toContainEqual({ name: 'PROPINA', valor: 0 })
+    const valorTotalIndex = data.totals.findIndex(t => t.name === 'VALOR TOTAL')
+    const propinaIndex = data.totals.findIndex(t => t.name === 'PROPINA')
+    expect(propinaIndex).toBe(valorTotalIndex - 1)
   })
 
   it('should successfully parse invoice.xml asset', () => {

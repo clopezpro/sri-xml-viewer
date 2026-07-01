@@ -364,6 +364,12 @@ function getTotalInvoice(doc: Document) {
     name: 'IRBPNR',
     valor: totalIRBPNR,
   })
+  const propinaVal = doc?.getElementsByTagName('propina')[0]?.textContent
+  const propina = propinaVal ? Number.parseFloat(propinaVal) : 0
+  dataTable.push({
+    name: 'PROPINA',
+    valor: Number.isNaN(propina) ? 0 : propina,
+  })
   const importeTotal = Number.parseFloat(doc?.getElementsByTagName('importeTotal')[0]?.textContent || '0')
   dataTable.push({
     name: 'VALOR TOTAL',
