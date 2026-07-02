@@ -167,6 +167,7 @@ function getEmissionName(val: string): string {
       <template v-else-if="data.typeDoc === '07'">
         <RetencionComponent
           :document="data.documentData"
+          :logoUrl="logoUrl"
           :authorization="data.dateAuthorization"
         />
       </template>
