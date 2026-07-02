@@ -14,6 +14,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  logoUrl: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 const getVersion = computed(() => {
   return props.document?.getElementsByTagName('comprobanteRetencion').item(0)?.getAttribute('version')
@@ -330,6 +335,7 @@ const infoRetention = computed(() => {
     <headDoc
       :document="document"
       :dateAuthorization="showAuthorizationDate(authorization)"
+      :logoUrl="logoUrl"
     />
     <div class="flex mt-5">
       <div class="border border-default rounded-lg w-full p-2">
@@ -357,7 +363,7 @@ const infoRetention = computed(() => {
           </div>
         </div>
 
-        <div class="flex-none flex">
+        <div class="flex-none flex gap-1">
           <div class="font-bold pr-2 text-dimmed">
             FECHA EMISION:
           </div>
