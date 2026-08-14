@@ -1,13 +1,33 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { VisorXml } from '@sri-xml-viewer/vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { VisorXml, agentRetentionResolutions, getResolutionsByAgentCode } from '@sri-xml-viewer/vue'
 import { mockFactura, mockNotaCredito, mockGuiaRemision } from './mocks'
 
 const xmlInput = ref(mockFactura)
 const claveAcceso = ref('')
+const resolutionAgentNumber = ref('')
 const fileError = ref('')
 const loading = ref(false)
 const toast = useToast()
+
+const xmlAgenteRetencion = computed(() => {
+  if (!xmlInput.value) return ''
+  const match = xmlInput.value.match(/<(?:\w+:)?agenteRetencion>([^<]+)<\/(?:\w+:)?agenteRetencion>/i)
+  return match ? match[1].trim() : ''
+})
+
+const availableResolutions = computed(() => {
+  const code = xmlAgenteRetencion.value
+  const filtered = code ? getResolutionsByAgentCode(code) : agentRetentionResolutions
+  return filtered.map(r => ({ label: r.label, value: r.value }))
+})
+
+watch(xmlAgenteRetencion, () => {
+  const isValid = availableResolutions.value.some(r => r.value === resolutionAgentNumber.value)
+  if (!isValid) {
+    resolutionAgentNumber.value = ''
+  }
+})
 
 function loadMock(type: 'factura' | 'notaCredito' | 'guiaRemision') {
   if (type === 'factura') {
@@ -427,6 +447,24 @@ function onLogoChange(event: Event) {
             <div class="title-panel p-2 border-b border-default flex justify-between items-center">
               <span class="text-xs font-black text-dimmed uppercase tracking-widest">Visualización del Comprobante</span>
               <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1">
+                  <USelect
+                    v-model="resolutionAgentNumber"
+                    :items="availableResolutions"
+                    placeholder="Sin resolución (por defecto)"
+                    class="w-64"
+                    size="sm"
+                  />
+                  <UButton
+                    v-if="resolutionAgentNumber"
+                    icon="i-carbon-close"
+                    variant="ghost"
+                    color="neutral"
+                    size="sm"
+                    title="Limpiar resolución"
+                    @click="resolutionAgentNumber = ''"
+                  />
+                </div>
                 <UColorModeButton />
                 <ClientOnly>
                   <input
@@ -458,6 +496,7 @@ function onLogoChange(event: Event) {
                 <VisorXml
                   :xml="xmlInput"
                   :logoUrl="logoUrl"
+                  :resolutionAgentNumber="resolutionAgentNumber"
                 />
               </div>
             </div>

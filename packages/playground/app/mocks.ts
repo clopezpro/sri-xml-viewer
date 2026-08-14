@@ -17,6 +17,7 @@ export const mockFactura = `<?xml version="1.0" encoding="UTF-8" standalone="yes
     <ptoEmi>001</ptoEmi>
     <secuencial>000000173</secuencial>
     <dirMatriz>ECUADOR-GUAYAQUIL</dirMatriz>
+    <agenteRetencion>1</agenteRetencion>
   </infoTributaria>
   <infoFactura>
     <fechaEmision>01/06/2026</fechaEmision>
