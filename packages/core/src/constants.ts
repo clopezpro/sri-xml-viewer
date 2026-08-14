@@ -22,13 +22,13 @@ export const AGENT_RETENTION_RESOLUTIONS: string[] = [
 ]
 
 export const agentRetentionResolutions: IAgentRetentionResolution[] = [
-  { value: 'NAC.DNCRASC20-00000001', label: 'NAC.DNCRASC20-00000001', code: '1' },
+  { value: 'NAC-DNCRASC20-00000001', label: 'NAC-DNCRASC20-00000001', code: '1' },
   { value: 'NAC.GTRRlOC21-00000001', label: 'NAC.GTRRlOC21-00000001', code: '1' },
-  { value: 'NAC.GTRRlOC22-00000001', label: 'NAC.GTRRlOC22-00000001', code: '1' },
-  { value: 'NAC.GTRRlOC22-000000003', label: 'NAC.GTRRlOC22-000000003', code: '3' },
-  { value: 'NAC.DGERCGC24-00000008', label: 'NAC.DGERCGC24-00000008', code: '8' },
-  { value: 'NAC.DGERCGC2E.00000010', label: 'NAC.DGERCGC2E.00000010', code: '10' },
-  { value: 'NAC.DGERCGC26-00000010', label: 'NAC.DGERCGC26-00000010', code: '10' },
+  { value: 'NAC-GTRRIOC22-00000001', label: 'NAC-GTRRIOC22-00000001', code: '1' },
+  { value: 'NAC-GTRRIOC22-000000003', label: 'NAC-GTRRIOC22-000000003', code: '3' },
+  { value: 'NAC-DGERCGC24-00000008', label: 'NAC-DGERCGC24-00000008', code: '8' },
+  { value: 'NAC-DGERCGC25-00000010', label: 'NAC-DGERCGC25-00000010', code: '10' },
+  { value: 'NAC-DGERCGC26-00000010', label: 'NAC-DGERCGC26-00000010', code: '10' },
 ]
 
 export function getResolutionsByAgentCode(code?: string): IAgentRetentionResolution[] {
