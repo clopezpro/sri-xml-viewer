@@ -4,6 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, it, expect } from 'vitest'
 import { getFullInvoiceDataFromXml } from './parser'
+import { getResolutionsByAgentCode, agentRetentionResolutions } from './constants'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -219,5 +220,29 @@ describe('SRI XML Parser core tests', () => {
     const data = getFullInvoiceDataFromXml(mockGuiaXml)
     expect(data.accessKey).toBe('1806202606093104800300120010010000001859257787812')
     expect(data.typeDoc).toBe('06')
+  })
+
+  it('filters retention agent resolutions by code correctly', () => {
+    const res1 = getResolutionsByAgentCode('1')
+    expect(res1.length).toBe(3)
+    expect(res1.map(r => r.value)).toEqual([
+      'NAC.DNCRASC20-00000001',
+      'NAC.GTRRlOC21-00000001',
+      'NAC.GTRRlOC22-00000001',
+    ])
+
+    const res8 = getResolutionsByAgentCode('8')
+    expect(res8.length).toBe(1)
+    expect(res8[0].value).toBe('NAC.DGERCGC24-00000008')
+
+    const res10 = getResolutionsByAgentCode('10')
+    expect(res10.length).toBe(2)
+    expect(res10.map(r => r.value)).toEqual([
+      'NAC.DGERCGC2E.00000010',
+      'NAC.DGERCGC26-00000010',
+    ])
+
+    const all = getResolutionsByAgentCode()
+    expect(all.length).toBe(7)
   })
 })

@@ -5,6 +5,46 @@ export interface ITypesIvaFee {
   fee: number
   status: boolean
 }
+export interface IAgentRetentionResolution {
+  value: string
+  label: string
+  code?: string
+}
+
+export const AGENT_RETENTION_RESOLUTIONS: string[] = [
+  'NAC.DNCRASC20-00000001',
+  'NAC.GTRRlOC21-00000001',
+  'NAC.GTRRlOC22-00000001',
+  'NAC.GTRRlOC22-000000003',
+  'NAC.DGERCGC24-00000008',
+  'NAC.DGERCGC2E.00000010',
+  'NAC.DGERCGC26-00000010',
+]
+
+export const agentRetentionResolutions: IAgentRetentionResolution[] = [
+  { value: 'NAC.DNCRASC20-00000001', label: 'NAC.DNCRASC20-00000001', code: '1' },
+  { value: 'NAC.GTRRlOC21-00000001', label: 'NAC.GTRRlOC21-00000001', code: '1' },
+  { value: 'NAC.GTRRlOC22-00000001', label: 'NAC.GTRRlOC22-00000001', code: '1' },
+  { value: 'NAC.GTRRlOC22-000000003', label: 'NAC.GTRRlOC22-000000003', code: '3' },
+  { value: 'NAC.DGERCGC24-00000008', label: 'NAC.DGERCGC24-00000008', code: '8' },
+  { value: 'NAC.DGERCGC2E.00000010', label: 'NAC.DGERCGC2E.00000010', code: '10' },
+  { value: 'NAC.DGERCGC26-00000010', label: 'NAC.DGERCGC26-00000010', code: '10' },
+]
+
+export function getResolutionsByAgentCode(code?: string): IAgentRetentionResolution[] {
+  if (!code) return agentRetentionResolutions
+  const cleanCode = code.trim()
+  const normalizedCode = cleanCode.replace(/^0+/, '') || cleanCode
+  return agentRetentionResolutions.filter((item) => {
+    if (item.code === cleanCode || item.code === normalizedCode) {
+      return true
+    }
+    const suffix = item.value.split('-')[1] || item.value.split('.').pop() || ''
+    const normalizedSuffix = suffix.replace(/^0+/, '')
+    return normalizedSuffix === normalizedCode || suffix.endsWith(cleanCode)
+  })
+}
+
 export interface ICodeRetention {
   code: string
   code_303: number
