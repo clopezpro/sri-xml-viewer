@@ -19,6 +19,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  resolutionAgentNumber: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 const getVersion = computed(() => {
   return props.document?.getElementsByTagName('comprobanteRetencion').item(0)?.getAttribute('version')
@@ -336,11 +341,12 @@ const infoRetention = computed(() => {
       :document="document"
       :dateAuthorization="showAuthorizationDate(authorization)"
       :logoUrl="logoUrl"
+      :resolutionAgentNumber="resolutionAgentNumber"
     />
     <div class="flex mt-5">
       <div class="border border-default rounded-lg w-full p-2">
         <div class="flex-none flex">
-          <div class="font-bold pr-2 text-dimmed">
+          <div class="font-bold pr-2 text-dimmed text-nowrap">
             Razón Social / Nombres y Apellidos :
           </div>
           <div>

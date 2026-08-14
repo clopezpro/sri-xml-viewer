@@ -9,6 +9,7 @@ import RetencionComponent from './components/retencion.vue'
 const props = defineProps<{
   xml: string
   logoUrl?: string
+  resolutionAgentNumber?: string
 }>()
 
 const data = ref<any>(null)
@@ -148,6 +149,7 @@ function getEmissionName(val: string): string {
           :document="data.documentData"
           :logoUrl="logoUrl"
           :dateAuthorization="data.dateAuthorization"
+          :resolutionAgentNumber="resolutionAgentNumber"
         />
       </template>
       <template v-else-if="data.typeDoc === '04'">
@@ -155,6 +157,7 @@ function getEmissionName(val: string): string {
           :document="data.documentData"
           :logoUrl="logoUrl"
           :authorization="data.dateAuthorization"
+          :resolutionAgentNumber="resolutionAgentNumber"
         />
       </template>
       <template v-else-if="data.typeDoc === '06'">
@@ -162,6 +165,7 @@ function getEmissionName(val: string): string {
           :document="data.documentData"
           :logoUrl="logoUrl"
           :authorization="data.dateAuthorization"
+          :resolutionAgentNumber="resolutionAgentNumber"
         />
       </template>
       <template v-else-if="data.typeDoc === '07'">
@@ -169,6 +173,7 @@ function getEmissionName(val: string): string {
           :document="data.documentData"
           :logoUrl="logoUrl"
           :authorization="data.dateAuthorization"
+          :resolutionAgentNumber="resolutionAgentNumber"
         />
       </template>
     </div>

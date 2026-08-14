@@ -26,6 +26,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  resolutionAgentNumber: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 
 const infoFactura = computed(() => getInfoInvoice(props.document))
@@ -147,11 +152,12 @@ function getColumnsTB() {
       :document="document"
       :logoUrl="logoUrl"
       :dateAuthorization="showAuthorizationDate(dateAuthorization)"
+      :resolutionAgentNumber="resolutionAgentNumber"
     />
     <div class="flex mt-2 text-sm">
       <div class="border border-default rounded-lg w-full px-1">
         <div class="flex-none flex">
-          <div class="font-bold pr-2">
+          <div class="font-bold pr-2 text-nowrap">
             Razón Social / Nombres y Apellidos :
           </div>
           <div>

@@ -48,6 +48,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  resolutionAgentNumber: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 
 // Extraer Información de Guía de Remisión (Transportista, Placa, Fechas, etc.)
@@ -250,13 +255,14 @@ function showTypeDocSustento(code: string) {
       :document="document"
       :dateAuthorization="showAuthorizationDate(authorization)"
       :logoUrl="logoUrl"
+      :resolutionAgentNumber="resolutionAgentNumber"
     />
 
     <!-- Datos de Movilización / Transporte -->
     <div class="border border-default rounded-lg p-2 mt-2">
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <span class="font-bold text-dimmed">Transportista (Razón Social):</span> {{ infoGuiaRemision.razonSocialTransportista }}
+          <span class="font-bold text-dimmed text-nowrap">Transportista (Razón Social):</span> {{ infoGuiaRemision.razonSocialTransportista }}
         </div>
         <div>
           <span class="font-bold text-dimmed">R.U.C. / C.I.:</span> {{ infoGuiaRemision.rucTransportista }}
@@ -324,7 +330,7 @@ function showTypeDocSustento(code: string) {
         <div class="font-bold">
           {{ dest.identificacionDestinatario }}
         </div>
-        <div class="text-dimmed">
+        <div class="text-dimmed text-nowrap">
           Nombre / Razón Social
         </div>
         <div class="font-bold">

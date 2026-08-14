@@ -20,6 +20,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  resolutionAgentNumber: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 
 const infoTributaria = computed(() => getInfoTributaria(props.document))
@@ -148,10 +153,11 @@ function getColumnsTB() {
       :document="document"
       :logoUrl="logoUrl"
       :dateAuthorization="showAuthorizationDate(authorization)"
+      :resolutionAgentNumber="resolutionAgentNumber"
     />
     <div class="border border-default rounded-lg w-full mt-8 p-2">
       <div class="flex-none flex">
-        <div class="font-bold pr-2">
+        <div class="font-bold pr-2 text-nowrap">
           Razón Social / Nombres y Apellidos :
         </div>
         <div>

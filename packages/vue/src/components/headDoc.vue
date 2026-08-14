@@ -18,6 +18,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  resolutionAgentNumber: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 
 const infoTributaria = computed(() => {
@@ -170,11 +175,11 @@ const mode = computed(() => {
           </div>
           <div
             v-if="infoTributaria.agenteRetencion"
-            class="text-center w-full"
+            class="justify-center w-full flex gap-2"
           >
             <span class="pr-1 font-bold">Agente de Retencion</span>
             <span class="pr-1 font-bold text-error">
-              Nº {{ infoTributaria.agenteRetencion }}
+              {{ resolutionAgentNumber ? resolutionAgentNumber : `Nº ${infoTributaria.agenteRetencion}` }}
             </span>
           </div>
           <div
