@@ -24,6 +24,26 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  companyPhone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  companyEmail: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  phone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  email: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 const getVersion = computed(() => {
   return props.document?.getElementsByTagName('comprobanteRetencion').item(0)?.getAttribute('version')
@@ -342,6 +362,8 @@ const infoRetention = computed(() => {
       :dateAuthorization="showAuthorizationDate(authorization)"
       :logoUrl="logoUrl"
       :resolutionAgentNumber="resolutionAgentNumber"
+      :companyPhone="companyPhone || phone"
+      :companyEmail="companyEmail || email"
     />
     <div class="flex mt-5">
       <div class="border border-default rounded-lg w-full p-2">

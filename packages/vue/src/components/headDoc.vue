@@ -23,6 +23,26 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  companyPhone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  companyEmail: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  phone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  email: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 
 const infoTributaria = computed(() => {
@@ -150,6 +170,28 @@ const mode = computed(() => {
             </div>
             <div>
               {{ infoDoc.dirEstablecimiento }}
+            </div>
+          </div>
+          <div
+            v-if="companyPhone || phone"
+            class="flex-none flex pr-2"
+          >
+            <div class="font-bold pr-2">
+              Teléfono
+            </div>
+            <div>
+              {{ companyPhone || phone }}
+            </div>
+          </div>
+          <div
+            v-if="companyEmail || email"
+            class="flex-none flex pr-2"
+          >
+            <div class="font-bold pr-2">
+              Correo
+            </div>
+            <div>
+              {{ companyEmail || email }}
             </div>
           </div>
           <div

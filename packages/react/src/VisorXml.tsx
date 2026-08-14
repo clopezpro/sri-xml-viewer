@@ -4,6 +4,11 @@ import { getFullInvoiceDataFromXml } from '@sri-xml-viewer/core'
 export interface VisorXmlProps {
   xml: string
   logoUrl?: string
+  resolutionAgentNumber?: string
+  companyPhone?: string
+  companyEmail?: string
+  phone?: string
+  email?: string
 }
 
 export const VisorXml: React.FC<VisorXmlProps> = ({ xml, logoUrl }) => {

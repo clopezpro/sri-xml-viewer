@@ -53,6 +53,26 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  companyPhone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  companyEmail: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  phone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  email: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 
 // Extraer Información de Guía de Remisión (Transportista, Placa, Fechas, etc.)
@@ -256,6 +276,8 @@ function showTypeDocSustento(code: string) {
       :dateAuthorization="showAuthorizationDate(authorization)"
       :logoUrl="logoUrl"
       :resolutionAgentNumber="resolutionAgentNumber"
+      :companyPhone="companyPhone || phone"
+      :companyEmail="companyEmail || email"
     />
 
     <!-- Datos de Movilización / Transporte -->

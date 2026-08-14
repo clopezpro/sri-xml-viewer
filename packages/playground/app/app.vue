@@ -6,6 +6,8 @@ import { mockFactura, mockNotaCredito, mockGuiaRemision } from './mocks'
 const xmlInput = ref(mockFactura)
 const claveAcceso = ref('')
 const resolutionAgentNumber = ref('')
+const companyPhone = ref('')
+const companyEmail = ref('')
 const fileError = ref('')
 const loading = ref(false)
 const toast = useToast()
@@ -370,6 +372,33 @@ function onLogoChange(event: Event) {
             </div>
           </div>
 
+          <!-- Datos de Empresa Opcionales -->
+          <div class="space-y-2">
+            <p class="text-[10px] font-black text-dimmed uppercase tracking-wider">
+              Datos de Empresa (Opcionales)
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] font-bold text-muted block mb-1">Teléfono</label>
+                <UInput
+                  v-model="companyPhone"
+                  placeholder="Ej. 0991234567"
+                  size="sm"
+                  class="w-full"
+                />
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-muted block mb-1">Email</label>
+                <UInput
+                  v-model="companyEmail"
+                  placeholder="Ej. info@empresa.com"
+                  size="sm"
+                  class="w-full"
+                />
+              </div>
+            </div>
+          </div>
+
           <!-- Raw Textarea Input -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
@@ -497,6 +526,8 @@ function onLogoChange(event: Event) {
                   :xml="xmlInput"
                   :logoUrl="logoUrl"
                   :resolutionAgentNumber="resolutionAgentNumber"
+                  :companyPhone="companyPhone"
+                  :companyEmail="companyEmail"
                 />
               </div>
             </div>

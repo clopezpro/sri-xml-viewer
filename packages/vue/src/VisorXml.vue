@@ -10,6 +10,10 @@ const props = defineProps<{
   xml: string
   logoUrl?: string
   resolutionAgentNumber?: string
+  companyPhone?: string
+  companyEmail?: string
+  phone?: string
+  email?: string
 }>()
 
 const data = ref<any>(null)
@@ -150,6 +154,8 @@ function getEmissionName(val: string): string {
           :logoUrl="logoUrl"
           :dateAuthorization="data.dateAuthorization"
           :resolutionAgentNumber="resolutionAgentNumber"
+          :companyPhone="companyPhone || phone"
+          :companyEmail="companyEmail || email"
         />
       </template>
       <template v-else-if="data.typeDoc === '04'">
@@ -158,6 +164,8 @@ function getEmissionName(val: string): string {
           :logoUrl="logoUrl"
           :authorization="data.dateAuthorization"
           :resolutionAgentNumber="resolutionAgentNumber"
+          :companyPhone="companyPhone || phone"
+          :companyEmail="companyEmail || email"
         />
       </template>
       <template v-else-if="data.typeDoc === '06'">
@@ -166,6 +174,8 @@ function getEmissionName(val: string): string {
           :logoUrl="logoUrl"
           :authorization="data.dateAuthorization"
           :resolutionAgentNumber="resolutionAgentNumber"
+          :companyPhone="companyPhone || phone"
+          :companyEmail="companyEmail || email"
         />
       </template>
       <template v-else-if="data.typeDoc === '07'">
@@ -174,6 +184,8 @@ function getEmissionName(val: string): string {
           :logoUrl="logoUrl"
           :authorization="data.dateAuthorization"
           :resolutionAgentNumber="resolutionAgentNumber"
+          :companyPhone="companyPhone || phone"
+          :companyEmail="companyEmail || email"
         />
       </template>
     </div>

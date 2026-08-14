@@ -25,6 +25,26 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  companyPhone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  companyEmail: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  phone: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
+  email: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
 })
 
 const infoTributaria = computed(() => getInfoTributaria(props.document))
@@ -154,6 +174,8 @@ function getColumnsTB() {
       :logoUrl="logoUrl"
       :dateAuthorization="showAuthorizationDate(authorization)"
       :resolutionAgentNumber="resolutionAgentNumber"
+      :companyPhone="companyPhone || phone"
+      :companyEmail="companyEmail || email"
     />
     <div class="border border-default rounded-lg w-full mt-8 p-2">
       <div class="flex-none flex">
