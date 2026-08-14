@@ -159,7 +159,9 @@ const mode = computed(() => {
             <div class="font-bold pr-2">
               Dirección Matriz
             </div>
-            <div>{{ infoTributaria.dirMatriz }}</div>
+            <div style="padding-left: 2px;">
+              {{ infoTributaria.dirMatriz }}
+            </div>
           </div>
           <div
             v-if="infoDoc.dirEstablecimiento"
@@ -168,7 +170,7 @@ const mode = computed(() => {
             <div class="font-bold pr-2">
               Dirección Sucursal
             </div>
-            <div>
+            <div style="padding-left: 2px;">
               {{ infoDoc.dirEstablecimiento }}
             </div>
           </div>
@@ -179,7 +181,7 @@ const mode = computed(() => {
             <div class="font-bold pr-2">
               Teléfono
             </div>
-            <div>
+            <div style="padding-left: 2px;">
               {{ companyPhone || phone }}
             </div>
           </div>
@@ -190,7 +192,7 @@ const mode = computed(() => {
             <div class="font-bold pr-2">
               Correo
             </div>
-            <div>
+            <div style="padding-left: 2px;">
               {{ companyEmail || email }}
             </div>
           </div>
