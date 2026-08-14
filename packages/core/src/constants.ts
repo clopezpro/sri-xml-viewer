@@ -11,19 +11,9 @@ export interface IAgentRetentionResolution {
   code?: string
 }
 
-export const AGENT_RETENTION_RESOLUTIONS: string[] = [
-  'NAC.DNCRASC20-00000001',
-  'NAC.GTRRlOC21-00000001',
-  'NAC.GTRRlOC22-00000001',
-  'NAC.GTRRlOC22-000000003',
-  'NAC.DGERCGC24-00000008',
-  'NAC.DGERCGC2E.00000010',
-  'NAC.DGERCGC26-00000010',
-]
-
 export const agentRetentionResolutions: IAgentRetentionResolution[] = [
   { value: 'NAC-DNCRASC20-00000001', label: 'NAC-DNCRASC20-00000001', code: '1' },
-  { value: 'NAC.GTRRlOC21-00000001', label: 'NAC.GTRRlOC21-00000001', code: '1' },
+  { value: 'NAC-GTRRIOC21-00000001', label: 'NAC-GTRRIOC21-00000001', code: '1' },
   { value: 'NAC-GTRRIOC22-00000001', label: 'NAC-GTRRIOC22-00000001', code: '1' },
   { value: 'NAC-GTRRIOC22-000000003', label: 'NAC-GTRRIOC22-000000003', code: '3' },
   { value: 'NAC-DGERCGC24-00000008', label: 'NAC-DGERCGC24-00000008', code: '8' },
