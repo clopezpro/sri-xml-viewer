@@ -1,3 +1,5 @@
 export * from './parser'
 export * from './constants'
 export * from './types/general'
+export * from './types/ebilling/settlementPurchase'
+export * from './types/ebilling/settlementPurchaseInfo'

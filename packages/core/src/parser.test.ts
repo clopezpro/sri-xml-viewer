@@ -222,24 +222,129 @@ describe('SRI XML Parser core tests', () => {
     expect(data.typeDoc).toBe('06')
   })
 
+  it('should successfully parse a mock settlement purchase (Liquidación de Compra) XML', () => {
+    const mockLiqXml = `<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1508202603093104800300120010010000000991234567814</numeroAutorizacion>
+  <fechaAutorizacion>15/08/2026 10:20:45</fechaAutorizacion>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<liquidacionCompra id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>CORPORACION AGROPECUARIA S.A.</razonSocial>
+    <nombreComercial>AGROCORP</nombreComercial>
+    <ruc>0931048003001</ruc>
+    <claveAcceso>1508202603093104800300120010010000000991234567814</claveAcceso>
+    <codDoc>03</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000099</secuencial>
+    <dirMatriz>Km 14.5 Via a Daule</dirMatriz>
+  </infoTributaria>
+  <infoLiquidacionCompra>
+    <fechaEmision>15/08/2026</fechaEmision>
+    <dirEstablecimiento>Guayaquil, Parque Industrial</dirEstablecimiento>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <tipoIdentificacionProveedor>05</tipoIdentificacionProveedor>
+    <razonSocialProveedor>MANUEL ANTONIO QUINTO ZAMBRANO</razonSocialProveedor>
+    <identificacionProveedor>0923456789</identificacionProveedor>
+    <direccionProveedor>Recinto Los Laureles, Manabi</direccionProveedor>
+    <totalSinImpuestos>250.00</totalSinImpuestos>
+    <totalDescuento>0.00</totalDescuento>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>4</codigoPorcentaje>
+        <baseImponible>250.00</baseImponible>
+        <tarifa>15.00</tarifa>
+        <valor>37.50</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <importeTotal>287.50</importeTotal>
+    <moneda>DOLAR</moneda>
+    <pagos>
+      <pago>
+        <formaPago>01</formaPago>
+        <total>287.50</total>
+        <plazo>0</plazo>
+        <unidadTiempo>dias</unidadTiempo>
+      </pago>
+    </pagos>
+  </infoLiquidacionCompra>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>SERV-001</codigoPrincipal>
+      <descripcion>Servicio de cosecha manual de cacao fino de aroma</descripcion>
+      <cantidad>50.000000</cantidad>
+      <precioUnitario>5.000000</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>250.00</precioTotalSinImpuesto>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <tarifa>15.00</tarifa>
+          <baseImponible>250.00</baseImponible>
+          <valor>37.50</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+  <infoAdicional>
+    <campoAdicional nombre="Sector">Agricola</campoAdicional>
+  </infoAdicional>
+</liquidacionCompra>
+]]></comprobante>
+</autorizacion>`
+    const data = getFullInvoiceDataFromXml(mockLiqXml)
+    expect(data.accessKey).toBe('1508202603093104800300120010010000000991234567814')
+    expect(data.typeDoc).toBe('03')
+    expect(data.numberDocument).toBe('001-001-000000099')
+    expect(data.emissionDate).toBe('15/08/2026')
+
+    // Info Liquidacion
+    expect(data.infoLiquidacionCompra?.razonSocialProveedor).toBe('MANUEL ANTONIO QUINTO ZAMBRANO')
+    expect(data.infoLiquidacionCompra?.identificacionProveedor).toBe('0923456789')
+    expect(data.infoLiquidacionCompra?.tipoIdentificacionProveedor).toBe('05')
+    expect(data.infoLiquidacionCompra?.importeTotal).toBe('287.50')
+
+    // Details
+    expect(data.details).toHaveLength(1)
+    expect(data.details[0]?.codigoPrincipal).toBe('SERV-001')
+    expect(data.details[0]?.descripcion).toBe('Servicio de cosecha manual de cacao fino de aroma')
+    expect(data.details[0]?.precioTotalSinImpuesto).toBe('250.00')
+
+    // Payments
+    expect(data.payments).toHaveLength(1)
+    expect(data.payments[0]?.formaPago).toBe('SIN UTILIZACIÓN DEL SISTEMA FINANCIERO')
+
+    // Totals
+    expect(data.totals).toContainEqual({ name: 'SUBTOTAL 15 %', valor: 250 })
+    expect(data.totals).toContainEqual({ name: 'SUBTOTAL SIN IMPUESTOS', valor: 250 })
+    expect(data.totals).toContainEqual({ name: 'IVA 15', valor: 37.5 })
+    expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 287.5 })
+  })
+
   it('filters retention agent resolutions by code correctly', () => {
     const res1 = getResolutionsByAgentCode('1')
     expect(res1.length).toBe(3)
     expect(res1.map(r => r.value)).toEqual([
-      'NAC.DNCRASC20-00000001',
-      'NAC.GTRRlOC21-00000001',
-      'NAC.GTRRlOC22-00000001',
+      'NAC-DNCRASC20-00000001',
+      'NAC-GTRRIOC21-00000001',
+      'NAC-GTRRIOC22-00000001',
     ])
 
     const res8 = getResolutionsByAgentCode('8')
     expect(res8.length).toBe(1)
-    expect(res8[0].value).toBe('NAC.DGERCGC24-00000008')
+    expect(res8[0].value).toBe('NAC-DGERCGC24-00000008')
 
     const res10 = getResolutionsByAgentCode('10')
     expect(res10.length).toBe(2)
     expect(res10.map(r => r.value)).toEqual([
-      'NAC.DGERCGC2E.00000010',
-      'NAC.DGERCGC26-00000010',
+      'NAC-DGERCGC25-00000010',
+      'NAC-DGERCGC26-00000010',
     ])
 
     const all = getResolutionsByAgentCode()

@@ -68,6 +68,7 @@ export interface IFullInvoiceData {
   documentData: Document
   infoTributaria: Record<string, string>
   infoFactura: Record<string, string>
+  infoLiquidacionCompra?: Record<string, string>
   details: Detail[]
   totals: { name: string, valor: string | number }[]
   payments: Payment[]

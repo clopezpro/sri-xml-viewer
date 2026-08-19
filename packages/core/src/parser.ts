@@ -133,6 +133,35 @@ export function getInfoInvoice(doc: Document): Record<string, string> {
   return result
 }
 
+export function getInfoLiquidacionCompra(doc: Document): Record<string, string> {
+  const data = doc?.getElementsByTagName('infoLiquidacionCompra') as HTMLCollectionOf<HTMLElement>
+  if (!data)
+    return {}
+
+  const result: Record<string, string> = {}
+  const firstElement = data.item(0)?.children // Obtiene el primer elemento
+
+  if (firstElement) {
+    for (let i = 0; i < firstElement.length; i++) {
+      const child = firstElement[i]
+      switch (child?.tagName) {
+        case 'pagos':
+        case 'totalConImpuestos':
+        case 'reembolsos':
+          continue
+        case undefined:
+          break
+        default:
+          if (child?.tagName)
+            result[child.tagName || 'na'] = child.textContent || ''
+          break
+      }
+    }
+  }
+
+  return result
+}
+
 export function getDetailsInvoiceNc(doc: Document): Detail[] {
   const data = doc?.getElementsByTagName('detalles') as HTMLCollectionOf<HTMLElement>
   const result: Detail[] = []
@@ -204,7 +233,8 @@ export function getTotals(doc: Document): { name: string, valor: string | number
   const datakey = getDataAccessKey(accessKey)
   const codDoc = doc?.getElementsByTagName('codDoc')[0]?.textContent || datakey?.type || ''
   switch (codDoc) {
-    case '01': {
+    case '01':
+    case '03': {
       return getTotalInvoice(doc)
     }
     case '04': {
@@ -475,6 +505,7 @@ export function getFullInvoiceDataFromXml(xmlString: string): IFullInvoiceData {
     documentData: doc,
     infoTributaria: getInfoTributaria(doc),
     infoFactura: getInfoInvoice(doc),
+    infoLiquidacionCompra: getInfoLiquidacionCompra(doc),
     details: getDetailsInvoiceNc(doc),
     totals: getTotals(doc),
     payments: getPagos(doc),
