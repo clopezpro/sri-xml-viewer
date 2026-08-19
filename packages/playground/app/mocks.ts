@@ -299,3 +299,89 @@ export const mockGuiaRemision = `<?xml version="1.0" encoding="UTF-8" standalone
   </infoAdicional>
 </guiaRemision>]]></comprobante>
 </autorizacion>`
+
+export const mockLiquidacionCompra = `<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1508202603093104800300120010010000000991234567814</numeroAutorizacion>
+  <fechaAutorizacion>15/08/2026 10:20:45</fechaAutorizacion>
+  <ambiente>PRODUCCIÓN</ambiente>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<liquidacionCompra id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>CORPORACION AGROPECUARIA S.A.</razonSocial>
+    <nombreComercial>AGROCORP</nombreComercial>
+    <ruc>0931048003001</ruc>
+    <claveAcceso>1508202603093104800300120010010000000991234567814</claveAcceso>
+    <codDoc>03</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000099</secuencial>
+    <dirMatriz>Km 14.5 Via a Daule</dirMatriz>
+    <agenteRetencion>1</agenteRetencion>
+  </infoTributaria>
+  <infoLiquidacionCompra>
+    <fechaEmision>15/08/2026</fechaEmision>
+    <dirEstablecimiento>Guayaquil, Parque Industrial</dirEstablecimiento>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <tipoIdentificacionProveedor>05</tipoIdentificacionProveedor>
+    <razonSocialProveedor>MANUEL ANTONIO QUINTO ZAMBRANO</razonSocialProveedor>
+    <identificacionProveedor>0923456789</identificacionProveedor>
+    <direccionProveedor>Recinto Los Laureles, Manabi</direccionProveedor>
+    <totalSinImpuestos>250.00</totalSinImpuestos>
+    <totalDescuento>0.00</totalDescuento>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>4</codigoPorcentaje>
+        <baseImponible>250.00</baseImponible>
+        <tarifa>15.00</tarifa>
+        <valor>37.50</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <importeTotal>287.50</importeTotal>
+    <moneda>DOLAR</moneda>
+    <pagos>
+      <pago>
+        <formaPago>01</formaPago>
+        <total>287.50</total>
+        <plazo>0</plazo>
+        <unidadTiempo>dias</unidadTiempo>
+      </pago>
+    </pagos>
+  </infoLiquidacionCompra>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>SERV-001</codigoPrincipal>
+      <codigoAuxiliar>AGRO-01</codigoAuxiliar>
+      <descripcion>Servicio de cosecha manual de cacao fino de aroma y recoleccion</descripcion>
+      <cantidad>50.000000</cantidad>
+      <precioUnitario>5.000000</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>250.00</precioTotalSinImpuesto>
+      <detallesAdicionales>
+        <detAdicional nombre="Lote" valor="Lote San Jose #4" />
+        <detAdicional nombre="Variedad" valor="Nacional Arriba" />
+      </detallesAdicionales>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <tarifa>15.00</tarifa>
+          <baseImponible>250.00</baseImponible>
+          <valor>37.50</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+  <infoAdicional>
+    <campoAdicional nombre="Sector">Agricola</campoAdicional>
+    <campoAdicional nombre="Observaciones">Liquidacion emitida por servicios agricolas en rusticidad</campoAdicional>
+    <campoAdicional nombre="Forma de Pago">Efectivo contra entrega</campoAdicional>
+  </infoAdicional>
+</liquidacionCompra>
+]]></comprobante>
+</autorizacion>`
+

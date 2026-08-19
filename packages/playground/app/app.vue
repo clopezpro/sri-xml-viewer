@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import { VisorXml, agentRetentionResolutions, getResolutionsByAgentCode } from '@sri-xml-viewer/vue'
-import { mockFactura, mockNotaCredito, mockGuiaRemision } from './mocks'
+import { mockFactura, mockNotaCredito, mockGuiaRemision, mockLiquidacionCompra } from './mocks'
 
 const xmlInput = ref(mockFactura)
 const claveAcceso = ref('')
@@ -31,13 +31,15 @@ watch(xmlAgenteRetencion, () => {
   }
 })
 
-function loadMock(type: 'factura' | 'notaCredito' | 'guiaRemision') {
+function loadMock(type: 'factura' | 'notaCredito' | 'guiaRemision' | 'liquidacionCompra') {
   if (type === 'factura') {
     xmlInput.value = mockFactura
   } else if (type === 'notaCredito') {
     xmlInput.value = mockNotaCredito
   } else if (type === 'guiaRemision') {
     xmlInput.value = mockGuiaRemision
+  } else if (type === 'liquidacionCompra') {
+    xmlInput.value = mockLiquidacionCompra
   }
 }
 
@@ -344,9 +346,9 @@ function onLogoChange(event: Event) {
             <p class="text-[10px] font-black text-dimmed uppercase tracking-wider mb-2">
               Comprobantes de Ejemplo
             </p>
-            <div class="flex flex-col gap-2 sm:flex-row">
+            <div class="grid grid-cols-2 gap-2">
               <UButton 
-                class="flex-1 justify-center"
+                class="justify-center"
                 variant="outline"
                 color="neutral"
                 @click="loadMock('factura')"
@@ -354,7 +356,15 @@ function onLogoChange(event: Event) {
                 📄 Factura
               </UButton>
               <UButton 
-                class="flex-1 justify-center"
+                class="justify-center"
+                variant="outline"
+                color="neutral"
+                @click="loadMock('liquidacionCompra')"
+              >
+                📄 Liq. Compra
+              </UButton>
+              <UButton 
+                class="justify-center"
                 variant="outline"
                 color="neutral"
                 @click="loadMock('notaCredito')"
@@ -362,7 +372,7 @@ function onLogoChange(event: Event) {
                 📄 Nota de Crédito
               </UButton>
               <UButton 
-                class="flex-1 justify-center"
+                class="justify-center"
                 variant="outline"
                 color="neutral"
                 @click="loadMock('guiaRemision')"
