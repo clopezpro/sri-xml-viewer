@@ -2,6 +2,7 @@
 import { ref, watchEffect, onMounted } from 'vue'
 import { getFullInvoiceDataFromXml } from '@sri-xml-viewer/core'
 import FacturaComponent from './components/factura.vue'
+import LiquidacionCompraComponent from './components/liquidacionCompra.vue'
 import NotaCreditoComponent from './components/notaCredito.vue'
 import GuiaRemisionComponent from './components/guiaRemision.vue'
 import RetencionComponent from './components/retencion.vue'
@@ -150,6 +151,16 @@ function getEmissionName(val: string): string {
       <!-- Specialized SRI Document Component Views -->
       <template v-if="data.typeDoc === '01'">
         <FacturaComponent
+          :document="data.documentData"
+          :logoUrl="logoUrl"
+          :dateAuthorization="data.dateAuthorization"
+          :resolutionAgentNumber="resolutionAgentNumber"
+          :companyPhone="companyPhone || phone"
+          :companyEmail="companyEmail || email"
+        />
+      </template>
+      <template v-else-if="data.typeDoc === '03'">
+        <LiquidacionCompraComponent
           :document="data.documentData"
           :logoUrl="logoUrl"
           :dateAuthorization="data.dateAuthorization"

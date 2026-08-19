@@ -1,6 +1,7 @@
 export { default as VisorXml } from './VisorXml.vue'
 export { default as headDocSri } from './components/headDoc.vue'
 export { default as facturaSri } from './components/factura.vue'
+export { default as liquidacionCompraSri } from './components/liquidacionCompra.vue'
 export { default as notaCreditoSri } from './components/notaCredito.vue'
 export { default as guiaRemisionSri } from './components/guiaRemision.vue'
 export { default as retencionSri } from './components/retencion.vue'

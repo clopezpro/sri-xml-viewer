@@ -78,7 +78,7 @@ const infoDoc = computed(() => {
   if (!doc) return {}
 
   // Buscar el primer nodo que coincida con alguno de los bloques de información del SRI
-  const tags = ['infoFactura', 'infoNotaCredito', 'infoGuiaRemision', 'infoCompRetencion']
+  const tags = ['infoFactura', 'infoLiquidacionCompra', 'infoNotaCredito', 'infoGuiaRemision', 'infoCompRetencion']
   let data: HTMLCollectionOf<Element> | null = null
 
   for (const tag of tags) {
