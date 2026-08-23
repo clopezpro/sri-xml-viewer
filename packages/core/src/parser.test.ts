@@ -147,6 +147,15 @@ describe('SRI XML Parser core tests', () => {
     expect(data.typeDoc).toBe('01')
   })
 
+  it('should parse optional placa field in infoFactura (Ficha Técnica v2.33 / NAC-DGERCGC26-00000024)', () => {
+    const xmlWithPlaca = mockXml.replace(
+      '<moneda>DOLAR</moneda>',
+      '<moneda>DOLAR</moneda>\n    <placa>PBC-1234</placa>',
+    )
+    const data = getFullInvoiceDataFromXml(xmlWithPlaca)
+    expect(data.infoFactura?.placa).toBe('PBC-1234')
+  })
+
   it('should resolve typeDoc from codDoc tag when claveAcceso type is mock or non-standard', () => {
     const mockXmlWithMockKey = `<?xml version="1.0" encoding="utf-8"?>
 <autorizacion>
@@ -349,5 +358,92 @@ describe('SRI XML Parser core tests', () => {
 
     const all = getResolutionsByAgentCode()
     expect(all.length).toBe(7)
+  })
+
+  it('should successfully parse a mock Credit Note (Nota de Crédito) with 0% IVA without duplicate subtotals', () => {
+    const mockNcXml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>2108202604070648210600120020020000000062295140519</numeroAutorizacion>
+  <fechaAutorizacion>2026-08-21T20:48:47.000Z</fechaAutorizacion>
+  <ambiente>PRODUCCIÓN</ambiente>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?><notaCredito xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>RAMIREZ BLACIO MARIA ANDREA</razonSocial>
+    <nombreComercial>RAMIREZ BLACIO MARIA ANDREA</nombreComercial>
+    <ruc>0706482106001</ruc>
+    <claveAcceso>2108202604070648210600120020020000000062295140519</claveAcceso>
+    <codDoc>04</codDoc>
+    <estab>002</estab>
+    <ptoEmi>002</ptoEmi>
+    <secuencial>000000006</secuencial>
+    <dirMatriz>EL ORO / MACHALA / MACHALA / CENTRAL S/N</dirMatriz>
+  </infoTributaria>
+  <infoNotaCredito>
+    <fechaEmision>21/08/2026</fechaEmision>
+    <dirEstablecimiento>EL ORO / MACHALA / MACHALA / CENTRAL S/N</dirEstablecimiento>
+    <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+    <razonSocialComprador>CAMARONERA CAMANMOR S A</razonSocialComprador>
+    <identificacionComprador>0791768209001</identificacionComprador>
+    <obligadoContabilidad>NO</obligadoContabilidad>
+    <codDocModificado>01</codDocModificado>
+    <numDocModificado>002-002-000000810</numDocModificado>
+    <fechaEmisionDocSustento>12/08/2026</fechaEmisionDocSustento>
+    <totalSinImpuestos>47.5</totalSinImpuestos>
+    <valorModificacion>47.5</valorModificacion>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>0</codigoPorcentaje>
+        <baseImponible>47.50</baseImponible>
+        <valor>0.00</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <motivo>Error Facturación</motivo>
+  </infoNotaCredito>
+  <detalles>
+    <detalle>
+      <codigoInterno>11005</codigoInterno>
+      <descripcion>CADENILLA DISTRINBUCION P/M CB1/JL110/XY125-30A/RAY-Z 25H-90L</descripcion>
+      <cantidad>5</cantidad>
+      <precioUnitario>9.5</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>47.50</precioTotalSinImpuesto>
+      <detallesAdicionales>
+        <detAdicional nombre="Name.Orden" valor="5 CADENILLAS"/>
+      </detallesAdicionales>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>0</codigoPorcentaje>
+          <tarifa>0.00</tarifa>
+          <baseImponible>47.50</baseImponible>
+          <valor>0.00</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+  <infoAdicional>
+    <campoAdicional nombre="RUC Proveedor">0931048003001</campoAdicional>
+    <campoAdicional nombre="Comentarios">Por Error de Facturacion Item</campoAdicional>
+  </infoAdicional>
+</notaCredito>
+]]></comprobante>
+</autorizacion>`
+    const data = getFullInvoiceDataFromXml(mockNcXml)
+    expect(data.accessKey).toBe('2108202604070648210600120020020000000062295140519')
+    expect(data.typeDoc).toBe('04')
+    expect(data.details).toHaveLength(1)
+    expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@nombre']).toBe('Name.Orden')
+    expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@valor']).toBe('5 CADENILLAS')
+
+    // Verify totals: exactly one SUBTOTAL 0 % and correct VALOR TOTAL from valorModificacion
+    const subtotal0Count = data.totals.filter(t => t.name === 'SUBTOTAL 0 %').length
+    expect(subtotal0Count).toBe(1)
+    expect(data.totals).toContainEqual({ name: 'SUBTOTAL 0 %', valor: 47.5 })
+    expect(data.totals).toContainEqual({ name: 'SUBTOTAL SIN IMPUESTOS', valor: 47.5 })
+    expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 47.5 })
   })
 })

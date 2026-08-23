@@ -314,7 +314,7 @@ export function parseXml(xml: string) {
   }
 }
 
-function getTotalInvoice(doc: Document) {
+function buildDocumentTotals(doc: Document, isCreditNote = false) {
   const dataTable: { name: string, valor: string | number }[] = []
   const allTypes = typesIvaFee.map((data) => {
     return {
@@ -375,11 +375,11 @@ function getTotalInvoice(doc: Document) {
   dataTable.push({ name: 'SUBTOTAL SIN IMPUESTOS', valor: totalSinImpuestos })
 
   const totalDescuento = Number.parseFloat(doc?.getElementsByTagName('totalDescuento')[0]?.textContent || '0')
-
   dataTable.push({
     name: 'TOTAL DESCUENTO',
     valor: totalDescuento,
   })
+
   dataTable.push({
     name: 'ICE',
     valor: totalIce,
@@ -388,19 +388,30 @@ function getTotalInvoice(doc: Document) {
     dataTable.push({ name: `IVA ${data.fee}`, valor: data.totalTax })
   })
 
-  dataTable.push({ name: 'TOTAL DEVOLUCIÓN IVA', valor: totalDEVOLUCIONIVA })
+  if (!isCreditNote || totalDEVOLUCIONIVA > 0) {
+    dataTable.push({ name: 'TOTAL DEVOLUCIÓN IVA', valor: totalDEVOLUCIONIVA })
+  }
 
   dataTable.push({
     name: 'IRBPNR',
     valor: totalIRBPNR,
   })
-  const propinaVal = doc?.getElementsByTagName('propina')[0]?.textContent
-  const propina = propinaVal ? Number.parseFloat(propinaVal) : 0
-  dataTable.push({
-    name: 'PROPINA',
-    valor: Number.isNaN(propina) ? 0 : propina,
-  })
-  const importeTotal = Number.parseFloat(doc?.getElementsByTagName('importeTotal')[0]?.textContent || '0')
+
+  if (!isCreditNote) {
+    const propinaVal = doc?.getElementsByTagName('propina')[0]?.textContent
+    const propina = propinaVal ? Number.parseFloat(propinaVal) : 0
+    dataTable.push({
+      name: 'PROPINA',
+      valor: Number.isNaN(propina) ? 0 : propina,
+    })
+  }
+
+  const importeTotal = Number.parseFloat(
+    doc?.getElementsByTagName('importeTotal')[0]?.textContent
+    || doc?.getElementsByTagName('valorModificacion')[0]?.textContent
+    || doc?.getElementsByTagName('valorModificado')[0]?.textContent
+    || '0'
+  )
   dataTable.push({
     name: 'VALOR TOTAL',
     valor: importeTotal,
@@ -408,81 +419,12 @@ function getTotalInvoice(doc: Document) {
   return dataTable
 }
 
+function getTotalInvoice(doc: Document) {
+  return buildDocumentTotals(doc, false)
+}
+
 function getTotalCreditNote(doc: Document) {
-  const dataTable: { name: string, valor: string | number }[] = []
-  const allTypes = typesIvaFee.map((data) => {
-    return {
-      type: data.code,
-      name: data.label,
-      tarifa: data.fee,
-      iva: 0,
-      total: 0,
-    }
-  })
-  let totalIce = 0
-  let totalIRBPNR = 0
-  const totalConImpuestoElement = doc?.getElementsByTagName('totalConImpuestos')[0]
-
-  if (!totalConImpuestoElement)
-    return []
-
-  for (let i = 0; i < totalConImpuestoElement.children.length; i++) {
-    const child = totalConImpuestoElement.children[i]
-    if (child?.tagName === 'totalImpuesto') {
-      const cod = child.getElementsByTagName('codigo')[0]?.textContent || ''
-      const codigoPorcentaje = child.getElementsByTagName('codigoPorcentaje')[0]?.textContent || ''
-      switch (cod) {
-        case '3':
-          totalIce += Number.parseFloat(child.getElementsByTagName('valor')[0]?.textContent ?? '0')
-          break
-        case '5':
-          totalIRBPNR += Number.parseFloat(child.getElementsByTagName('valor')[0]?.textContent ?? '0')
-          break
-        default:
-          break
-      }
-
-      const index = allTypes.findIndex((data) => {
-        return data.type === codigoPorcentaje
-      })
-      if (index !== -1 && allTypes[index]) {
-        const baseImponible = child.getElementsByTagName('baseImponible')[0]?.textContent || '0'
-        const valor = child.getElementsByTagName('valor')[0]?.textContent || '0'
-        allTypes[index].total = Number.parseFloat(baseImponible)
-        allTypes[index].iva = Number.parseFloat(valor)
-      }
-    }
-  }
-  const impuestos = allTypes.filter(data => data.total > 0)
-  const impuestos_0 = allTypes.filter(data => data.tarifa === 0)
-  impuestos.forEach((data) => {
-    dataTable.push({ name: `SUBTOTAL ${data.name}`, valor: data.total })
-  })
-  impuestos_0.forEach((data) => {
-    dataTable.push({ name: `SUBTOTAL ${data.name}`, valor: data.total })
-  })
-  const totalSinImpuestos = Number.parseFloat(doc?.getElementsByTagName('totalSinImpuestos')[0]?.textContent || '0')
-
-  dataTable.push({ name: 'SUBTOTAL SIN IMPUESTOS', valor: totalSinImpuestos })
-
-  dataTable.push({
-    name: 'ICE',
-    valor: totalIce,
-  })
-  impuestos.forEach((data) => {
-    dataTable.push({ name: `IVA ${data.name}`, valor: data.iva })
-  })
-
-  dataTable.push({
-    name: 'IRBPNR',
-    valor: totalIRBPNR,
-  })
-  const valorModificado = Number.parseFloat(doc?.getElementsByTagName('valorModificado')[0]?.textContent || '0')
-  dataTable.push({
-    name: 'VALOR TOTAL',
-    valor: valorModificado,
-  })
-  return dataTable
+  return buildDocumentTotals(doc, true)
 }
 
 export function nameCodeRetention(code: string): string {
