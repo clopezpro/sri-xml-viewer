@@ -173,6 +173,7 @@ function getEmissionName(val: string): string {
         <NotaCreditoComponent
           :document="data.documentData"
           :logoUrl="logoUrl"
+          :dateAuthorization="data.dateAuthorization"
           :authorization="data.dateAuthorization"
           :resolutionAgentNumber="resolutionAgentNumber"
           :companyPhone="companyPhone || phone"

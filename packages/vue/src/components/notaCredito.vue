@@ -10,6 +10,11 @@ const props = defineProps({
     type: typeof Document !== 'undefined' ? Document : Object,
     required: true,
   },
+  dateAuthorization: {
+    type: String,
+    required: false,
+    default: undefined,
+  },
   authorization: {
     type: String,
     required: false,
@@ -47,6 +52,7 @@ const props = defineProps({
   },
 })
 
+const effectiveAuthDate = computed(() => props.dateAuthorization || props.authorization)
 const infoTributaria = computed(() => getInfoTributaria(props.document))
 const infoAdicional = computed(() => getInfoAdicional(props.document))
 const detalles = computed(() => getDetailsInvoiceNc(props.document))
@@ -68,7 +74,7 @@ function showTypeDoc(type: string, mode = 0) {
     case 0:
       switch (type) {
         case '05':
-          return 'Cedula'
+          return 'Cédula'
         case '04':
           return 'RUC'
         case '06':
@@ -76,7 +82,7 @@ function showTypeDoc(type: string, mode = 0) {
         case '07':
           return 'Consumidor final'
         case '08':
-          return 'Identificacion extranjera'
+          return 'Identificación extranjera'
         case '09':
           return 'Placa'
       }
@@ -86,13 +92,13 @@ function showTypeDoc(type: string, mode = 0) {
         case '01':
           return 'FACTURA'
         case '04':
-          return 'NOTA DE CREDITO'
+          return 'NOTA DE CRÉDITO'
         case '05':
-          return 'NOTA DE DEBITO'
+          return 'NOTA DE DÉBITO'
         case '06':
-          return 'GUIA DE REMISION'
+          return 'GUÍA DE REMISIÓN'
         case '07':
-          return 'COMPROBANTE DE RETENCION'
+          return 'COMPROBANTE DE RETENCIÓN'
         default:
           return 'FACTURA'
       }
@@ -108,43 +114,83 @@ function showTypeDoc(type: string, mode = 0) {
 }
 
 function getColumnsDT() {
-  if (detalles.value.length === 0) return []
+  if (detalles.value.length === 0)
+    return []
+
+  const isAux = detalles.value.some(rs => rs.codigoAuxiliar)
+  const isUnidadMedida = detalles.value.some(rs => rs.unidadMedida)
   const firstItem = detalles.value[0]
+
   const columns: { valor: string, style?: string }[] = [{ valor: '#', style: 'text-align: center;' }]
-  if (firstItem.codigoPrincipal)
+  if (firstItem?.codigoPrincipal)
     columns.push({ valor: 'COD' })
-  if (firstItem.codigoAuxiliar)
+
+  if (isAux)
     columns.push({ valor: 'COD.aux' })
-  if (firstItem.descripcion)
-    columns.push({ valor: 'Descripcion' })
-  if (firstItem.cantidad)
+
+  if (firstItem?.descripcion)
+    columns.push({ valor: 'Descripción' })
+
+  if (firstItem?.detallesAdicionales?.detAdicional) {
+    firstItem.detallesAdicionales.detAdicional.forEach((rs) => {
+      columns.push({ valor: rs['@nombre'] })
+    })
+  }
+
+  if (firstItem?.cantidad)
     columns.push({ valor: 'CANT', style: 'text-align: right;' })
-  if (firstItem.precioUnitario)
+
+  if (isUnidadMedida)
+    columns.push({ valor: 'UNIDAD', style: 'text-align: right;' })
+
+  if (firstItem?.precioUnitario)
     columns.push({ valor: 'PVP', style: 'text-align: right;' })
-  if (firstItem.descuento)
+
+  if (firstItem?.descuento)
     columns.push({ valor: 'DESC', style: 'text-align: right;' })
-  if (firstItem.precioTotalSinImpuesto)
+
+  if (firstItem?.precioTotalSinImpuesto)
     columns.push({ valor: 'TOTAL', style: 'text-align: right;' })
+
   return columns
 }
 
 function getColumnsTB() {
-  const itemArray: any[] = []
-  detalles.value.forEach((itemFirst, index) => {
-    const columns = []
-    columns.push({ valor: index + 1 })
+  const item = detalles.value
+  const itemArray: {
+    valor: string | number
+    clase?: string
+  }[][] = []
+
+  const isAux = item.some(rs => rs.codigoAuxiliar)
+  const isUnidadMedida = item.some(rs => rs.unidadMedida)
+  item.forEach((itemFirst, index) => {
+    const columns: { valor: string | number, clase?: string }[] = []
+    columns.push({ valor: index + 1, clase: 'text-center' })
     if (itemFirst.codigoPrincipal)
       columns.push({ valor: itemFirst.codigoPrincipal })
-    if (itemFirst.codigoAuxiliar)
-      columns.push({ valor: itemFirst.codigoAuxiliar })
+    if (isAux)
+      columns.push({ valor: itemFirst.codigoAuxiliar ?? '' })
+
     if (itemFirst.descripcion)
       columns.push({ valor: itemFirst.descripcion })
+
+    if (itemFirst.detallesAdicionales?.detAdicional) {
+      itemFirst.detallesAdicionales.detAdicional.forEach((rs) => {
+        columns.push({ valor: rs['@valor'] })
+      })
+    }
     if (itemFirst.cantidad)
       columns.push({ valor: itemFirst.cantidad, clase: 'text-right' })
+
+    if (isUnidadMedida)
+      columns.push({ valor: itemFirst.unidadMedida ?? '', clase: 'text-right' })
+
     if (itemFirst.precioUnitario)
       columns.push({ valor: itemFirst.precioUnitario, clase: 'text-right' })
     if (itemFirst.descuento)
       columns.push({ valor: itemFirst.descuento, clase: 'text-right' })
+
     if (itemFirst.precioTotalSinImpuesto) {
       columns.push({
         valor: itemFirst.precioTotalSinImpuesto,
@@ -159,34 +205,37 @@ function getColumnsTB() {
 
 <template>
   <div
-    class="max-w-5xl mx-auto bg-default text-default m-1 rounded-md p-1 printContent print:mx-0 print:w-screen"
+    class="font-sans antialiased text-default max-w-6xl mx-auto print:mx-0 print:w-full m-1 rounded-md p-1 printContent"
   >
     <div
-      v-if="authorization"
+      v-if="effectiveAuthDate"
       class="print:!hidden flex justify-end"
     >
-      <div class="font-bold text-primary">
-        Documento autorizado el {{ showAuthorizationDate(authorization) }}
+      <div>
+        Documento autorizado el <span
+          class="font-bold text-primary text-sm"
+          :title="'Fecha de XML es ' + effectiveAuthDate"
+        >{{ showAuthorizationDate(effectiveAuthDate) }}</span>
       </div>
     </div>
     <headDoc
       :document="document"
       :logoUrl="logoUrl"
-      :dateAuthorization="showAuthorizationDate(authorization)"
+      :dateAuthorization="showAuthorizationDate(effectiveAuthDate)"
       :resolutionAgentNumber="resolutionAgentNumber"
       :companyPhone="companyPhone || phone"
       :companyEmail="companyEmail || email"
     />
-    <div class="border border-default rounded-lg w-full mt-8 p-2">
-      <div class="flex-none flex">
+    <div class="border border-default rounded-lg w-full mt-2 p-2 text-xs">
+      <div class="flex-none flex flex-wrap gap-2">
         <div class="font-bold pr-2 text-nowrap">
           Razón Social / Nombres y Apellidos :
         </div>
         <div>
           {{ infoNotaCredito.razonSocialComprador }}
         </div>
-        <div class="font-bold pr-2 mx-2">
-          Identificacion :
+        <div class="font-bold ">
+          Identificación :
         </div>
         <div>
           {{ infoNotaCredito.identificacionComprador }}
@@ -208,11 +257,11 @@ function getColumnsTB() {
           </div>
         </div>
       </div>
-      <div class="py-4">
+      <div class="py-2">
         <hr class="border-default">
       </div>
       <div>
-        <div class="flex gap-x-2">
+        <div class="flex flex-wrap gap-x-2">
           <div class="font-bold pr-2">
             Comprobante que se modifica :
           </div>
@@ -225,88 +274,94 @@ function getColumnsTB() {
         </div>
         <div class="flex">
           <div class="font-bold pr-2">
-            Fecha Emision (Comprobante a modificar) :
+            Fecha Emisión (Comprobante a modificar) :
           </div>
           <div>
             {{ infoNotaCredito.fechaEmisionDocSustento }}
           </div>
         </div>
         <div class="flex justify-between items-center">
-          <div class="font-bold pr-2">
+          <div class="font-bold pr-2 ">
             Razón de Modificación:
           </div>
-          <div class="font-bold text-2xl">
+          <div class="font-semibold text-left text-xl">
             {{ infoNotaCredito.motivo }}
           </div>
           <div class="mx-10" />
         </div>
       </div>
     </div>
-    <div class="border border-default rounded-lg w-full mt-8 p-1">
-      <div class="overflow-x-auto">
-        <table class="w-full table-bordered text-xs border border-default">
-          <thead>
-            <tr class="bg-muted">
-              <th
-                v-for="(tag, index) in getColumnsDT()"
-                :key="index"
-                class="border border-default p-1"
-                :style="tag.style || 'text-align: left;'"
-              >
-                {{ tag.valor }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(dt, index) in getColumnsTB()"
+    <div class="overflow-x-auto mt-1">
+      <table class="w-full table-bordered text-xs border border-default">
+        <thead>
+          <tr>
+            <th
+              v-for="(tag, index) in getColumnsDT()"
               :key="index"
+              class="border border-default"
+              :style="tag.style || 'text-align: left;'"
             >
-              <td
-                v-for="(valor, i) in dt"
-                :key="i"
-                class="break-words border border-default p-1"
-                :class="valor.clase ? valor.clase : ''"
-                :style="(valor.clase || '').includes('right') ? 'text-align: right;' : ((valor.clase || '').includes('center') ? 'text-align: center;' : 'text-align: left;')"
+              {{ tag.valor }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(dt, index) in getColumnsTB()"
+            :key="index"
+          >
+            <td
+              v-for="(valor, i) in dt"
+              :key="i"
+              class="break-words border border-default"
+              :class="valor.clase ? valor.clase : ''"
+              :style="(valor.clase || '').includes('right') ? 'text-align: right;' : ((valor.clase || '').includes('center') ? 'text-align: center;' : 'text-align: left;')"
+            >
+              {{ valor.valor }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="flex justify-between gap-2 mt-2">
+      <div class="flex-1">
+        <div
+          v-if="infoAdicional && infoAdicional.length > 0"
+          class="text-center font-bold mb-1"
+        >
+          Información Adicional
+        </div>
+        <div
+          v-if="infoAdicional && infoAdicional.length > 0"
+          class="mb-2"
+        >
+          <table
+            class="text-xs w-full table-fixed border border-default"
+          >
+            <tbody>
+              <tr
+                v-for="(dt, index) in infoAdicional"
+                :key="index"
               >
-                {{ valor.valor }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="flex justify-between gap-4 mt-2 p-1">
-        <div class="border border-default rounded-lg w-1/2 p-2">
-          <div class="text-center font-bold mb-1">
-            Información Adicional
-          </div>
-          <div>
-            <table
-              v-if="infoAdicional && infoAdicional.length > 0"
-              class="text-xs w-full table-fixed"
-            >
-              <tbody>
-                <tr
-                  v-for="(dt, index) in infoAdicional"
-                  :key="index"
+                <td
+                  class="break-words !p-1 border border-default"
+                  style="max-width: 100px;"
                 >
-                  <td
-                    class="break-words font-bold bg-muted p-1 border border-default"
-                    style="width: 120px;"
-                  >
-                    {{ dt.name }}
-                  </td>
-                  <td class="break-words p-1 border border-default">
-                    {{ dt.value }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  {{ dt.name }}
+                </td>
+                <td class="break-words !p-1 border border-default">
+                  {{ dt.value }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="rounded-lg w-1/2">
-          <tableSubtotals :data="document" />
-        </div>
+      </div>
+      <div
+        class="rounded-lg mt-1 shrink-0"
+        style="width: 320px;"
+      >
+        <tableSubtotals :data="document" />
       </div>
     </div>
   </div>
