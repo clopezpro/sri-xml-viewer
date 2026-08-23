@@ -37,6 +37,12 @@ export const VisorXml: React.FC<VisorXmlProps> = ({ xml, logoUrl }) => {
           <p><strong>Fecha de Emisión:</strong> {data.emissionDate}</p>
           <p><strong>RUC Emisor:</strong> {data.infoTributaria?.ruc}</p>
           <p><strong>Razón Social:</strong> {data.infoTributaria?.razonSocial}</p>
+          {data.infoFactura?.guiaRemision && (
+            <p><strong>Guía de Remisión:</strong> {data.infoFactura.guiaRemision}</p>
+          )}
+          {data.infoFactura?.placa && (
+            <p><strong>Placa:</strong> {data.infoFactura.placa}</p>
+          )}
         </div>
       )}
     </div>

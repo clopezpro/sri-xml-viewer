@@ -197,7 +197,7 @@ function getColumnsTB() {
             {{ infoFactura.tipoIdentificacionComprador }}: {{ nameTypeDocument }}
           </div>
         </div>
-        <div class="flex-none flex">
+        <div class="flex-none flex flex-wrap">
           <div class="font-bold pr-2">
             FECHA EMISION:
           </div>
@@ -208,6 +208,14 @@ function getColumnsTB() {
           <div v-if="infoFactura.guiaRemision">
             {{ infoFactura.guiaRemision }}
           </div>
+          <template v-if="infoFactura.placa">
+            <div class="font-bold pr-2 pl-4">
+              PLACA:
+            </div>
+            <div>
+              {{ infoFactura.placa }}
+            </div>
+          </template>
         </div>
         <div
           v-if="infoFactura.direccionComprador"

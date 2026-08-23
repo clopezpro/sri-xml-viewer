@@ -40,6 +40,7 @@ export const mockFactura = `<?xml version="1.0" encoding="UTF-8" standalone="yes
     </totalConImpuestos>
     <importeTotal>19</importeTotal>
     <moneda>DOLAR</moneda>
+    <placa>GYE-1234</placa>
     <pagos>
       <pago>
         <formaPago>20</formaPago>
