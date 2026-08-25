@@ -9,7 +9,7 @@ import {
   getPagos,
   getDetailsInvoiceNc,
 } from '@sri-xml-viewer/core'
-import { showAuthorizationDate } from '../utils.js'
+import { showAuthorizationDate, formatToMoney } from '../utils'
 
 const props = defineProps({
   document: {
@@ -71,10 +71,11 @@ function getColumnsDT() {
 
   const isAux = detalles.value.some(rs => rs.codigoAuxiliar)
   const isUnidadMedida = detalles.value.some(rs => rs.unidadMedida)
+  const hasCodigoPrincipal = detalles.value.some(rs => rs.codigoPrincipal)
   const firstItem = detalles.value[0]
 
   const columns: { valor: string, style?: string }[] = [{ valor: '#', style: 'text-align: center;' }]
-  if (firstItem?.codigoPrincipal)
+  if (hasCodigoPrincipal)
     columns.push({ valor: 'COD' })
 
   if (isAux)
@@ -114,11 +115,12 @@ function getColumnsTB() {
 
   const isAux = item.some(rs => rs.codigoAuxiliar)
   const isUnidadMedida = item.some(rs => rs.unidadMedida)
+  const hasCodigoPrincipal = item.some(rs => rs.codigoPrincipal)
   item.forEach((itemFirst, index) => {
     const columns: { valor: string | number, clase?: string }[] = []
     columns.push({ valor: index + 1, clase: 'text-center' })
-    if (itemFirst.codigoPrincipal)
-      columns.push({ valor: itemFirst.codigoPrincipal })
+    if (hasCodigoPrincipal)
+      columns.push({ valor: itemFirst.codigoPrincipal ?? '' })
     if (isAux)
       columns.push({ valor: itemFirst.codigoAuxiliar ?? '' })
 
@@ -137,13 +139,13 @@ function getColumnsTB() {
       columns.push({ valor: itemFirst.unidadMedida ?? '', clase: 'text-right' })
 
     if (itemFirst.precioUnitario)
-      columns.push({ valor: itemFirst.precioUnitario, clase: 'text-right' })
+      columns.push({ valor: formatToMoney(itemFirst.precioUnitario, 'decimal'), clase: 'text-right' })
     if (itemFirst.descuento)
-      columns.push({ valor: itemFirst.descuento, clase: 'text-right' })
+      columns.push({ valor: formatToMoney(itemFirst.descuento, 'decimal'), clase: 'text-right' })
    
     if (itemFirst.precioTotalSinImpuesto) {
       columns.push({
-        valor: itemFirst.precioTotalSinImpuesto,
+        valor: formatToMoney(itemFirst.precioTotalSinImpuesto, 'decimal'),
         clase: 'text-right',
       })
     }
@@ -229,7 +231,10 @@ function getColumnsTB() {
       </div>
     </div>
     <div class="overflow-x-auto mt-1">
-      <table class="w-full table-bordered text-xs border border-default">
+      <table
+        class="w-full table-bordered text-xs border border-default tabular-nums text-left"
+        style="font-variant-numeric: tabular-nums; text-align: left;"
+      >
         <thead>
           <tr>
             <th
@@ -250,9 +255,9 @@ function getColumnsTB() {
             <td
               v-for="(valor, i) in dt"
               :key="i"
-              class="break-words border border-default"
+              class="break-words border border-default tabular-nums"
               :class="valor.clase ? valor.clase : ''"
-              :style="(valor.clase || '').includes('right') ? 'text-align: right;' : ((valor.clase || '').includes('center') ? 'text-align: center;' : 'text-align: left;')"
+              :style="(valor.clase || '').includes('right') ? 'text-align: right; font-variant-numeric: tabular-nums;' : ((valor.clase || '').includes('center') ? 'text-align: center; font-variant-numeric: tabular-nums;' : 'text-align: left; font-variant-numeric: tabular-nums;')"
             >
               {{ valor.valor }}
             </td>

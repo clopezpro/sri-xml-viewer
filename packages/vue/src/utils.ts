@@ -3,6 +3,11 @@ export function formatToMoney(val: any, type?: string): string {
   const num = typeof val === 'string' ? parseFloat(val) : val
   if (isNaN(num)) return type === 'decimal' ? '0.00' : '$0.00'
   if (type === 'decimal') {
+    const str = String(val).trim()
+    const parts = str.split('.')
+    if (parts.length === 2 && parts[1].length > 2) {
+      return num.toFixed(parts[1].length)
+    }
     return num.toFixed(2)
   }
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num)
