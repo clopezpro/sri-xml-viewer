@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+  </defs>
+
+  <style>
+    .bg { fill: url(#bgGrad); }
+    .doc { fill: #ffffff; }
+    .accent { fill: #10b981; }
+    .doc-line { stroke: #e2e8f0; stroke-width: 14; stroke-linecap: round; }
+    .code-tag { stroke: #059669; stroke-width: 18; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0f172a; stroke: #10b981; stroke-width: 8; }
+      .doc { fill: #1e293b; }
+      .doc-line { stroke: #334155; }
+      .code-tag { stroke: #34d399; }
+    }
+  </style>
+
+  <!-- Background Squircle -->
+  <rect class="bg" x="32" y="32" width="448" height="448" rx="112" />
+
+  <!-- Document Sheet -->
+  <path class="doc" d="M144 112 H312 L376 176 V392 C376 405.255 365.255 416 352 416 H144 C130.745 416 120 405.255 120 392 V136 C120 122.745 130.745 112 144 112 Z" />
+  
+  <!-- Folded Corner -->
+  <path d="M312 112 V176 H376 Z" fill="#cbd5e1" opacity="0.8"/>
+
+  <!-- Document Horizontal Lines -->
+  <line class="doc-line" x1="168" y1="210" x2="230" y2="210" />
+  <line class="doc-line" x1="168" y1="242" x2="328" y2="242" />
+  
+  <!-- XML Brackets < / > in the center/bottom -->
+  <!-- Left Bracket < -->
+  <path class="code-tag" d="M210 290 L168 326 L210 362" />
+  <!-- Slash / -->
+  <line class="code-tag" x1="270" y1="284" x2="242" y2="368" />
+  <!-- Right Bracket > -->
+  <path class="code-tag" d="M286 290 L328 326 L286 362" />
+</svg>
