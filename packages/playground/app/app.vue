@@ -2,6 +2,12 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { VisorXml, agentRetentionResolutions, getResolutionsByAgentCode } from '@sri-xml-viewer/vue'
 import { mockFactura, mockNotaCredito, mockGuiaRemision, mockLiquidacionCompra } from './mocks'
+import {
+  useComprobantesDb,
+  type IStoredComprobante,
+  getTipoComprobanteLabel,
+  extractTipoFromClave
+} from './composables/useComprobantesDb'
 
 const xmlInput = ref(mockFactura)
 const claveAcceso = ref('')
@@ -11,6 +17,20 @@ const companyEmail = ref('')
 const fileError = ref('')
 const loading = ref(false)
 const toast = useToast()
+
+const {
+  getComprobante,
+  saveComprobante,
+  deleteComprobante,
+  listComprobantes,
+  clearAllComprobantes
+} = useComprobantesDb()
+
+const storedList = ref<IStoredComprobante[]>([])
+
+async function refreshStoredList() {
+  storedList.value = await listComprobantes()
+}
 
 const xmlAgenteRetencion = computed(() => {
   if (!xmlInput.value) return ''
@@ -67,6 +87,36 @@ function clearXml() {
   fileError.value = ''
 }
 
+async function loadStoredComprobante(item: IStoredComprobante) {
+  claveAcceso.value = item.claveAcceso
+  xmlInput.value = item.xml
+  toast.add({
+    title: 'Comprobante cargado',
+    description: `${getTipoComprobanteLabel(item.tipoComprobante)} recuperado del almacenamiento local.`,
+    color: 'info'
+  })
+}
+
+async function handleRemoveStored(clave: string) {
+  await deleteComprobante(clave)
+  await refreshStoredList()
+  toast.add({
+    title: 'Comprobante eliminado',
+    description: 'El comprobante ha sido borrado de IndexedDB.',
+    color: 'neutral'
+  })
+}
+
+async function handleClearAll() {
+  await clearAllComprobantes()
+  await refreshStoredList()
+  toast.add({
+    title: 'Historial vaciado',
+    description: 'Se eliminaron todos los comprobantes de la base de datos del navegador.',
+    color: 'neutral'
+  })
+}
+
 async function searchByClave() {
   const cleanClave = claveAcceso.value.trim()
   if (!cleanClave) {
@@ -91,6 +141,20 @@ async function searchByClave() {
   fileError.value = ''
 
   try {
+    // 1. Verificar si ya existe en la base de datos local (IndexedDB)
+    const cached = await getComprobante(cleanClave)
+    if (cached) {
+      xmlInput.value = cached.xml
+      loading.value = false
+      toast.add({
+        title: 'Comprobante recuperado de caché local',
+        description: `Cargado desde IndexedDB (${getTipoComprobanteLabel(cached.tipoComprobante)} - ${cached.ambiente}).`,
+        color: 'success'
+      })
+      return
+    }
+
+    // 2. Si no está en caché, consultar al SRI
     const response = await $fetch<{
       success: boolean
       estado: string
@@ -111,9 +175,23 @@ async function searchByClave() {
 
     if (response.success && response.xml) {
       xmlInput.value = response.xml
+      
+      // 3. Guardar en IndexedDB para consultas futuras
+      const tipoCode = extractTipoFromClave(cleanClave)
+      await saveComprobante({
+        claveAcceso: cleanClave,
+        xml: response.xml,
+        ambiente: response.ambiente || 'PRODUCCIÓN',
+        numeroAutorizacion: response.numeroAutorizacion || cleanClave,
+        fechaAutorizacion: response.fechaAutorizacion || new Date().toISOString(),
+        tipoComprobante: tipoCode,
+        createdAt: Date.now()
+      })
+      await refreshStoredList()
+
       toast.add({
-        title: 'Comprobante obtenido',
-        description: `El comprobante se obtuvo correctamente del ambiente de ${response.ambiente}.`,
+        title: 'Comprobante obtenido y guardado',
+        description: `El comprobante se obtuvo del SRI (${response.ambiente}) y se guardó en la base de datos local.`,
         color: 'success'
       })
     } else {
@@ -236,11 +314,12 @@ const print = () => {
 const logoUrl = ref('')
 const logoInputRef = ref<HTMLInputElement | null>(null)
 
-onMounted(() => {
+onMounted(async () => {
   const savedLogo = localStorage.getItem('sri_visor_logo')
   if (savedLogo) {
     logoUrl.value = savedLogo
   }
+  await refreshStoredList()
 })
 
 function handleLogoClick() {
@@ -270,6 +349,51 @@ function onLogoChange(event: Event) {
   }
   reader.readAsDataURL(file)
 }
+
+useSeoMeta({
+  title: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador',
+  ogTitle: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador',
+  ogUrl: 'https://sxv.clopezpro.com/',
+  description: 'Visualizador, validador y conversor a PDF para comprobantes electrónicos del SRI (Ecuador): Facturas, Retenciones, Notas de Crédito, Liquidaciones de Compra y Guías de Remisión.',
+  ogDescription: 'Visualiza, valida y exporta a PDF tus comprobantes electrónicos del SRI (Facturas, Retenciones, Notas de Crédito, Liquidaciones) por clave de acceso o archivo XML.',
+  ogImage: 'https://sxv.clopezpro.com/og-image.jpg',
+  ogImageSecureUrl: 'https://sxv.clopezpro.com/og-image.jpg',
+  ogImageType: 'image/jpeg',
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
+  ogImageAlt: 'SRI XML Viewer - Visualizador de Comprobantes SRI Ecuador',
+  twitterCard: 'summary_large_image',
+  twitterTitle: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador',
+  twitterDescription: 'Visualiza, valida y exporta a PDF comprobantes electrónicos del SRI Ecuador por clave de acceso o archivo XML.',
+  twitterImage: 'https://sxv.clopezpro.com/og-image.jpg',
+  twitterImageAlt: 'SRI XML Viewer - Visualizador de Comprobantes SRI Ecuador'
+})
+
+useHead({
+  link: [
+    { rel: 'canonical', href: 'https://sxv.clopezpro.com/' }
+  ],
+  script: [
+    {
+      type: 'application/ld+json',
+      innerHTML: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebApplication',
+        name: 'SRI XML Viewer Ecuador',
+        url: 'https://sxv.clopezpro.com/',
+        image: 'https://sxv.clopezpro.com/og-image.jpg',
+        description: 'Visualizador, validador y conversor a PDF de comprobantes electrónicos autorizados por el SRI Ecuador.',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'All',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD'
+        }
+      })
+    }
+  ]
+})
 </script>
 
 
@@ -309,6 +433,67 @@ function onLogoChange(event: Event) {
                   :loading="loading"
                   @click="searchByClave"
                 />
+              </div>
+            </div>
+          </div>
+
+          <!-- Historial Local IndexedDB (Cumplimiento LOPDP) -->
+          <div v-if="storedList.length > 0" class="space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-black text-dimmed uppercase tracking-wider">Historial Local</span>
+                <UBadge color="primary" variant="subtle" size="sm">
+                  {{ storedList.length }}
+                </UBadge>
+              </div>
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-carbon-trash-can"
+                @click="handleClearAll"
+              >
+                Vaciar
+              </UButton>
+            </div>
+
+            <div class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs">
+              <div
+                v-for="item in storedList"
+                :key="item.claveAcceso"
+                class="p-2.5 bg-muted/50 hover:bg-muted border border-default rounded-xl flex items-center justify-between gap-2 transition-colors"
+              >
+                <div class="min-w-0 flex-1 cursor-pointer" @click="loadStoredComprobante(item)">
+                  <div class="flex items-center gap-1.5 mb-0.5">
+                    <UBadge size="xs" variant="outline" color="neutral">
+                      {{ getTipoComprobanteLabel(item.tipoComprobante) }}
+                    </UBadge>
+                    <span class="text-[10px] text-muted truncate">
+                      {{ new Date(item.createdAt).toLocaleDateString() }}
+                    </span>
+                  </div>
+                  <p class="font-mono text-[10px] text-dimmed truncate" :title="item.claveAcceso">
+                    ...{{ item.claveAcceso.slice(-14) }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <UButton
+                    size="xs"
+                    icon="i-carbon-play"
+                    variant="ghost"
+                    color="primary"
+                    title="Cargar comprobante"
+                    @click="loadStoredComprobante(item)"
+                  />
+                  <UButton
+                    size="xs"
+                    icon="i-carbon-close"
+                    variant="ghost"
+                    color="error"
+                    title="Eliminar de IndexedDB"
+                    @click="handleRemoveStored(item.claveAcceso)"
+                  />
+                </div>
               </div>
             </div>
           </div>
