@@ -33,6 +33,8 @@ export interface AdditionalDetails {
 export interface Detail {
   codigoPrincipal: string
   codigoAuxiliar?: string
+  codigoInterno?: string
+  codigoAdicional?: string
   descripcion: string
   unidadMedida?: string
   cantidad: string

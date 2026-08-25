@@ -207,9 +207,20 @@ export function getDetailsInvoiceNc(doc: Document): Detail[] {
           detallesAdicionales.detAdicional.push(item)
         }
       }
+      const codigoPrincipal = elementDetail?.getElementsByTagName('codigoPrincipal')[0]?.textContent
+        || elementDetail?.getElementsByTagName('codigoInterno')[0]?.textContent
+        || ''
+      const codigoAuxiliar = elementDetail?.getElementsByTagName('codigoAuxiliar')[0]?.textContent
+        || elementDetail?.getElementsByTagName('codigoAdicional')[0]?.textContent
+        || undefined
+      const codigoInterno = elementDetail?.getElementsByTagName('codigoInterno')[0]?.textContent || undefined
+      const codigoAdicional = elementDetail?.getElementsByTagName('codigoAdicional')[0]?.textContent || undefined
+
       const detail: Detail = {
-        codigoPrincipal: elementDetail?.getElementsByTagName('codigoPrincipal')[0]?.textContent || '',
-        codigoAuxiliar: elementDetail?.getElementsByTagName('codigoAuxiliar')[0]?.textContent || undefined,
+        codigoPrincipal,
+        codigoAuxiliar,
+        codigoInterno,
+        codigoAdicional,
         descripcion: elementDetail?.getElementsByTagName('descripcion')[0]?.textContent || '',
         unidadMedida: elementDetail?.getElementsByTagName('unidadMedida')[0]?.textContent || undefined,
         cantidad: elementDetail?.getElementsByTagName('cantidad')[0]?.textContent || '',
@@ -374,19 +385,44 @@ function buildDocumentTotals(doc: Document, isCreditNote = false) {
   const totalSinImpuestos = Number.parseFloat(doc?.getElementsByTagName('totalSinImpuestos')[0]?.textContent || '0')
   dataTable.push({ name: 'SUBTOTAL SIN IMPUESTOS', valor: totalSinImpuestos })
 
-  const totalDescuento = Number.parseFloat(doc?.getElementsByTagName('totalDescuento')[0]?.textContent || '0')
-  dataTable.push({
-    name: 'TOTAL DESCUENTO',
-    valor: totalDescuento,
-  })
+  let totalDescuento = 0
+  const totalDescuentoTag = doc?.getElementsByTagName('totalDescuento')[0]?.textContent
+  if (totalDescuentoTag) {
+    totalDescuento = Number.parseFloat(totalDescuentoTag)
+  }
+  else if (isCreditNote) {
+    const details = doc?.getElementsByTagName('detalles')[0]?.children
+    if (details) {
+      for (let i = 0; i < details.length; i++) {
+        const descVal = Number.parseFloat(details[i]?.getElementsByTagName('descuento')[0]?.textContent || '0')
+        if (!Number.isNaN(descVal)) {
+          totalDescuento += descVal
+        }
+      }
+    }
+  }
+
+  if (!isCreditNote || totalDescuento > 0) {
+    dataTable.push({
+      name: 'TOTAL DESCUENTO',
+      valor: totalDescuento,
+    })
+  }
 
   dataTable.push({
     name: 'ICE',
     valor: totalIce,
   })
-  newAllTypes.filter(rs => rs.fee > 0).forEach((data) => {
-    dataTable.push({ name: `IVA ${data.fee}`, valor: data.totalTax })
-  })
+  const ivaTypes = newAllTypes.filter(rs => rs.fee > 0 || rs.code === '0')
+  if (ivaTypes.length === 0) {
+    dataTable.push({ name: 'IVA 0%', valor: 0 })
+  }
+  else {
+    ivaTypes.forEach((data) => {
+      const ivaLabel = data.code === '0' ? 'IVA 0%' : `IVA ${data.fee}%`
+      dataTable.push({ name: ivaLabel, valor: data.totalTax })
+    })
+  }
 
   if (!isCreditNote || totalDEVOLUCIONIVA > 0) {
     dataTable.push({ name: 'TOTAL DEVOLUCIÓN IVA', valor: totalDEVOLUCIONIVA })

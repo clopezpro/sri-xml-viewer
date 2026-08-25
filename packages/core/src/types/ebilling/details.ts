@@ -23,6 +23,8 @@ export interface Taxes {
 export interface Detail {
   codigoPrincipal: string
   codigoAuxiliar?: string
+  codigoInterno?: string
+  codigoAdicional?: string
   descripcion: string
   unidadMedida?: string
   cantidad: string

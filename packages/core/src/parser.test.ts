@@ -436,6 +436,8 @@ describe('SRI XML Parser core tests', () => {
     expect(data.accessKey).toBe('2108202604070648210600120020020000000062295140519')
     expect(data.typeDoc).toBe('04')
     expect(data.details).toHaveLength(1)
+    expect(data.details[0]?.codigoPrincipal).toBe('11005')
+    expect(data.details[0]?.codigoInterno).toBe('11005')
     expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@nombre']).toBe('Name.Orden')
     expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@valor']).toBe('5 CADENILLAS')
 
@@ -444,6 +446,90 @@ describe('SRI XML Parser core tests', () => {
     expect(subtotal0Count).toBe(1)
     expect(data.totals).toContainEqual({ name: 'SUBTOTAL 0 %', valor: 47.5 })
     expect(data.totals).toContainEqual({ name: 'SUBTOTAL SIN IMPUESTOS', valor: 47.5 })
+    expect(data.totals).toContainEqual({ name: 'IVA 0%', valor: 0 })
     expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 47.5 })
+    // TOTAL DESCUENTO should not be present when discount is 0 on credit note
+    expect(data.totals.some(t => t.name === 'TOTAL DESCUENTO')).toBe(false)
+  })
+
+  it('should parse Credit Note item with codigoInterno (e.g. 10967) and additional details correctly', () => {
+    const userNcXml = `<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>2408202604093104800300120010010000000551234567811</numeroAutorizacion>
+  <fechaAutorizacion>24/08/2026 19:30:00</fechaAutorizacion>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<notaCredito id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>REPUESTOS Y MOTOS S.A.</razonSocial>
+    <ruc>0931048003001</ruc>
+    <claveAcceso>2408202604093104800300120010010000000551234567811</claveAcceso>
+    <codDoc>04</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000055</secuencial>
+    <dirMatriz>Guayaquil</dirMatriz>
+  </infoTributaria>
+  <infoNotaCredito>
+    <fechaEmision>24/08/2026</fechaEmision>
+    <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+    <razonSocialComprador>MOTOS DEL ECUADOR S.A.</razonSocialComprador>
+    <identificacionComprador>0991234567001</identificacionComprador>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <codDocModificado>01</codDocModificado>
+    <numDocModificado>001-001-000012345</numDocModificado>
+    <fechaEmisionDocSustento>20/08/2026</fechaEmisionDocSustento>
+    <totalSinImpuestos>8.55</totalSinImpuestos>
+    <valorModificacion>8.55</valorModificacion>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>0</codigoPorcentaje>
+        <baseImponible>8.55</baseImponible>
+        <valor>0.00</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <motivo>DEVOLUCION PARCIAL</motivo>
+  </infoNotaCredito>
+  <detalles>
+    <detalle>
+      <codigoInterno>10967</codigoInterno>
+      <descripcion>KIT TEMPLADOR GUIA DE CADENILLA DISTRIBUCIÓN P/MOTO SHINERAY GN125/150</descripcion>
+      <cantidad>1</cantidad>
+      <precioUnitario>8.55</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>8.55</precioTotalSinImpuesto>
+      <detallesAdicionales>
+        <detAdicional nombre="Name.Orden" valor="1 TEMPLADORES DE CADENILLA P/M SHINERAY 150"/>
+      </detallesAdicionales>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>0</codigoPorcentaje>
+          <tarifa>0.00</tarifa>
+          <baseImponible>8.55</baseImponible>
+          <valor>0.00</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+</notaCredito>
+]]></comprobante>
+</autorizacion>`
+
+    const data = getFullInvoiceDataFromXml(userNcXml)
+    expect(data.typeDoc).toBe('04')
+    expect(data.details).toHaveLength(1)
+    expect(data.details[0]?.codigoPrincipal).toBe('10967')
+    expect(data.details[0]?.codigoInterno).toBe('10967')
+    expect(data.details[0]?.descripcion).toBe('KIT TEMPLADOR GUIA DE CADENILLA DISTRIBUCIÓN P/MOTO SHINERAY GN125/150')
+    expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@nombre']).toBe('Name.Orden')
+    expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@valor']).toBe('1 TEMPLADORES DE CADENILLA P/M SHINERAY 150')
+    expect(data.totals).toContainEqual({ name: 'SUBTOTAL 0 %', valor: 8.55 })
+    expect(data.totals).toContainEqual({ name: 'SUBTOTAL SIN IMPUESTOS', valor: 8.55 })
+    expect(data.totals).toContainEqual({ name: 'IVA 0%', valor: 0 })
+    expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 8.55 })
   })
 })
