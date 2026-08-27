@@ -34,3 +34,20 @@ export function showAuthorizationDate(datStr: string | undefined | null) {
   }
   return datStr
 }
+
+export function formatAdditionalDetails(
+  details?: { '@nombre'?: string, '@valor'?: string, nombre?: string, valor?: string }[]
+): string {
+  if (!details || !Array.isArray(details) || details.length === 0) return ''
+  return details
+    .map((d) => {
+      const nombre = (d['@nombre'] || d.nombre || '').trim()
+      const valor = (d['@valor'] || d.valor || '').trim()
+      if (nombre && valor) return `${nombre}: ${valor}`
+      if (nombre) return nombre
+      return valor
+    })
+    .filter(Boolean)
+    .join('\n')
+}
+

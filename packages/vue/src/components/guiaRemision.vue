@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import headDoc from './headDoc.vue'
 import { getInfoAdicional } from '@sri-xml-viewer/core'
-import { showAuthorizationDate } from '../utils'
+import { showAuthorizationDate, formatAdditionalDetails } from '../utils'
 
 interface DetalleAdicional {
   nombre: string
@@ -144,21 +144,6 @@ const destinatarios = computed<Destinatario[]>(() => {
 // Extraer campos adicionales generales
 const infoAdicional = computed(() => getInfoAdicional(props.document))
 
-// Nombres únicos de detalles adicionales en los detalles de este destinatario
-function getUniqueAdditionalDetailNames(detalles: DetalleProducto[]): string[] {
-  const names = new Set<string>()
-  detalles.forEach((item) => {
-    if (item.detallesAdicionales && Array.isArray(item.detallesAdicionales)) {
-      item.detallesAdicionales.forEach((ad) => {
-        if (ad.nombre) {
-          names.add(ad.nombre)
-        }
-      })
-    }
-  })
-  return Array.from(names)
-}
-
 // Obtener cabeceras de la tabla dinámicamente
 function getColumnsDT(detalles: DetalleProducto[]) {
   if (detalles.length === 0) return []
@@ -169,14 +154,17 @@ function getColumnsDT(detalles: DetalleProducto[]) {
   }]
   columns.push({ label: 'CANT', headerClassName: 'text-center' })
   columns.push({ label: 'Descripción' })
-  const extraDetailNames = getUniqueAdditionalDetailNames(detalles)
-  extraDetailNames.forEach((name) => {
-    columns.push({ label: name })
-  })
+
+  const hasDetallesAdicionales = detalles.some(
+    item => item.detallesAdicionales && item.detallesAdicionales.length > 0
+  )
+  if (hasDetallesAdicionales) {
+    columns.push({ label: 'Detalle Adicional' })
+  }
 
   const hasCodInterno = detalles.some(item => item.codigoInterno)
   if (hasCodInterno) {
-    columns.push({ label: 'Còdigo Princial' })
+    columns.push({ label: 'Código Principal' })
   }
 
   const hasCodAdicional = detalles.some(item => item.codigoAdicional)
@@ -184,7 +172,6 @@ function getColumnsDT(detalles: DetalleProducto[]) {
     columns.push({ label: 'COD.aux' })
   }
 
- 
   return columns
 }
 
@@ -193,7 +180,9 @@ function getColumnsTB(detalles: DetalleProducto[]) {
   const itemArray: { valor: string | number, clase?: string }[][] = []
   const hasCodInterno = detalles.some(item => item.codigoInterno)
   const hasCodAdicional = detalles.some(item => item.codigoAdicional)
-  const extraDetailNames = getUniqueAdditionalDetailNames(detalles)
+  const hasDetallesAdicionales = detalles.some(
+    item => item.detallesAdicionales && item.detallesAdicionales.length > 0
+  )
 
   detalles.forEach((item, index) => {
     const row: { valor: string | number, clase?: string }[] = []
@@ -202,33 +191,24 @@ function getColumnsTB(detalles: DetalleProducto[]) {
     row.push({ valor: index + 1, clase: 'text-center' })
     row.push({ valor: item.cantidad || '0', clase: 'text-right font-bold' })
     row.push({ valor: item.descripcion || '' })
-     // 5. Detalles adicionales dinámicos
-    extraDetailNames.forEach((name) => {
-      let val = ''
-      if (item.detallesAdicionales && Array.isArray(item.detallesAdicionales)) {
-        const found = item.detallesAdicionales.find(ad => ad.nombre === name)
-        if (found) {
-          val = found.valor
-        }
-      }
-      row.push({ valor: val })
-    })
 
-    // 2. Código Principal
+    // 2. Detalle adicional
+    if (hasDetallesAdicionales) {
+      row.push({
+        valor: formatAdditionalDetails(item.detallesAdicionales),
+        clase: 'whitespace-pre-line',
+      })
+    }
+
+    // 3. Código Principal
     if (hasCodInterno) {
       row.push({ valor: item.codigoInterno || '' })
     }
 
-    // 3. Código Auxiliar
+    // 4. Código Auxiliar
     if (hasCodAdicional) {
       row.push({ valor: item.codigoAdicional || '' })
     }
-
-    // 4. Descripción
-
-   
-
-    // 6. Cantidad
 
     itemArray.push(row)
   })

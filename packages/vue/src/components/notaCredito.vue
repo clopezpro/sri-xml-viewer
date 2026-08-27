@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import headDoc from './headDoc.vue'
 import tableSubtotals from './tableSubtotals.vue'
 import { getInfoTributaria, getInfoAdicional, getDetailsInvoiceNc } from '@sri-xml-viewer/core'
-import { showAuthorizationDate, formatToMoney } from '../utils'
+import { showAuthorizationDate, formatToMoney, formatAdditionalDetails } from '../utils'
 
 const props = defineProps({
   document: {
@@ -120,6 +120,9 @@ function getColumnsDT() {
   const isAux = detalles.value.some(rs => rs.codigoAuxiliar || rs.codigoAdicional)
   const isUnidadMedida = detalles.value.some(rs => rs.unidadMedida)
   const hasCodigoPrincipal = detalles.value.some(rs => rs.codigoPrincipal || rs.codigoInterno)
+  const hasDetallesAdicionales = detalles.value.some(
+    rs => rs.detallesAdicionales?.detAdicional && rs.detallesAdicionales.detAdicional.length > 0
+  )
   const firstItem = detalles.value[0]
 
   const columns: { valor: string, style?: string }[] = [{ valor: '#', style: 'text-align: center;' }]
@@ -129,28 +132,25 @@ function getColumnsDT() {
   if (isAux)
     columns.push({ valor: 'COD.aux' })
 
-  if (firstItem?.descripcion)
+  if (firstItem?.descripcion !== undefined)
     columns.push({ valor: 'Descripción' })
 
-  if (firstItem?.detallesAdicionales?.detAdicional) {
-    firstItem.detallesAdicionales.detAdicional.forEach((rs) => {
-      columns.push({ valor: rs['@nombre'] })
-    })
-  }
+  if (hasDetallesAdicionales)
+    columns.push({ valor: 'Detalle Adicional' })
 
-  if (firstItem?.cantidad)
+  if (firstItem?.cantidad !== undefined)
     columns.push({ valor: 'CANT', style: 'text-align: right;' })
 
   if (isUnidadMedida)
     columns.push({ valor: 'UNIDAD', style: 'text-align: right;' })
 
-  if (firstItem?.precioUnitario)
+  if (firstItem?.precioUnitario !== undefined)
     columns.push({ valor: 'PVP', style: 'text-align: right;' })
 
-  if (firstItem?.descuento)
+  if (firstItem?.descuento !== undefined)
     columns.push({ valor: 'DESC', style: 'text-align: right;' })
 
-  if (firstItem?.precioTotalSinImpuesto)
+  if (firstItem?.precioTotalSinImpuesto !== undefined)
     columns.push({ valor: 'TOTAL', style: 'text-align: right;' })
 
   return columns
@@ -166,6 +166,10 @@ function getColumnsTB() {
   const isAux = item.some(rs => rs.codigoAuxiliar || rs.codigoAdicional)
   const isUnidadMedida = item.some(rs => rs.unidadMedida)
   const hasCodigoPrincipal = item.some(rs => rs.codigoPrincipal || rs.codigoInterno)
+  const hasDetallesAdicionales = item.some(
+    rs => rs.detallesAdicionales?.detAdicional && rs.detallesAdicionales.detAdicional.length > 0
+  )
+
   item.forEach((itemFirst, index) => {
     const columns: { valor: string | number, clase?: string }[] = []
     columns.push({ valor: index + 1, clase: 'text-center' })
@@ -174,26 +178,28 @@ function getColumnsTB() {
     if (isAux)
       columns.push({ valor: itemFirst.codigoAuxiliar || itemFirst.codigoAdicional || '' })
 
-    if (itemFirst.descripcion)
+    if (itemFirst.descripcion !== undefined)
       columns.push({ valor: itemFirst.descripcion })
 
-    if (itemFirst.detallesAdicionales?.detAdicional) {
-      itemFirst.detallesAdicionales.detAdicional.forEach((rs) => {
-        columns.push({ valor: rs['@valor'] })
+    if (hasDetallesAdicionales) {
+      columns.push({
+        valor: formatAdditionalDetails(itemFirst.detallesAdicionales?.detAdicional),
+        clase: 'whitespace-pre-line',
       })
     }
-    if (itemFirst.cantidad)
+
+    if (itemFirst.cantidad !== undefined)
       columns.push({ valor: itemFirst.cantidad, clase: 'text-right' })
 
     if (isUnidadMedida)
       columns.push({ valor: itemFirst.unidadMedida ?? '', clase: 'text-right' })
 
-    if (itemFirst.precioUnitario)
+    if (itemFirst.precioUnitario !== undefined)
       columns.push({ valor: formatToMoney(itemFirst.precioUnitario, 'decimal'), clase: 'text-right' })
-    if (itemFirst.descuento)
+    if (itemFirst.descuento !== undefined)
       columns.push({ valor: formatToMoney(itemFirst.descuento, 'decimal'), clase: 'text-right' })
 
-    if (itemFirst.precioTotalSinImpuesto) {
+    if (itemFirst.precioTotalSinImpuesto !== undefined) {
       columns.push({
         valor: formatToMoney(itemFirst.precioTotalSinImpuesto, 'decimal'),
         clase: 'text-right',
