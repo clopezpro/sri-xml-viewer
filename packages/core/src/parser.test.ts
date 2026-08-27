@@ -332,7 +332,7 @@ describe('SRI XML Parser core tests', () => {
     // Totals
     expect(data.totals).toContainEqual({ name: 'SUBTOTAL 15 %', valor: 250 })
     expect(data.totals).toContainEqual({ name: 'SUBTOTAL SIN IMPUESTOS', valor: 250 })
-    expect(data.totals).toContainEqual({ name: 'IVA 15', valor: 37.5 })
+    expect(data.totals).toContainEqual({ name: 'IVA 15%', valor: 37.5 })
     expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 287.5 })
   })
 
@@ -531,5 +531,78 @@ describe('SRI XML Parser core tests', () => {
     expect(data.totals).toContainEqual({ name: 'SUBTOTAL SIN IMPUESTOS', valor: 8.55 })
     expect(data.totals).toContainEqual({ name: 'IVA 0%', valor: 0 })
     expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 8.55 })
+  })
+
+  it('should parse invoice item with detallesAdicionales (detAdicional) correctly', () => {
+    const userFacturaXml = `<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>2708202601093104800300120010010000000881234567815</numeroAutorizacion>
+  <fechaAutorizacion>27/08/2026 09:30:00</fechaAutorizacion>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<factura id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>2</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>EMPRESA DE SERVICIOS S.A.</razonSocial>
+    <ruc>0931048003001</ruc>
+    <claveAcceso>2708202601093104800300120010010000000881234567815</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000088</secuencial>
+    <dirMatriz>Guayaquil</dirMatriz>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>27/08/2026</fechaEmision>
+    <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+    <razonSocialComprador>CLIENTE PRUEBA S.A.</razonSocialComprador>
+    <identificacionComprador>0991234567001</identificacionComprador>
+    <totalSinImpuestos>8.70</totalSinImpuestos>
+    <totalDescuento>0.00</totalDescuento>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>4</codigoPorcentaje>
+        <baseImponible>8.70</baseImponible>
+        <tarifa>15.00</tarifa>
+        <valor>1.30</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <importeTotal>10.00</importeTotal>
+  </infoFactura>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>10009</codigoPrincipal>
+      <descripcion>serv inc iva</descripcion>
+      <cantidad>1</cantidad>
+      <precioUnitario>8.695652</precioUnitario>
+      <descuento>0.00</descuento>
+      <precioTotalSinImpuesto>8.70</precioTotalSinImpuesto>
+      <detallesAdicionales>
+        <detAdicional nombre="Detalle" valor="pryuebas"/>
+      </detallesAdicionales>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>4</codigoPorcentaje>
+          <tarifa>15</tarifa>
+          <baseImponible>8.70</baseImponible>
+          <valor>1.30</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+</factura>
+]]></comprobante>
+</autorizacion>`
+
+    const data = getFullInvoiceDataFromXml(userFacturaXml)
+    expect(data.typeDoc).toBe('01')
+    expect(data.details).toHaveLength(1)
+    expect(data.details[0]?.codigoPrincipal).toBe('10009')
+    expect(data.details[0]?.descripcion).toBe('serv inc iva')
+    expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@nombre']).toBe('Detalle')
+    expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@valor']).toBe('pryuebas')
   })
 })
