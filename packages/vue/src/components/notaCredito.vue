@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import headDoc from './headDoc.vue'
 import tableSubtotals from './tableSubtotals.vue'
 import { getInfoTributaria, getInfoAdicional, getDetailsInvoiceNc } from '@sri-xml-viewer/core'
-import { showAuthorizationDate, formatToMoney, formatAdditionalDetails } from '../utils'
+import { showAuthorizationDate, formatToMoney, formatAdditionalDetails, getAdditionalDetailHeader } from '../utils'
 
 const props = defineProps({
   document: {
@@ -136,7 +136,7 @@ function getColumnsDT() {
     columns.push({ valor: 'Descripción' })
 
   if (hasDetallesAdicionales)
-    columns.push({ valor: 'Detalle Adicional' })
+    columns.push({ valor: getAdditionalDetailHeader(detalles.value) })
 
   if (firstItem?.cantidad !== undefined)
     columns.push({ valor: 'CANT', style: 'text-align: right;' })

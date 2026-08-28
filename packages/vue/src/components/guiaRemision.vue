@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import headDoc from './headDoc.vue'
 import { getInfoAdicional } from '@sri-xml-viewer/core'
-import { showAuthorizationDate, formatAdditionalDetails } from '../utils'
+import { showAuthorizationDate, formatAdditionalDetails, getAdditionalDetailHeader } from '../utils'
 
 interface DetalleAdicional {
   nombre: string
@@ -159,7 +159,7 @@ function getColumnsDT(detalles: DetalleProducto[]) {
     item => item.detallesAdicionales && item.detallesAdicionales.length > 0
   )
   if (hasDetallesAdicionales) {
-    columns.push({ label: 'Detalle Adicional' })
+    columns.push({ label: getAdditionalDetailHeader(detalles) })
   }
 
   const hasCodInterno = detalles.some(item => item.codigoInterno)

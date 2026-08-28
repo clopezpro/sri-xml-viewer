@@ -9,7 +9,7 @@ import {
   getPagos,
   getDetailsInvoiceNc,
 } from '@sri-xml-viewer/core'
-import { showAuthorizationDate, formatToMoney, formatAdditionalDetails } from '../utils'
+import { showAuthorizationDate, formatToMoney, formatAdditionalDetails, getAdditionalDetailHeader } from '../utils'
 
 const props = defineProps({
   document: {
@@ -87,7 +87,7 @@ function getColumnsDT() {
     columns.push({ valor: 'Descripcion' })
 
   if (hasDetallesAdicionales)
-    columns.push({ valor: 'Detalle Adicional' })
+    columns.push({ valor: getAdditionalDetailHeader(detalles.value) })
 
   if (firstItem?.cantidad !== undefined)
     columns.push({ valor: 'CANT', style: 'text-align: right;' })

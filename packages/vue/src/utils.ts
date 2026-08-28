@@ -35,19 +35,39 @@ export function showAuthorizationDate(datStr: string | undefined | null) {
   return datStr
 }
 
+export function getAdditionalDetailHeader(
+  detalles: Array<any>
+): string {
+  const names: string[] = []
+  detalles.forEach((item) => {
+    const list = item.detallesAdicionales?.detAdicional || (Array.isArray(item.detallesAdicionales) ? item.detallesAdicionales : [])
+    if (Array.isArray(list)) {
+      list.forEach((d) => {
+        const name = (d['@nombre'] || d.nombre || '').trim()
+        if (name && !names.includes(name)) {
+          names.push(name)
+        }
+      })
+    }
+  })
+  if (names.length > 0) {
+    return names.join(' / ')
+  }
+  return 'Detalle Adicional'
+}
+
 export function formatAdditionalDetails(
   details?: { '@nombre'?: string, '@valor'?: string, nombre?: string, valor?: string }[]
 ): string {
   if (!details || !Array.isArray(details) || details.length === 0) return ''
   return details
     .map((d) => {
-      const nombre = (d['@nombre'] || d.nombre || '').trim()
       const valor = (d['@valor'] || d.valor || '').trim()
-      if (nombre && valor) return `${nombre}: ${valor}`
-      if (nombre) return nombre
-      return valor
+      const nombre = (d['@nombre'] || d.nombre || '').trim()
+      return valor || nombre
     })
     .filter(Boolean)
     .join('\n')
 }
+
 
