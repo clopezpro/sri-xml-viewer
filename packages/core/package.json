@@ -1,6 +1,6 @@
 {
   "name": "@sri-xml-viewer/core",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Parser core for SRI Ecuador XML electronic vouchers",
   "type": "module",
   "exports": {
