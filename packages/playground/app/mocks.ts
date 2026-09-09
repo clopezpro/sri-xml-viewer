@@ -58,6 +58,9 @@ export const mockFactura = `<?xml version="1.0" encoding="UTF-8" standalone="yes
       <precioUnitario>16.521739</precioUnitario>
       <descuento>0.00</descuento>
       <precioTotalSinImpuesto>16.52</precioTotalSinImpuesto>
+      <detallesAdicionales>
+        <detAdicional nombre="RUC Proveedor" valor="0931048003" />
+      </detallesAdicionales>
       <impuestos>
         <impuesto>
           <codigo>2</codigo>
@@ -70,6 +73,7 @@ export const mockFactura = `<?xml version="1.0" encoding="UTF-8" standalone="yes
     </detalle>
   </detalles>
   <infoAdicional>
+    <campoAdicional nombre="RUC Proveedor">0931048003</campoAdicional>
     <campoAdicional nombre="Generado por">Pruebas de lectura</campoAdicional>
     <campoAdicional nombre="Se genera CXC-52 ">Por $ 19 a pagar en 0 días</campoAdicional>
     <campoAdicional nombre="Cuentas Autorizadas">B.Pichincha/ 2203811776/ ahorros / Chistrian Lopez</campoAdicional>
@@ -215,6 +219,9 @@ export const mockNotaCredito = `<?xml version="1.0" encoding="utf-8"?>
       <precioUnitario>15.00</precioUnitario>
       <descuento>0.00</descuento>
       <precioTotalSinImpuesto>15.00</precioTotalSinImpuesto>
+      <detallesAdicionales>
+        <detAdicional nombre="RUC Proveedor" valor="0931048003" />
+      </detallesAdicionales>
       <impuestos>
         <impuesto>
           <codigo>2</codigo>
@@ -227,6 +234,7 @@ export const mockNotaCredito = `<?xml version="1.0" encoding="utf-8"?>
     </detalle>
   </detalles>
   <infoAdicional>
+    <campoAdicional nombre="RUC Proveedor">0931048003</campoAdicional>
     <campoAdicional nombre="Email">juan.perez@example.com</campoAdicional>
     <campoAdicional nombre="Observacion">Nota de crédito generada automáticamente por devolución de mercadería.</campoAdicional>
   </infoAdicional>
@@ -282,6 +290,7 @@ export const mockGuiaRemision = `<?xml version="1.0" encoding="UTF-8" standalone
           <descripcion>Monitor Gamer UltraWide 34 Pulgadas Curved</descripcion>
           <cantidad>2</cantidad>
           <detallesAdicionales>
+            <detAdicional nombre="RUC Proveedor" valor="0931048003" />
             <detAdicional nombre="Garantia" valor="3 anos" />
             <detAdicional nombre="Color" valor="Negro Mate" />
           </detallesAdicionales>
@@ -290,11 +299,15 @@ export const mockGuiaRemision = `<?xml version="1.0" encoding="UTF-8" standalone
           <codigoInterno>PROD-012</codigoInterno>
           <descripcion>Silla Ergonomica de Oficina Premium</descripcion>
           <cantidad>1</cantidad>
+          <detallesAdicionales>
+            <detAdicional nombre="RUC Proveedor" valor="0931048003" />
+          </detallesAdicionales>
         </detalle>
       </detalles>
     </destinatario>
   </destinatarios>
   <infoAdicional>
+    <campoAdicional nombre="RUC Proveedor">0931048003</campoAdicional>
     <campoAdicional nombre="Observaciones">Entregar en el departamento 402 en horas de la tarde.</campoAdicional>
     <campoAdicional nombre="Contacto">Juan Perez - 0998877665</campoAdicional>
   </infoAdicional>
@@ -363,6 +376,7 @@ export const mockLiquidacionCompra = `<?xml version="1.0" encoding="utf-8"?>
       <descuento>0.00</descuento>
       <precioTotalSinImpuesto>250.00</precioTotalSinImpuesto>
       <detallesAdicionales>
+        <detAdicional nombre="RUC Proveedor" valor="0931048003" />
         <detAdicional nombre="Lote" valor="Lote San Jose #4" />
         <detAdicional nombre="Variedad" valor="Nacional Arriba" />
       </detallesAdicionales>
@@ -378,6 +392,7 @@ export const mockLiquidacionCompra = `<?xml version="1.0" encoding="utf-8"?>
     </detalle>
   </detalles>
   <infoAdicional>
+    <campoAdicional nombre="RUC Proveedor">0931048003</campoAdicional>
     <campoAdicional nombre="Sector">Agricola</campoAdicional>
     <campoAdicional nombre="Observaciones">Liquidacion emitida por servicios agricolas en rusticidad</campoAdicional>
     <campoAdicional nombre="Forma de Pago">Efectivo contra entrega</campoAdicional>
