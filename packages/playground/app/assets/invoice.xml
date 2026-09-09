@@ -29,7 +29,7 @@
     <precioTotalSinImpuesto>16.52</precioTotalSinImpuesto> <impuestos> <impuesto> <codigo>2</codigo>
     <codigoPorcentaje>4</codigoPorcentaje> <tarifa>15</tarifa> <baseImponible>16.52</baseImponible>
     <valor>2.48</valor> </impuesto> </impuestos> </detalle> </detalles> <infoAdicional>
-    <campoAdicional nombre="RUC Proveedor">0931048003</campoAdicional> <campoAdicional
+    <campoAdicional nombre="RUC Proveedor">0931048003001</campoAdicional> <campoAdicional
     nombre="Generado por">FACTURADOR PRO</campoAdicional> <campoAdicional nombre="Se genera CXC-52
     ">Por $ 19 a pagar en 0 días</campoAdicional> <campoAdicional name="Cuentas Autorizadas para
     Cobro">B.Pichincha/ 2203811776/ ahorros / Chistrian Lopez</campoAdicional> </infoAdicional>
