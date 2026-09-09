@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@vercel/analytics'],
   css: ['~/assets/main.css'],
   devServer: {
     port: 4007,
@@ -13,17 +13,17 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: 'es'
       },
-      title: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador',
+      title: 'Lector online de comprobantes electrónicos de Ecuador | Descargar factura con clave de acceso SRI',
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         {
           name: 'description',
-          content: 'Visualizador, validador y conversor a PDF para comprobantes electrónicos del SRI (Ecuador): Facturas, Retenciones, Notas de Crédito, Liquidaciones de Compra y Guías de Remisión.'
+          content: 'Lector online de comprobantes electrónicos de Ecuador. Descargar factura con clave de acceso o archivo XML. Visualiza, valida y convierte a PDF comprobantes del SRI.'
         },
         {
           name: 'keywords',
-          content: 'SRI, XML SRI, Facturación Electrónica Ecuador, Comprobantes Electrónicos, Visor SRI, RIDE SRI, Factura Electrónica, SRI Ecuador XML, Clave de Acceso SRI'
+          content: 'descargar factura con clave de acceso, lector de comprobantes electronicos, lector online de comprobantes electronicos de ecuador, consultar factura sri con clave de acceso, descargar factura sri, lector xml sri, visor sri, ride sri, facturacion electronica ecuador, retenciones sri, notas de credito sri, liquidaciones de compra sri, guias de remision sri, comprobantes electronicos ecuador, conversor sri xml a pdf, sxv, sri ecuador'
         },
         { name: 'author', content: 'Christian Lopez (clopezpro)' },
         { name: 'theme-color', media: '(prefers-color-scheme: light)', content: '#059669' },
@@ -31,29 +31,29 @@ export default defineNuxtConfig({
         // Open Graph / Facebook / WhatsApp / LinkedIn
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://sxv.clopezpro.com/' },
-        { property: 'og:site_name', content: 'SRI XML Viewer' },
-        { property: 'og:title', content: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador' },
+        { property: 'og:site_name', content: 'Lector online de comprobantes electrónicos de Ecuador' },
+        { property: 'og:title', content: 'Lector online de comprobantes electrónicos de Ecuador | Descargar factura con clave de acceso SRI' },
         {
           property: 'og:description',
-          content: 'Visualiza, valida y exporta a PDF tus comprobantes electrónicos del SRI (Facturas, Retenciones, Notas de Crédito, Liquidaciones) por clave de acceso o archivo XML.'
+          content: 'Lector online de comprobantes electrónicos de Ecuador: consulta y descarga tu factura con clave de acceso o archivo XML del SRI. Visualiza y exporta a PDF gratis.'
         },
         { property: 'og:image', content: 'https://sxv.clopezpro.com/og-image.jpg' },
         { property: 'og:image:secure_url', content: 'https://sxv.clopezpro.com/og-image.jpg' },
         { property: 'og:image:type', content: 'image/jpeg' },
         { property: 'og:image:width', content: '1200' },
         { property: 'og:image:height', content: '630' },
-        { property: 'og:image:alt', content: 'SRI XML Viewer - Visualizador y conversor de comprobantes electrónicos SRI Ecuador' },
+        { property: 'og:image:alt', content: 'Lector online de comprobantes electrónicos de Ecuador' },
         { property: 'og:locale', content: 'es_EC' },
         // Twitter / X
         { name: 'twitter:card', content: 'summary_large_image' },
         { name: 'twitter:url', content: 'https://sxv.clopezpro.com/' },
-        { name: 'twitter:title', content: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador' },
+        { name: 'twitter:title', content: 'Lector online de comprobantes electrónicos de Ecuador | Descargar factura con clave de acceso SRI' },
         {
           name: 'twitter:description',
-          content: 'Visualiza, valida y exporta a PDF comprobantes electrónicos del SRI Ecuador por clave de acceso o archivo XML.'
+          content: 'Lector online de comprobantes electrónicos de Ecuador. Descarga factura con clave de acceso o archivo XML y convierte a PDF.'
         },
         { name: 'twitter:image', content: 'https://sxv.clopezpro.com/og-image.jpg' },
-        { name: 'twitter:image:alt', content: 'SRI XML Viewer - Visualizador y conversor de comprobantes electrónicos SRI Ecuador' }
+        { name: 'twitter:image:alt', content: 'Lector online de comprobantes electrónicos de Ecuador' }
       ],
       link: [
         { rel: 'canonical', href: 'https://sxv.clopezpro.com/' },

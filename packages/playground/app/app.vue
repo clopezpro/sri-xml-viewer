@@ -351,22 +351,22 @@ function onLogoChange(event: Event) {
 }
 
 useSeoMeta({
-  title: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador',
-  ogTitle: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador',
+  title: 'Lector online de comprobantes electrónicos de Ecuador | Descargar factura con clave de acceso SRI',
+  ogTitle: 'Lector online de comprobantes electrónicos de Ecuador | Descargar factura con clave de acceso SRI',
   ogUrl: 'https://sxv.clopezpro.com/',
-  description: 'Visualizador, validador y conversor a PDF para comprobantes electrónicos del SRI (Ecuador): Facturas, Retenciones, Notas de Crédito, Liquidaciones de Compra y Guías de Remisión.',
-  ogDescription: 'Visualiza, valida y exporta a PDF tus comprobantes electrónicos del SRI (Facturas, Retenciones, Notas de Crédito, Liquidaciones) por clave de acceso o archivo XML.',
+  description: 'Lector online de comprobantes electrónicos de Ecuador. Descargar factura con clave de acceso o archivo XML. Visualiza, valida y convierte a PDF comprobantes del SRI.',
+  ogDescription: 'Lector online de comprobantes electrónicos de Ecuador: consulta y descarga tu factura con clave de acceso o archivo XML del SRI. Visualiza y exporta a PDF gratis.',
   ogImage: 'https://sxv.clopezpro.com/og-image.jpg',
   ogImageSecureUrl: 'https://sxv.clopezpro.com/og-image.jpg',
   ogImageType: 'image/jpeg',
   ogImageWidth: 1200,
   ogImageHeight: 630,
-  ogImageAlt: 'SRI XML Viewer - Visualizador de Comprobantes SRI Ecuador',
+  ogImageAlt: 'Lector online de comprobantes electrónicos de Ecuador',
   twitterCard: 'summary_large_image',
-  twitterTitle: 'SRI XML Viewer | Visualizador de Comprobantes Electrónicos SRI Ecuador',
-  twitterDescription: 'Visualiza, valida y exporta a PDF comprobantes electrónicos del SRI Ecuador por clave de acceso o archivo XML.',
+  twitterTitle: 'Lector online de comprobantes electrónicos de Ecuador | Descargar factura con clave de acceso SRI',
+  twitterDescription: 'Lector online de comprobantes electrónicos de Ecuador. Descarga factura con clave de acceso o archivo XML y convierte a PDF.',
   twitterImage: 'https://sxv.clopezpro.com/og-image.jpg',
-  twitterImageAlt: 'SRI XML Viewer - Visualizador de Comprobantes SRI Ecuador'
+  twitterImageAlt: 'Lector online de comprobantes electrónicos de Ecuador'
 })
 
 useHead({
@@ -379,12 +379,19 @@ useHead({
       innerHTML: JSON.stringify({
         '@context': 'https://schema.org',
         '@type': 'WebApplication',
-        name: 'SRI XML Viewer Ecuador',
+        name: 'Lector online de comprobantes electrónicos de Ecuador',
+        alternateName: [
+          'Lector de comprobantes electrónicos SRI',
+          'Descargar factura con clave de acceso',
+          'Visualizador SRI Ecuador',
+          'SXV Lector SRI'
+        ],
         url: 'https://sxv.clopezpro.com/',
         image: 'https://sxv.clopezpro.com/og-image.jpg',
-        description: 'Visualizador, validador y conversor a PDF de comprobantes electrónicos autorizados por el SRI Ecuador.',
+        description: 'Lector online y visualizador de comprobantes electrónicos autorizados por el SRI Ecuador. Consulta y descarga facturas con clave de acceso o archivo XML y convierte a PDF.',
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'All',
+        inLanguage: 'es-EC',
         offers: {
           '@type': 'Offer',
           price: '0',
@@ -400,6 +407,40 @@ useHead({
 <template>
   <UApp>
     <div class="min-h-screen bg-muted transition-colors duration-300 font-sans antialiased">
+      <!-- Top Header / SEO & Branding -->
+      <header class="max-w-7xl mx-auto px-6 pt-6 lg:pt-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-default">
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <UBadge
+                color="primary"
+                variant="subtle"
+                size="sm"
+              >
+                SRI Ecuador
+              </UBadge>
+              <UBadge
+                color="neutral"
+                variant="outline"
+                size="sm"
+              >
+                Lector Online
+              </UBadge>
+              <span class="text-xs text-muted font-medium">Facturas, Retenciones, Notas de Crédito, Liquidaciones y Guías</span>
+            </div>
+            <h1 class="text-2xl lg:text-3xl font-black text-highlighted tracking-tight">
+              Lector online de comprobantes electrónicos de Ecuador
+            </h1>
+            <p class="text-xs lg:text-sm text-muted mt-1 max-w-3xl">
+              Descarga tu factura con clave de acceso (49 dígitos) o carga tu comprobante XML del SRI para visualizar, validar y convertir a PDF de forma gratuita e inmediata.
+            </p>
+          </div>
+          <div class="flex items-center gap-2 self-start md:self-center">
+            <UColorModeButton />
+          </div>
+        </div>
+      </header>
+
       <main class="max-w-7xl mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         <!-- Input Panel (Left, 4 columns) -->
         <section class="lg:col-span-4 bg-default border border-default rounded-3xl p-6 shadow-md space-y-6">
@@ -438,11 +479,18 @@ useHead({
           </div>
 
           <!-- Historial Local IndexedDB (Cumplimiento LOPDP) -->
-          <div v-if="storedList.length > 0" class="space-y-2">
+          <div
+            v-if="storedList.length > 0"
+            class="space-y-2"
+          >
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-1.5">
                 <span class="text-[10px] font-black text-dimmed uppercase tracking-wider">Historial Local</span>
-                <UBadge color="primary" variant="subtle" size="sm">
+                <UBadge
+                  color="primary"
+                  variant="subtle"
+                  size="sm"
+                >
                   {{ storedList.length }}
                 </UBadge>
               </div>
@@ -463,16 +511,26 @@ useHead({
                 :key="item.claveAcceso"
                 class="p-2.5 bg-muted/50 hover:bg-muted border border-default rounded-xl flex items-center justify-between gap-2 transition-colors"
               >
-                <div class="min-w-0 flex-1 cursor-pointer" @click="loadStoredComprobante(item)">
+                <div
+                  class="min-w-0 flex-1 cursor-pointer"
+                  @click="loadStoredComprobante(item)"
+                >
                   <div class="flex items-center gap-1.5 mb-0.5">
-                    <UBadge size="xs" variant="outline" color="neutral">
+                    <UBadge
+                      size="xs"
+                      variant="outline"
+                      color="neutral"
+                    >
                       {{ getTipoComprobanteLabel(item.tipoComprobante) }}
                     </UBadge>
                     <span class="text-[10px] text-muted truncate">
                       {{ new Date(item.createdAt).toLocaleDateString() }}
                     </span>
                   </div>
-                  <p class="font-mono text-[10px] text-dimmed truncate" :title="item.claveAcceso">
+                  <p
+                    class="font-mono text-[10px] text-dimmed truncate"
+                    :title="item.claveAcceso"
+                  >
                     ...{{ item.claveAcceso.slice(-14) }}
                   </p>
                 </div>
@@ -731,7 +789,7 @@ useHead({
       </main>
 
       <footer class="border-t border-default mt-12 py-6 px-6 text-center text-xs text-muted font-medium">
-        <p>Visor XML SRI Ecuador © 2026. Construido con Nuxt 4, Nuxt UI y Tailwind CSS.</p>
+        <p>Lector online de comprobantes electrónicos de Ecuador © 2026. Construido con Nuxt 4, Nuxt UI y Tailwind CSS.</p>
       </footer>
     </div>
   </UApp>

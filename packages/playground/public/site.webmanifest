@@ -1,7 +1,7 @@
 {
-  "name": "SRI XML Viewer Ecuador",
-  "short_name": "SRI Viewer",
-  "description": "Visualizador, validador y conversor a PDF de comprobantes electrónicos del SRI Ecuador",
+  "name": "Lector online de comprobantes electrónicos de Ecuador",
+  "short_name": "Lector SRI",
+  "description": "Lector online y conversor a PDF de comprobantes electrónicos del SRI Ecuador",
   "icons": [
     {
       "src": "/favicon-32x32.png",
