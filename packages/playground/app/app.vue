@@ -14,6 +14,39 @@ const claveAcceso = ref('')
 const resolutionAgentNumber = ref('')
 const companyPhone = ref('')
 const companyEmail = ref('')
+const logoUrl = ref('')
+const logoInputRef = ref<HTMLInputElement | null>(null)
+const isParamsOpen = ref(false)
+
+const activeParamsCount = computed(() => {
+  let count = 0
+  if (resolutionAgentNumber.value) count++
+  if (companyPhone.value.trim()) count++
+  if (companyEmail.value.trim()) count++
+  if (logoUrl.value) count++
+  return count
+})
+
+function resetAllParams() {
+  resolutionAgentNumber.value = ''
+  companyPhone.value = ''
+  companyEmail.value = ''
+  logoUrl.value = ''
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('sri_visor_logo')
+    localStorage.removeItem('sri_visor_phone')
+    localStorage.removeItem('sri_visor_email')
+  }
+  if (logoInputRef.value) {
+    logoInputRef.value.value = ''
+  }
+  toast.add({
+    title: 'Parámetros restablecidos',
+    description: 'Se han restaurado los valores predeterminados del lector.',
+    color: 'neutral'
+  })
+}
+
 const fileError = ref('')
 const loading = ref(false)
 const toast = useToast()
@@ -311,15 +344,42 @@ const print = () => {
   window.print()
 }
 
-const logoUrl = ref('')
-const logoInputRef = ref<HTMLInputElement | null>(null)
-
 onMounted(async () => {
-  const savedLogo = localStorage.getItem('sri_visor_logo')
-  if (savedLogo) {
-    logoUrl.value = savedLogo
+  if (typeof window !== 'undefined') {
+    const savedLogo = localStorage.getItem('sri_visor_logo')
+    if (savedLogo) {
+      logoUrl.value = savedLogo
+    }
+    const savedPhone = localStorage.getItem('sri_visor_phone')
+    if (savedPhone) {
+      companyPhone.value = savedPhone
+    }
+    const savedEmail = localStorage.getItem('sri_visor_email')
+    if (savedEmail) {
+      companyEmail.value = savedEmail
+    }
   }
   await refreshStoredList()
+})
+
+watch(companyPhone, (val) => {
+  if (typeof window === 'undefined') return
+  const clean = val.trim()
+  if (clean) {
+    localStorage.setItem('sri_visor_phone', clean)
+  } else {
+    localStorage.removeItem('sri_visor_phone')
+  }
+})
+
+watch(companyEmail, (val) => {
+  if (typeof window === 'undefined') return
+  const clean = val.trim()
+  if (clean) {
+    localStorage.setItem('sri_visor_email', clean)
+  } else {
+    localStorage.removeItem('sri_visor_email')
+  }
 })
 
 function handleLogoClick() {
@@ -408,96 +468,218 @@ useHead({
   <UApp>
     <div class="min-h-screen bg-muted flex flex-col gap-4 transition-colors duration-300 font-sans antialiased">
       <!-- Top Header / SEO & Branding -->
-      <header class="max-w-7xl mt-1 mx-auto bg-default border border-default rounded-xl p-4   ">
-        <div class="  flex flex-col   gap-4 ">
-          <div>
-            <div class="flex flex-wrap items-center gap-2 mb-2">
-              <UBadge
-                color="primary"
-                variant="subtle"
-                size="sm"
-              >
-                SRI Ecuador
-              </UBadge>
-              <UBadge
-                color="neutral"
-                variant="outline"
-                size="sm"
-              >
-                Lector Online
-              </UBadge>
-              <span class="text-xs text-muted font-medium">Facturas, Retenciones, Notas de Crédito, Liquidaciones y Guías</span>
-            </div>
-            <h1 class="text-2xl lg:text-3xl font-black text-highlighted tracking-tight">
-              Lector online de comprobantes electrónicos de Ecuador
-            </h1>
-          </div>
-        </div>
+      <header class="max-w-7xl mt-1 mx-auto bg-default border border-default rounded-xl p-2   ">
+        <h1 class="text-2xl lg:text-3xl font-black text-highlighted ">
+          Lector online de comprobantes electrónicos de Ecuador
+        </h1>
       </header>
 
       <main class=" max-w-7xl mx-auto  grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
-        <section class="bg-default lg:col-span-12 title-panel p-2 rounded-xl border border-default flex justify-between items-end gap-2">
-          <div class="flex-1">
-            <div class="p-4 border border-default">
-              <p class="p-2 bg-accented text-sm">
-                Parámetros Opcionales que recibe el lector para una mejor presentación 
-              </p>
-              <div class="flex items-center gap-1">
-                <UFormField
-                  label="Resolución de Agente de Retención (Opcional)"
-                  class="w-full"
-                >
-                  <USelect
-                    v-model="resolutionAgentNumber"
-                    :items="availableResolutions"
-                    placeholder="Sin resolución (por defecto)"
-                    class="w-full"
-                    size="sm"
+        <!-- Optional Presentation Parameters (Progressive Disclosure) -->
+        <section class="lg:col-span-12">
+          <UCollapsible
+            v-model:open="isParamsOpen"
+            :unmountOnHide="false"
+            class="w-full"
+          >
+            <div
+              class="bg-default border border-default rounded-xl p-3 sm:p-4 flex flex-wrap items-center justify-between gap-3 transition-colors hover:border-accented cursor-pointer select-none"
+              @click="isParamsOpen = !isParamsOpen"
+            >
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <UIcon
+                    name="i-carbon-settings-adjust"
+                    class="w-4 h-4"
                   />
-                  <UButton
-                    v-if="resolutionAgentNumber"
-                    icon="i-carbon-close"
-                    variant="ghost"
-                    color="neutral"
-                    size="sm"
-                    title="Limpiar resolución"
-                    @click="resolutionAgentNumber = ''"
-                  />
-                </UFormField>
+                </div>
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="text-sm font-bold text-highlighted tracking-tight">
+                      Parámetros de Presentación del RIDE
+                    </h2>
+                  </div>
+                  <p class="text-xs text-muted truncate sm:whitespace-normal">
+                    Personaliza logo, datos de contacto y resolución oficial en el membrete del comprobante.
+                  </p>
+                </div>
               </div>
-              <!-- Datos de Empresa Opcionales -->
-              <div class="space-y-2">
-                <p class="text-[10px] font-black text-dimmed uppercase tracking-wider">
-                  Datos de Empresa (Opcionales)
-                </p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <div>
-                    <label class="text-[10px] font-bold text-muted block mb-1">Teléfono</label>
+
+              <div
+                class="flex items-center gap-2 shrink-0"
+                @click.stop
+              >
+                <UButton
+                  v-if="activeParamsCount > 0"
+                  size="xs"
+                  variant="ghost"
+                  color="neutral"
+                  icon="i-carbon-reset"
+                  label="Restablecer"
+                  title="Restablecer todos los parámetros opcionales a valores predeterminados"
+                  @click="resetAllParams"
+                />
+                <UButton
+                  variant="ghost"
+                  color="neutral"
+                  size="xs"
+                  :icon="isParamsOpen ? 'i-carbon-chevron-up' : 'i-carbon-chevron-down'"
+                  :aria-expanded="isParamsOpen"
+                  :aria-label="isParamsOpen ? 'Contraer parámetros de presentación' : 'Expandir parámetros de presentación'"
+                  @click="isParamsOpen = !isParamsOpen"
+                />
+              </div>
+            </div>
+
+            <template #content>
+              <div class="mt-2 bg-default border border-default rounded-xl p-4 sm:p-5 space-y-4 shadow-xs">
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+                  <!-- 1. Logo de la Empresa -->
+                  <UFormField
+                    label="Logotipo del Emisor"
+                    description="Imagen para el membrete superior"
+                    size="sm"
+                  >
+                    <div class="space-y-2">
+                      <div
+                        v-if="logoUrl"
+                        class="flex items-center gap-2 p-2 bg-muted/30 border border-default rounded-lg"
+                      >
+                        <img
+                          :src="logoUrl"
+                          alt="Logo del emisor"
+                          class="h-8 max-w-[80px] object-contain rounded bg-white p-0.5 border border-default"
+                        >
+                        <div class="flex-1 min-w-0">
+                          <p class="text-xs font-medium text-highlighted truncate">
+                            Logo cargado
+                          </p>
+                          <span class="text-[10px] text-muted">Se mostrará en el RIDE</span>
+                        </div>
+                        <UButton
+                          size="xs"
+                          variant="ghost"
+                          color="error"
+                          icon="i-carbon-trash-can"
+                          title="Quitar logotipo"
+                          aria-label="Quitar logotipo"
+                          @click="handleLogoClick"
+                        />
+                      </div>
+
+                      <div
+                        v-else
+                        class="flex items-center gap-2"
+                      >
+                        <UButton
+                          icon="i-carbon-image"
+                          variant="outline"
+                          color="neutral"
+                          size="sm"
+                          class="w-full justify-center"
+                          @click="handleLogoClick"
+                        >
+                          Cargar logo
+                        </UButton>
+                      </div>
+                    </div>
+                  </UFormField>
+
+                  <!-- 2. Resolución de Agente de Retención -->
+                  <UFormField
+                    label="Resolución Agente SRI"
+                    :description="xmlAgenteRetencion ? `Filtrado por agente #${xmlAgenteRetencion}` : 'Reemplaza el código genérico'"
+                    size="sm"
+                  >
+                    <div class="flex items-center gap-1.5">
+                      <USelect
+                        v-model="resolutionAgentNumber"
+                        :items="availableResolutions"
+                        icon="i-carbon-certificate"
+                        placeholder="Sin resolución oficial"
+                        size="sm"
+                        class="w-full"
+                      />
+                      <UButton
+                        v-if="resolutionAgentNumber"
+                        icon="i-carbon-close"
+                        variant="ghost"
+                        color="neutral"
+                        size="xs"
+                        title="Limpiar resolución"
+                        aria-label="Limpiar resolución"
+                        @click="resolutionAgentNumber = ''"
+                      />
+                    </div>
+                  </UFormField>
+
+                  <!-- 3. Teléfono de Contacto -->
+                  <UFormField
+                    label="Teléfono de Contacto"
+                    description="Datos adicionales del emisor"
+                    size="sm"
+                  >
                     <UInput
                       v-model="companyPhone"
+                      icon="i-carbon-phone"
                       placeholder="Ej. 0991234567"
                       size="sm"
                       class="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label class="text-[10px] font-bold text-muted block mb-1">Email</label>
+                      :ui="{ trailing: 'pe-1' }"
+                    >
+                      <template
+                        v-if="companyPhone.length"
+                        #trailing
+                      >
+                        <UButton
+                          color="neutral"
+                          variant="link"
+                          size="xs"
+                          icon="i-carbon-close"
+                          aria-label="Limpiar teléfono"
+                          @click="companyPhone = ''"
+                        />
+                      </template>
+                    </UInput>
+                  </UFormField>
+
+                  <!-- 4. Correo de Contacto -->
+                  <UFormField
+                    label="Correo de Contacto"
+                    description="Email informativo en el membrete"
+                    size="sm"
+                  >
                     <UInput
                       v-model="companyEmail"
+                      icon="i-carbon-email"
                       placeholder="Ej. info@empresa.com"
                       size="sm"
                       class="w-full"
-                    />
-                  </div>
+                      :ui="{ trailing: 'pe-1' }"
+                    >
+                      <template
+                        v-if="companyEmail.length"
+                        #trailing
+                      >
+                        <UButton
+                          color="neutral"
+                          variant="link"
+                          size="xs"
+                          icon="i-carbon-close"
+                          aria-label="Limpiar correo"
+                          @click="companyEmail = ''"
+                        />
+                      </template>
+                    </UInput>
+                  </UFormField>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2" />
+            </template>
+          </UCollapsible>
         </section>
         
         <!-- Input Panel (Left, 4 columns) -->
-        <section class="lg:col-span-4 bg-default border border-default rounded-xl p-6 shadow-md space-y-6">
+        <section class="lg:col-span-4 bg-default border border-default rounded-xl p-6  space-y-6">
           <!-- Historial Local IndexedDB (Cumplimiento LOPDP) -->
           <div
             v-if="storedList.length > 0"
@@ -794,7 +976,7 @@ useHead({
           </div>
           <div
             v-if="!xmlInput"
-            class="bg-default border border-default rounded-xl p-10 text-center shadow-md"
+            class="bg-default border border-default rounded-xl p-10 text-center "
           >
             <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
@@ -822,7 +1004,7 @@ useHead({
           <!-- Render SRI XML Component -->
           <div
             v-else
-            class="sri-xml-viewer bg-default border border-default rounded-xl  shadow-md overflow-hidden"
+            class="sri-xml-viewer bg-default border border-default rounded-xl   overflow-hidden"
           >
             <div class="p-6 overflow-x-auto w-full">
               <div class="min-w-[800px] lg:min-w-0 print:min-w-0">
