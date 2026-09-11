@@ -483,7 +483,7 @@ useHead({
   <UApp>
     <div class="min-h-screen bg-muted flex flex-col gap-4 transition-colors duration-300 font-sans antialiased">
       <!-- Top Header / SEO & Branding -->
-      <header class="max-w-7xl mt-1 mx-auto bg-default border border-default rounded-xl p-2   ">
+      <header class="max-w-7xl mt-1 mx-auto bg-default border border-default rounded-xl p-2 print:hidden">
         <h1 class="text-2xl lg:text-3xl font-black text-highlighted ">
           Lector online de comprobantes electrónicos de Ecuador
         </h1>
@@ -491,7 +491,7 @@ useHead({
 
       <main class=" max-w-7xl mx-auto  grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
         <!-- Optional Presentation Parameters (Progressive Disclosure) -->
-        <section class="lg:col-span-12">
+        <section class="lg:col-span-12 print:hidden">
           <UCollapsible
             v-model:open="isParamsOpen"
             :unmountOnHide="false"
@@ -694,7 +694,7 @@ useHead({
         </section>
         
         <!-- Input Panel (Left, 4 columns) -->
-        <section class="lg:col-span-4 bg-default border border-default rounded-xl p-6  space-y-6">
+        <section class="lg:col-span-4 bg-default border border-default rounded-xl p-6 space-y-6 print:hidden">
           <template v-if="claveAcceso.length==0">
             <div>
               <h2 class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
@@ -807,8 +807,8 @@ useHead({
 
         <!-- View Panel (Right, 8 columns) -->
         <section class="lg:col-span-8 space-y-2 ">
-          <!-- Welcome Card if input is empty -->
-          <div class="flex  justify-between bg-default ">
+          <!-- Toolbar (clave de acceso, buscar, acciones) -->
+          <div class="flex justify-between bg-default print:hidden">
             <div class="flex flex-1 lg:max-w-150  gap-1">
               <UFieldGroup
                 class="w-full"
@@ -919,7 +919,7 @@ useHead({
           </div>
           <div
             v-if="!xmlInput"
-            class="bg-default border border-default rounded-xl p-10 text-center "
+            class="bg-default border border-default rounded-xl p-10 text-center print:hidden"
           >
             <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
@@ -964,7 +964,7 @@ useHead({
         </section>
       </main>
 
-      <footer class="border-t border-default mt-12 py-6 px-6 text-center text-xs text-muted font-medium">
+      <footer class="border-t border-default mt-12 py-6 px-6 text-center text-xs text-muted font-medium print:hidden">
         <p>
           Lector online de comprobantes electrónicos de Ecuador © 2026. Construido por <ULink
             to="https://clopezpro.com"
@@ -1021,16 +1021,25 @@ useHead({
     font-size: 11px !important;
   }
 
-  /* Hide playground shell elements (header, footer, buttons, left panel, card header) */
+  /* Hide playground shell elements */
   header, 
   footer, 
   button, 
-  .px-6.py-4, /* card header wrapper */
-  .border-b, 
-  section:first-of-type, /* input panel */
   nav, 
-  aside {
+  aside,
+  section.lg\:col-span-12,
+  section.lg\:col-span-4,
+  .print-hidden,
+  .print\:hidden {
     display: none !important;
+  }
+
+  .min-h-screen {
+    min-height: auto !important;
+    background: transparent !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   /* Reset main layouts to block, utilizing full A4 width */
@@ -1040,9 +1049,10 @@ useHead({
     max-width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    gap: 0 !important;
   }
 
-  section:last-of-type {
+  section.lg\:col-span-8 {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -1053,18 +1063,20 @@ useHead({
   }
 
   /* Strip all card container decoration and padding */
-  section:last-of-type > div {
+  .sri-xml-viewer {
     border: none !important;
     box-shadow: none !important;
     background: transparent !important;
     padding: 0 !important;
     margin: 0 !important;
     border-radius: 0 !important;
+    overflow: visible !important;
   }
 
-  section:last-of-type > div > div:last-child {
+  .sri-xml-viewer > div {
     padding: 0 !important;
     margin: 0 !important;
+    overflow: visible !important;
   }
 
   /* Enhance printed tables borders and contrast */
@@ -1076,11 +1088,6 @@ useHead({
   th, td {
     border: 1px solid #000 !important;
     padding: 4px 6px !important;
-  }
-
-  /* Hide print-specific sections if any */
-  .print-hidden {
-    display: none !important;
   }
 }
 </style>
