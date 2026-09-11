@@ -406,10 +406,10 @@ useHead({
 
 <template>
   <UApp>
-    <div class="min-h-screen bg-muted transition-colors duration-300 font-sans antialiased">
+    <div class="min-h-screen bg-muted flex flex-col gap-4 transition-colors duration-300 font-sans antialiased">
       <!-- Top Header / SEO & Branding -->
-      <header class="max-w-7xl mx-auto px-6 pt-6 lg:pt-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-default">
+      <header class="max-w-7xl mt-1 mx-auto bg-default border border-default rounded-xl p-4   ">
+        <div class="  flex flex-col   gap-4 ">
           <div>
             <div class="flex flex-wrap items-center gap-2 mb-2">
               <UBadge
@@ -431,53 +431,73 @@ useHead({
             <h1 class="text-2xl lg:text-3xl font-black text-highlighted tracking-tight">
               Lector online de comprobantes electrónicos de Ecuador
             </h1>
-            <p class="text-xs lg:text-sm text-muted mt-1 max-w-3xl">
-              Descarga tu factura con clave de acceso (49 dígitos) o carga tu comprobante XML del SRI para visualizar, validar y convertir a PDF de forma gratuita e inmediata.
-            </p>
-          </div>
-          <div class="flex items-center gap-2 self-start md:self-center">
-            <UColorModeButton />
           </div>
         </div>
       </header>
 
-      <main class="max-w-7xl mx-auto p-6 lg:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        <!-- Input Panel (Left, 4 columns) -->
-        <section class="lg:col-span-4 bg-default border border-default rounded-3xl p-6 shadow-md space-y-6">
-          <div>
-            <p class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
-              Con clave de Acceso
-            </p>
-            <div class="flex gap-1">
-              <UInput
-                v-model="claveAcceso"
-                class="w-full"
-                icon="i-carbon-virtual-column-key" 
-                placeholder="0101010101010101010101010101010101010101 49 dígitos"
-                :disabled="loading"
-                @keydown.enter="searchByClave"
-              />
-              <div class="flex gap-1">
-                <UButton
-                  v-if="claveAcceso.length > 0 && !loading"
-                  icon="i-carbon-close"
-                  variant="solid"
-                  color="error"
-                  aria-label="Limpiar"
-                  @click="claveAcceso = ''"
-                />
-                <UButton
-                  icon="i-carbon-search"
-                  variant="solid"
-                  color="primary"
-                  aria-label="Buscar"
-                  :loading="loading"
-                  @click="searchByClave"
-                />
+      <main class=" max-w-7xl mx-auto  grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
+        <section class="bg-default lg:col-span-12 title-panel p-2 rounded-xl border border-default flex justify-between items-end gap-2">
+          <div class="flex-1">
+            <div class="p-4 border border-default">
+              <p class="p-2 bg-accented text-sm">
+                Parámetros Opcionales que recibe el lector para una mejor presentación 
+              </p>
+              <div class="flex items-center gap-1">
+                <UFormField
+                  label="Resolución de Agente de Retención (Opcional)"
+                  class="w-full"
+                >
+                  <USelect
+                    v-model="resolutionAgentNumber"
+                    :items="availableResolutions"
+                    placeholder="Sin resolución (por defecto)"
+                    class="w-full"
+                    size="sm"
+                  />
+                  <UButton
+                    v-if="resolutionAgentNumber"
+                    icon="i-carbon-close"
+                    variant="ghost"
+                    color="neutral"
+                    size="sm"
+                    title="Limpiar resolución"
+                    @click="resolutionAgentNumber = ''"
+                  />
+                </UFormField>
+              </div>
+              <!-- Datos de Empresa Opcionales -->
+              <div class="space-y-2">
+                <p class="text-[10px] font-black text-dimmed uppercase tracking-wider">
+                  Datos de Empresa (Opcionales)
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <label class="text-[10px] font-bold text-muted block mb-1">Teléfono</label>
+                    <UInput
+                      v-model="companyPhone"
+                      placeholder="Ej. 0991234567"
+                      size="sm"
+                      class="w-full"
+                    />
+                  </div>
+                  <div>
+                    <label class="text-[10px] font-bold text-muted block mb-1">Email</label>
+                    <UInput
+                      v-model="companyEmail"
+                      placeholder="Ej. info@empresa.com"
+                      size="sm"
+                      class="w-full"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-
+          <div class="flex items-center gap-2" />
+        </section>
+        
+        <!-- Input Panel (Left, 4 columns) -->
+        <section class="lg:col-span-4 bg-default border border-default rounded-xl p-6 shadow-md space-y-6">
           <!-- Historial Local IndexedDB (Cumplimiento LOPDP) -->
           <div
             v-if="storedList.length > 0"
@@ -625,32 +645,7 @@ useHead({
             </div>
           </div>
 
-          <!-- Datos de Empresa Opcionales -->
-          <div class="space-y-2">
-            <p class="text-[10px] font-black text-dimmed uppercase tracking-wider">
-              Datos de Empresa (Opcionales)
-            </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div>
-                <label class="text-[10px] font-bold text-muted block mb-1">Teléfono</label>
-                <UInput
-                  v-model="companyPhone"
-                  placeholder="Ej. 0991234567"
-                  size="sm"
-                  class="w-full"
-                />
-              </div>
-              <div>
-                <label class="text-[10px] font-bold text-muted block mb-1">Email</label>
-                <UInput
-                  v-model="companyEmail"
-                  placeholder="Ej. info@empresa.com"
-                  size="sm"
-                  class="w-full"
-                />
-              </div>
-            </div>
-          </div>
+        
 
           <!-- Raw Textarea Input -->
           <div class="space-y-2">
@@ -692,11 +687,114 @@ useHead({
         </section>
 
         <!-- View Panel (Right, 8 columns) -->
-        <section class="lg:col-span-8 space-y-6">
+        <section class="lg:col-span-8 space-y-2 ">
           <!-- Welcome Card if input is empty -->
+          <div class="flex  justify-between bg-default ">
+            <div class="flex flex-1 lg:max-w-150  gap-1">
+              <UFieldGroup
+                class="w-full"
+                label="Email "
+              >
+                <UTooltip
+                  text="Ingresa la clave de acceso de 49 dígitos del comprobante para buscarlo en el SRI aplica tiempo de espera si el SRI no responde, reintentar la consulta."
+                  placement="input"
+                >
+                  <UInput
+                    v-model="claveAcceso"
+                    class="w-full"
+                    :ui="{
+                      base:'tabular-nums font-mono text-xs! h-full w-full',
+                    }"
+                    icon="i-carbon-virtual-column-key" 
+                    placeholder="0101010101010101010101010101010101010101 49 dígitos"
+                    :disabled="loading"
+                    @keydown.enter="searchByClave"
+                  />
+                </UTooltip>
+                <UTooltip
+                  v-if="claveAcceso.length > 0 && !loading"
+                  text="Buscar comprobante en el SRI por clave de acceso (49 dígitos) solo si fue emitido antes de 30 dias"
+                  placement="bottom"
+                >
+                  <UButton
+                    icon="i-carbon-search"
+                    variant="solid"
+                    color="primary"
+                    aria-label="Buscar"
+                    label="Buscar"
+                    :loading="loading"
+                    @click="searchByClave"
+                  />
+                </UTooltip> 
+                <UTooltip
+                  v-if="claveAcceso.length > 0 && !loading"
+                  text="Descargar Archivo XML"
+                  placement="bottom"
+                >
+                  <UButton 
+                    v-if="xmlInput" 
+                    icon="i-carbon-arrow-shift-down"
+                    variant="solid"
+                    label="XML"
+                    color="error"
+                    @click="downloadXml"
+                  />
+                </UTooltip>
+              </UFieldGroup>
+
+              <div class="flex gap-1">
+                <UTooltip
+                  v-if="claveAcceso.length > 0 && !loading"
+                  text="Limpiar campo de clave de acceso"
+                  placement="bottom"
+                >
+                  <UButton
+                    icon="i-carbon-close"
+                    variant="solid"
+                    color="error"
+                    aria-label="Limpiar"
+                    @click="claveAcceso = ''"
+                  />
+                </UTooltip>
+              </div>
+            </div>
+           
+            <div>
+              <UColorModeButton />
+              <ClientOnly>
+                <input
+                  ref="logoInputRef"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="onLogoChange"
+                >
+                <UTooltip
+                  text="Cargar o quitar logo de la empresa"
+                  placement="bottom"
+                >
+                  <UButton
+                    icon="i-carbon-image"
+                    :color="logoUrl ? 'error' : 'neutral'"
+                    variant="outline"
+                    :title="logoUrl ? 'Quitar logo cargado' : 'Cargar logo de la empresa'"
+                    @click="handleLogoClick"
+                  />
+                </UTooltip>
+                <UButton
+                  icon="i-carbon-printer" 
+                  color="primary"
+                  variant="outline"
+                  @click="print"
+                >                  
+                  <span>Imprimir</span>
+                </UButton>
+              </ClientOnly>
+            </div>
+          </div>
           <div
             v-if="!xmlInput"
-            class="bg-default border border-default rounded-3xl p-10 text-center shadow-md"
+            class="bg-default border border-default rounded-xl p-10 text-center shadow-md"
           >
             <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
@@ -724,55 +822,8 @@ useHead({
           <!-- Render SRI XML Component -->
           <div
             v-else
-            class="sri-xml-viewer bg-default border border-default rounded-3xl  shadow-md overflow-hidden"
+            class="sri-xml-viewer bg-default border border-default rounded-xl  shadow-md overflow-hidden"
           >
-            <div class="title-panel p-2 border-b border-default flex justify-between items-center">
-              <span class="text-xs font-black text-dimmed uppercase tracking-widest">Visualización del Comprobante</span>
-              <div class="flex items-center gap-2">
-                <div class="flex items-center gap-1">
-                  <USelect
-                    v-model="resolutionAgentNumber"
-                    :items="availableResolutions"
-                    placeholder="Sin resolución (por defecto)"
-                    class="w-64"
-                    size="sm"
-                  />
-                  <UButton
-                    v-if="resolutionAgentNumber"
-                    icon="i-carbon-close"
-                    variant="ghost"
-                    color="neutral"
-                    size="sm"
-                    title="Limpiar resolución"
-                    @click="resolutionAgentNumber = ''"
-                  />
-                </div>
-                <UColorModeButton />
-                <ClientOnly>
-                  <input
-                    ref="logoInputRef"
-                    type="file"
-                    accept="image/*"
-                    class="hidden"
-                    @change="onLogoChange"
-                  >
-                  <UButton
-                    :icon="logoUrl ? 'i-carbon-trash-can' : 'i-carbon-image'"
-                    :color="logoUrl ? 'error' : 'neutral'"
-                    :variant="logoUrl ? 'solid' : 'ghost'"
-                    :title="logoUrl ? 'Quitar logo cargado' : 'Cargar logo de la empresa'"
-                    @click="handleLogoClick"
-                  />
-                  <UButton
-                    icon="i-carbon-printer" 
-                    color="primary"
-                    @click="print"
-                  >                  
-                    <span>Imprimir / PDF</span>
-                  </UButton>
-                </ClientOnly>
-              </div>
-            </div>
             <div class="p-6 overflow-x-auto w-full">
               <div class="min-w-[800px] lg:min-w-0 print:min-w-0">
                 <VisorXml
