@@ -8,6 +8,7 @@ import {
   getTipoComprobanteLabel,
   extractTipoFromClave
 } from './composables/useComprobantesDb'
+import LocalHistoryModal from './components/LocalHistoryModal.vue'
 
 const xmlInput = ref(mockFactura)
 const claveAcceso = ref('')
@@ -117,8 +118,22 @@ function handleFileUpload(files: File | File[] | null | undefined) {
 
 function clearXml() {
   xmlInput.value = ''
+  claveAcceso.value = ''
   fileError.value = ''
 }
+
+function handleClearClaveAcceso() {
+  claveAcceso.value = ''
+  xmlInput.value = ''
+  fileError.value = ''
+}
+
+watch(claveAcceso, (newVal, oldVal) => {
+  if (oldVal && !newVal.trim() && xmlInput.value) {
+    xmlInput.value = ''
+    fileError.value = ''
+  }
+})
 
 async function loadStoredComprobante(item: IStoredComprobante) {
   claveAcceso.value = item.claveAcceso
@@ -680,84 +695,6 @@ useHead({
         
         <!-- Input Panel (Left, 4 columns) -->
         <section class="lg:col-span-4 bg-default border border-default rounded-xl p-6  space-y-6">
-          <!-- Historial Local IndexedDB (Cumplimiento LOPDP) -->
-          <div
-            v-if="storedList.length > 0"
-            class="space-y-2"
-          >
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[10px] font-black text-dimmed uppercase tracking-wider">Historial Local</span>
-                <UBadge
-                  color="primary"
-                  variant="subtle"
-                  size="sm"
-                >
-                  {{ storedList.length }}
-                </UBadge>
-              </div>
-              <UButton
-                size="xs"
-                variant="ghost"
-                color="error"
-                icon="i-carbon-trash-can"
-                @click="handleClearAll"
-              >
-                Vaciar
-              </UButton>
-            </div>
-
-            <div class="max-h-48 overflow-y-auto space-y-1.5 pr-1 text-xs">
-              <div
-                v-for="item in storedList"
-                :key="item.claveAcceso"
-                class="p-2.5 bg-muted/50 hover:bg-muted border border-default rounded-xl flex items-center justify-between gap-2 transition-colors"
-              >
-                <div
-                  class="min-w-0 flex-1 cursor-pointer"
-                  @click="loadStoredComprobante(item)"
-                >
-                  <div class="flex items-center gap-1.5 mb-0.5">
-                    <UBadge
-                      size="xs"
-                      variant="outline"
-                      color="neutral"
-                    >
-                      {{ getTipoComprobanteLabel(item.tipoComprobante) }}
-                    </UBadge>
-                    <span class="text-[10px] text-muted truncate">
-                      {{ new Date(item.createdAt).toLocaleDateString() }}
-                    </span>
-                  </div>
-                  <p
-                    class="font-mono text-[10px] text-dimmed truncate"
-                    :title="item.claveAcceso"
-                  >
-                    ...{{ item.claveAcceso.slice(-14) }}
-                  </p>
-                </div>
-                <div class="flex items-center gap-1">
-                  <UButton
-                    size="xs"
-                    icon="i-carbon-play"
-                    variant="ghost"
-                    color="primary"
-                    title="Cargar comprobante"
-                    @click="loadStoredComprobante(item)"
-                  />
-                  <UButton
-                    size="xs"
-                    icon="i-carbon-close"
-                    variant="ghost"
-                    color="error"
-                    title="Eliminar de IndexedDB"
-                    @click="handleRemoveStored(item.claveAcceso)"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-       
           <template v-if="claveAcceso.length==0">
             <div>
               <h2 class="text-sm font-black text-dimmed uppercase tracking-widest mb-1">
@@ -935,13 +872,13 @@ useHead({
                     variant="solid"
                     color="error"
                     aria-label="Limpiar"
-                    @click="claveAcceso = ''"
+                    @click="handleClearClaveAcceso"
                   />
                 </UTooltip>
               </div>
             </div>
            
-            <div>
+            <div class="flex items-center gap-1.5">
               <UColorModeButton />
               <ClientOnly>
                 <input
@@ -951,6 +888,12 @@ useHead({
                   class="hidden"
                   @change="onLogoChange"
                 >
+                <LocalHistoryModal
+                  :items="storedList"
+                  @load="loadStoredComprobante"
+                  @remove="handleRemoveStored"
+                  @clear="handleClearAll"
+                />
                 <UTooltip
                   text="Cargar o quitar logo de la empresa"
                   placement="bottom"
@@ -1022,7 +965,14 @@ useHead({
       </main>
 
       <footer class="border-t border-default mt-12 py-6 px-6 text-center text-xs text-muted font-medium">
-        <p>Lector online de comprobantes electrónicos de Ecuador © 2026. Construido con Nuxt 4, Nuxt UI y Tailwind CSS.</p>
+        <p>
+          Lector online de comprobantes electrónicos de Ecuador © 2026. Construido por <ULink
+            to="https://clopezpro.com"
+            target="_blank"
+          >
+            @clopezpro
+          </ULink>  con Nuxt 4, Nuxt UI y Tailwind CSS.
+        </p>
       </footer>
     </div>
   </UApp>

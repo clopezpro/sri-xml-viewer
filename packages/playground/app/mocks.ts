@@ -74,9 +74,7 @@ export const mockFactura = `<?xml version="1.0" encoding="UTF-8" standalone="yes
   </detalles>
   <infoAdicional>
     <campoAdicional nombre="RUC Proveedor">0931048003001</campoAdicional>
-    <campoAdicional nombre="Generado por">Pruebas de lectura</campoAdicional>
-    <campoAdicional nombre="Se genera CXC-52 ">Por $ 19 a pagar en 0 días</campoAdicional>
-    <campoAdicional nombre="Cuentas Autorizadas">B.Pichincha/ 2203811776/ ahorros / Chistrian Lopez</campoAdicional>
+    <campoAdicional nombre="Generado por">Pruebas Para lectura</campoAdicional>
   </infoAdicional>
 <ds:Signature xmlns:etsi="http://uri.etsi.org/01903/v1.3.2#" Id="Signature318228">
 <ds:SignedInfo Id="Signature-SignedInfo723786">
