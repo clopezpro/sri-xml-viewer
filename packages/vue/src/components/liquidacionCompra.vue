@@ -51,6 +51,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  isStandardFormat: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 })
 
 const infoLiquidacionCompra = computed(() => getInfoLiquidacionCompra(props.document))
@@ -185,6 +190,7 @@ function getColumnsTB() {
       :resolutionAgentNumber="resolutionAgentNumber"
       :companyPhone="companyPhone || phone"
       :companyEmail="companyEmail || email"
+      :isStandardFormat="isStandardFormat"
     />
     <div class="flex mt-2 text-sm">
       <div class="border border-default rounded-lg w-full px-1">

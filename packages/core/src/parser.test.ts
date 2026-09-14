@@ -599,10 +599,120 @@ describe('SRI XML Parser core tests', () => {
 
     const data = getFullInvoiceDataFromXml(userFacturaXml)
     expect(data.typeDoc).toBe('01')
+    expect(data.isStandardFormat).toBe(true)
     expect(data.details).toHaveLength(1)
     expect(data.details[0]?.codigoPrincipal).toBe('10009')
     expect(data.details[0]?.descripcion).toBe('serv inc iva')
     expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@nombre']).toBe('Detalle')
     expect(data.details[0]?.detallesAdicionales?.detAdicional[0]?.['@valor']).toBe('pryuebas')
+  })
+
+  it('should successfully parse SOAP envelope XML with direct XML elements inside comprobante and mark as non-standard', () => {
+    const soapXml = `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+    <soap:Body>
+        <ns2:autorizacionComprobanteResponse xmlns:ns2="http://ec.gob.sri.ws.autorizacion">
+            <RespuestaAutorizacionComprobante>
+                <claveAccesoConsultada>0509202601099062169100120010020003786522800108519</claveAccesoConsultada>
+                <numeroComprobantes>1</numeroComprobantes>
+                <autorizaciones>
+                    <autorizacion>
+                        <estado>AUTORIZADO</estado>
+                        <numeroAutorizacion>0509202601099062169100120010020003786522800108519</numeroAutorizacion>
+                        <fechaAutorizacion>2026-09-05T11:49:55-05:00</fechaAutorizacion>
+                        <ambiente>PRODUCCI?N</ambiente>
+                        <comprobante>
+                            <factura id="comprobante" version="1.1.0">
+                                <infoTributaria>
+                                    <ambiente>2</ambiente>
+                                    <tipoEmision>1</tipoEmision>
+                                    <razonSocial>DEMACO, DISTRIBUIDORA DE EQUIPOS Y MATERIALES DE CONSTRUCCION GOMEZ C LTDA.</razonSocial>
+                                    <nombreComercial>DEMACO CIA. LTDA.</nombreComercial>
+                                    <ruc>0990621691001</ruc>
+                                    <claveAcceso>0509202601099062169100120010020003786522800108519</claveAcceso>
+                                    <codDoc>01</codDoc>
+                                    <estab>001</estab>
+                                    <ptoEmi>002</ptoEmi>
+                                    <secuencial>000378652</secuencial>
+                                    <dirMatriz>AV. BENJAMIN ROSALES, URB. SANTA LEONORMZ. 6 SOLAR 13</dirMatriz>
+                                </infoTributaria>
+                                <infoFactura>
+                                    <fechaEmision>05/09/2026</fechaEmision>
+                                    <dirEstablecimiento>MACHALA 1701 Y COL?N ESQUINA</dirEstablecimiento>
+                                    <contribuyenteEspecial>136</contribuyenteEspecial>
+                                    <obligadoContabilidad>SI</obligadoContabilidad>
+                                    <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+                                    <razonSocialComprador>DIMAR S.A.</razonSocialComprador>
+                                    <identificacionComprador>0992528079001</identificacionComprador>
+                                    <direccionComprador>Km 8 ? VIA A LA COSTA COOP. PUERTA SOL MZ 2382 SL 9-10</direccionComprador>
+                                    <totalSinImpuestos>13.66</totalSinImpuestos>
+                                    <totalDescuento>1.26</totalDescuento>
+                                    <totalConImpuestos>
+                                        <totalImpuesto>
+                                            <codigo>2</codigo>
+                                            <codigoPorcentaje>4</codigoPorcentaje>
+                                            <baseImponible>13.66</baseImponible>
+                                            <valor>2.05</valor>
+                                        </totalImpuesto>
+                                    </totalConImpuestos>
+                                    <propina>0.00</propina>
+                                    <importeTotal>15.71</importeTotal>
+                                    <moneda>U.S. Dollar</moneda>
+                                    <pagos>
+                                        <pago>
+                                            <formaPago>01</formaPago>
+                                            <total>15.71</total>
+                                            <plazo>30</plazo>
+                                            <unidadTiempo>dias</unidadTiempo>
+                                        </pago>
+                                    </pagos>
+                                </infoFactura>
+                                <detalles>
+                                    <detalle>
+                                        <codigoPrincipal>ADE1348/0.50KG</codigoPrincipal>
+                                        <codigoAuxiliar>ADE1348/0.50KG</codigoAuxiliar>
+                                        <descripcion>CLAVO 2 1/2"x10 CON CABEZA (65x3.45) 0,50 KG. ADELCA -</descripcion>
+                                        <cantidad>20.00</cantidad>
+                                        <precioUnitario>0.7463</precioUnitario>
+                                        <descuento>1.26</descuento>
+                                        <precioTotalSinImpuesto>13.66</precioTotalSinImpuesto>
+                                        <impuestos>
+                                            <impuesto>
+                                                <codigo>2</codigo>
+                                                <codigoPorcentaje>4</codigoPorcentaje>
+                                                <tarifa>15.00</tarifa>
+                                                <baseImponible>13.66</baseImponible>
+                                                <valor>2.05</valor>
+                                            </impuesto>
+                                        </impuestos>
+                                    </detalle>
+                                </detalles>
+                                <infoAdicional>
+                                    <campoAdicional nombre="PROVEEDOR DE FACTURACION">CLOUDSOLUCIONES CLOUDSOLSA S.A. (0993048275001)</campoAdicional>
+                                </infoAdicional>
+                            </factura>
+                        </comprobante>
+                        <mensajes/>
+                    </autorizacion>
+                </autorizaciones>
+            </RespuestaAutorizacionComprobante>
+        </ns2:autorizacionComprobanteResponse>
+    </soap:Body>
+</soap:Envelope>`
+
+    const data = getFullInvoiceDataFromXml(soapXml)
+    expect(data.isStandardFormat).toBe(false)
+    expect(data.accessKey).toBe('0509202601099062169100120010020003786522800108519')
+    expect(data.typeDoc).toBe('01')
+    expect(data.numberDocument).toBe('001-002-000378652')
+    expect(data.emissionDate).toBe('05/09/2026')
+    expect(data.dateAuthorization).toBe('2026-09-05T11:49:55-05:00')
+    expect(data.infoTributaria.razonSocial).toBe('DEMACO, DISTRIBUIDORA DE EQUIPOS Y MATERIALES DE CONSTRUCCION GOMEZ C LTDA.')
+    expect(data.infoFactura.razonSocialComprador).toBe('DIMAR S.A.')
+    expect(data.details).toHaveLength(1)
+    expect(data.details[0]?.codigoPrincipal).toBe('ADE1348/0.50KG')
+    expect(data.details[0]?.precioTotalSinImpuesto).toBe('13.66')
+    expect(data.payments).toHaveLength(1)
+    expect(data.payments[0]?.total).toBe('15.71')
+    expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 15.71 })
   })
 })

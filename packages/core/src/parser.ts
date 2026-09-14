@@ -273,43 +273,127 @@ export function getInfoTributaria(doc: Document): Record<string, string> {
   return result
 }
 
+export function serializeXmlNode(node: Node): string {
+  if (typeof XMLSerializer !== 'undefined') {
+    return new XMLSerializer().serializeToString(node)
+  }
+  const GlobalXMLSerializer = (globalThis as any).XMLSerializer
+  if (GlobalXMLSerializer) {
+    const serializer = new GlobalXMLSerializer()
+    return serializer.serializeToString(node)
+  }
+  if ('outerHTML' in (node as any) && typeof (node as any).outerHTML === 'string') {
+    return (node as any).outerHTML
+  }
+  if (typeof (node as any).toString === 'function') {
+    return (node as any).toString()
+  }
+  throw new Error('XMLSerializer no está disponible globalmente.')
+}
+
+const VOUCHER_TAGS = ['factura', 'notaCredito', 'notaDebito', 'comprobanteRetencion', 'guiaRemision', 'liquidacionCompra']
+
 export function parseXml(xml: string) {
   if (!xml) {
     throw new Error('No se ha recibido el XML, el xml está vacío')
   }
   try {
     const dataOfSri = parseXmlString(xml)
-    const fechaAutorizacion = dataOfSri.getElementsByTagName('fechaAutorizacion')[0]?.textContent || dataOfSri.getElementsByTagName('fechaAutorizacion')[0]?.innerHTML
+    const rootTagName = dataOfSri.documentElement?.localName || dataOfSri.documentElement?.tagName || ''
+    const isSoapEnvelope = /envelope/i.test(rootTagName) || /autorizacionComprobanteResponse/i.test(rootTagName)
+
+    let isStandardFormat = !isSoapEnvelope
+
+    const fechaAutorizacion = dataOfSri.getElementsByTagName('fechaAutorizacion')[0]?.textContent?.trim()
+      || dataOfSri.getElementsByTagName('fechaAutorizacion')[0]?.innerHTML?.trim()
+
     const comprobante = dataOfSri.getElementsByTagName('comprobante')[0]
     let accessKey = ''
     let dataComprobante: Document
+
     if (comprobante) {
-      const childNodes = comprobante?.childNodes || []
-      let cdataContent = ''
-      if (childNodes.length === 0) {
-        cdataContent = childNodes[0]?.nodeValue?.trim() || ''
+      // Check if comprobante contains child element(s) (e.g. <factura>, etc. directly as XML nodes)
+      const childElement = comprobante.firstElementChild || Array.from(comprobante.childNodes || []).find(n => n.nodeType === 1) as Element | undefined
+
+      if (childElement) {
+        isStandardFormat = false
+        const serialized = serializeXmlNode(childElement)
+        dataComprobante = parseXmlString(serialized)
       }
       else {
+        // Look for CDATA section (nodeType 4)
+        const childNodes = comprobante.childNodes || []
+        let cdataContent = ''
         for (let i = 0; i < childNodes.length; i++) {
           if (childNodes[i]?.nodeType === 4) {
             cdataContent = childNodes[i]?.nodeValue?.trim() || ''
             break
           }
         }
+        if (!cdataContent) {
+          const text = comprobante.textContent?.trim() || ''
+          if (text.startsWith('<')) {
+            cdataContent = text
+          }
+        }
+
+        if (cdataContent) {
+          dataComprobante = parseXmlString(cdataContent)
+        }
+        else {
+          let foundVoucher: Element | null = null
+          for (const tag of VOUCHER_TAGS) {
+            const el = dataOfSri.getElementsByTagName(tag)[0]
+            if (el) {
+              foundVoucher = el
+              break
+            }
+          }
+          if (foundVoucher) {
+            isStandardFormat = false
+            dataComprobante = parseXmlString(serializeXmlNode(foundVoucher))
+          }
+          else {
+            dataComprobante = dataOfSri
+          }
+        }
       }
-      if (!cdataContent) {
-        cdataContent = comprobante.textContent?.trim() || ''
-      }
-      dataComprobante = parseXmlString(cdataContent)
-      accessKey = dataComprobante.getElementsByTagName('claveAcceso')[0]?.textContent || dataComprobante.getElementsByTagName('claveAcceso')[0]?.innerHTML || ''
     }
     else {
-      accessKey = dataOfSri.getElementsByTagName('claveAcceso')[0]?.textContent || dataOfSri.getElementsByTagName('claveAcceso')[0]?.innerHTML || ''
-      dataComprobante = dataOfSri
+      // No <comprobante> tag found
+      const isRootVoucher = VOUCHER_TAGS.some(t => t.toLowerCase() === rootTagName.toLowerCase())
+      if (isRootVoucher) {
+        dataComprobante = dataOfSri
+      }
+      else {
+        let foundVoucher: Element | null = null
+        for (const tag of VOUCHER_TAGS) {
+          const el = dataOfSri.getElementsByTagName(tag)[0]
+          if (el) {
+            foundVoucher = el
+            break
+          }
+        }
+        if (foundVoucher) {
+          isStandardFormat = false
+          dataComprobante = parseXmlString(serializeXmlNode(foundVoucher))
+        }
+        else {
+          dataComprobante = dataOfSri
+        }
+      }
     }
 
+    // Extract access key with fallback
+    accessKey = dataComprobante.getElementsByTagName('claveAcceso')[0]?.textContent?.trim()
+      || dataComprobante.getElementsByTagName('claveAcceso')[0]?.innerHTML?.trim()
+      || dataOfSri.getElementsByTagName('numeroAutorizacion')[0]?.textContent?.trim()
+      || dataOfSri.getElementsByTagName('claveAccesoConsultada')[0]?.textContent?.trim()
+      || dataOfSri.getElementsByTagName('claveAcceso')[0]?.textContent?.trim()
+      || ''
+
     const dataKey = getDataAccessKey(accessKey)
-    const codDoc = dataComprobante.getElementsByTagName('codDoc')[0]?.textContent || dataKey.type
+    const codDoc = dataComprobante.getElementsByTagName('codDoc')[0]?.textContent?.trim() || dataKey.type
     const data = {
       numAuto: accessKey,
       dateAuto: fechaAutorizacion || undefined,
@@ -317,6 +401,7 @@ export function parseXml(xml: string) {
       numberDocument: dataKey.numberDoc,
       typeDoc: codDoc || dataKey.type,
       emissionDate: dataKey.emissionDate,
+      isStandardFormat,
     }
     return data
   }
@@ -488,5 +573,6 @@ export function getFullInvoiceDataFromXml(xmlString: string): IFullInvoiceData {
     totals: getTotals(doc),
     payments: getPagos(doc),
     additionalInfo: getInfoAdicional(doc),
+    isStandardFormat: parsed.isStandardFormat,
   }
 }

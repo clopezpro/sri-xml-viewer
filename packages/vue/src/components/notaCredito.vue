@@ -50,6 +50,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  isStandardFormat: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 })
 
 const effectiveAuthDate = computed(() => props.dateAuthorization || props.authorization)
@@ -233,6 +238,7 @@ function getColumnsTB() {
       :resolutionAgentNumber="resolutionAgentNumber"
       :companyPhone="companyPhone || phone"
       :companyEmail="companyEmail || email"
+      :isStandardFormat="isStandardFormat"
     />
     <div class="border border-default rounded-lg w-full mt-2 p-2 text-xs">
       <div class="flex-none flex flex-wrap gap-2">

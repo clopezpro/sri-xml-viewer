@@ -157,6 +157,7 @@ function getEmissionName(val: string): string {
           :resolutionAgentNumber="resolutionAgentNumber"
           :companyPhone="companyPhone || phone"
           :companyEmail="companyEmail || email"
+          :isStandardFormat="data.isStandardFormat"
         />
       </template>
       <template v-else-if="data.typeDoc === '03'">
@@ -167,6 +168,7 @@ function getEmissionName(val: string): string {
           :resolutionAgentNumber="resolutionAgentNumber"
           :companyPhone="companyPhone || phone"
           :companyEmail="companyEmail || email"
+          :isStandardFormat="data.isStandardFormat"
         />
       </template>
       <template v-else-if="data.typeDoc === '04'">
@@ -178,6 +180,7 @@ function getEmissionName(val: string): string {
           :resolutionAgentNumber="resolutionAgentNumber"
           :companyPhone="companyPhone || phone"
           :companyEmail="companyEmail || email"
+          :isStandardFormat="data.isStandardFormat"
         />
       </template>
       <template v-else-if="data.typeDoc === '06'">
@@ -188,6 +191,7 @@ function getEmissionName(val: string): string {
           :resolutionAgentNumber="resolutionAgentNumber"
           :companyPhone="companyPhone || phone"
           :companyEmail="companyEmail || email"
+          :isStandardFormat="data.isStandardFormat"
         />
       </template>
       <template v-else-if="data.typeDoc === '07'">
@@ -198,6 +202,7 @@ function getEmissionName(val: string): string {
           :resolutionAgentNumber="resolutionAgentNumber"
           :companyPhone="companyPhone || phone"
           :companyEmail="companyEmail || email"
+          :isStandardFormat="data.isStandardFormat"
         />
       </template>
     </div>

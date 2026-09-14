@@ -43,6 +43,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  isStandardFormat: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 })
 
 const infoTributaria = computed(() => {
@@ -278,12 +283,30 @@ const mode = computed(() => {
         </div>
         <div
           v-if="dateAuthorization"
-          class="flex gap-2"
+          class="flex items-center gap-2 flex-wrap"
         >
           <div class="font-bold pr-2">
             FECHA AUTORIZACIÓN
           </div>
           <div>{{ dateAuthorization }}</div>
+          <span
+            v-if="isStandardFormat === false"
+            class="text-[10px] text-muted italic print:hidden"
+            title="Comprobante obtenido desde envoltura SOAP o estructura no estándar del SRI"
+          >
+            (XML no estándar del SRI)
+          </span>
+        </div>
+        <div
+          v-else-if="isStandardFormat === false"
+          class="flex items-center gap-2"
+        >
+          <span
+            class="text-[10px] text-muted italic print:hidden"
+            title="Comprobante obtenido desde envoltura SOAP o estructura no estándar del SRI"
+          >
+            (XML no estándar del SRI)
+          </span>
         </div>
         <div class="flex gap-2">
           <div class="font-bold pr-2">

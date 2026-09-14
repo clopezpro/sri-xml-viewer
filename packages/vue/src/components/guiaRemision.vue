@@ -73,6 +73,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  isStandardFormat: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 })
 
 // Extraer Información de Guía de Remisión (Transportista, Placa, Fechas, etc.)
@@ -258,6 +263,7 @@ function showTypeDocSustento(code: string) {
       :resolutionAgentNumber="resolutionAgentNumber"
       :companyPhone="companyPhone || phone"
       :companyEmail="companyEmail || email"
+      :isStandardFormat="isStandardFormat"
     />
 
     <!-- Datos de Movilización / Transporte -->

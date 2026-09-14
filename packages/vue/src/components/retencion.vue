@@ -44,6 +44,11 @@ const props = defineProps({
     required: false,
     default: undefined,
   },
+  isStandardFormat: {
+    type: Boolean,
+    required: false,
+    default: true,
+  },
 })
 const getVersion = computed(() => {
   return props.document?.getElementsByTagName('comprobanteRetencion').item(0)?.getAttribute('version')
@@ -364,6 +369,7 @@ const infoRetention = computed(() => {
       :resolutionAgentNumber="resolutionAgentNumber"
       :companyPhone="companyPhone || phone"
       :companyEmail="companyEmail || email"
+      :isStandardFormat="isStandardFormat"
     />
     <div class="flex mt-5">
       <div class="border border-default rounded-lg w-full p-2">

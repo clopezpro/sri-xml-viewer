@@ -75,4 +75,5 @@ export interface IFullInvoiceData {
   totals: { name: string, valor: string | number }[]
   payments: Payment[]
   additionalInfo: { name: string, value: string }[]
+  isStandardFormat?: boolean
 }
