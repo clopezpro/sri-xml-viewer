@@ -9,15 +9,52 @@ import {
   extractTipoFromClave
 } from './composables/useComprobantesDb'
 import LocalHistoryModal from './components/LocalHistoryModal.vue'
+import SriResponseModal, { type ISriDebugResponse } from './components/SriResponseModal.vue'
 
+export type MockType = 'factura' | 'notaCredito' | 'guiaRemision' | 'liquidacionCompra'
+export type ComprobanteSource = 'mock' | 'sri' | 'cache' | 'upload' | 'manual'
+
+const mockConfigs: Record<MockType, { getXml: () => string; label: string }> = {
+  factura: {
+    getXml: () => mockFactura,
+    label: 'Factura'
+  },
+  liquidacionCompra: {
+    getXml: () => mockLiquidacionCompra,
+    label: 'Liq. Compra'
+  },
+  notaCredito: {
+    getXml: () => mockNotaCredito,
+    label: 'Nota de Crédito'
+  },
+  guiaRemision: {
+    getXml: () => mockGuiaRemision,
+    label: 'Guía Remisión'
+  }
+}
+
+function extractClaveAccesoFromXml(xml: string): string {
+  if (!xml) return ''
+  const claveMatch = xml.match(/<(?:\w+:)?claveAcceso>(\d{49})<\/(?:\w+:)?claveAcceso>/i)
+  if (claveMatch) return claveMatch[1]
+  const numAutMatch = xml.match(/<(?:\w+:)?numeroAutorizacion>(\d{49})<\/(?:\w+:)?numeroAutorizacion>/i)
+  if (numAutMatch) return numAutMatch[1]
+  return ''
+}
+
+const activeMock = ref<MockType | null>('factura')
+const comprobanteSource = ref<ComprobanteSource>('mock')
 const xmlInput = ref(mockFactura)
-const claveAcceso = ref('')
+const claveAcceso = ref(extractClaveAccesoFromXml(mockFactura))
 const resolutionAgentNumber = ref('')
 const companyPhone = ref('')
 const companyEmail = ref('')
 const logoUrl = ref('')
 const logoInputRef = ref<HTMLInputElement | null>(null)
 const isParamsOpen = ref(false)
+
+const lastSriResponse = ref<ISriDebugResponse | null>(null)
+const isSriModalOpen = ref(false)
 
 const activeParamsCount = computed(() => {
   let count = 0
@@ -85,15 +122,19 @@ watch(xmlAgenteRetencion, () => {
   }
 })
 
-function loadMock(type: 'factura' | 'notaCredito' | 'guiaRemision' | 'liquidacionCompra') {
-  if (type === 'factura') {
-    xmlInput.value = mockFactura
-  } else if (type === 'notaCredito') {
-    xmlInput.value = mockNotaCredito
-  } else if (type === 'guiaRemision') {
-    xmlInput.value = mockGuiaRemision
-  } else if (type === 'liquidacionCompra') {
-    xmlInput.value = mockLiquidacionCompra
+function loadMock(type: MockType) {
+  if (activeMock.value === type) {
+    clearXml()
+    return
+  }
+  const config = mockConfigs[type]
+  if (config) {
+    const xml = config.getXml()
+    xmlInput.value = xml
+    claveAcceso.value = extractClaveAccesoFromXml(xml)
+    activeMock.value = type
+    comprobanteSource.value = 'mock'
+    fileError.value = ''
   }
 }
 
@@ -108,6 +149,12 @@ function handleFileUpload(files: File | File[] | null | undefined) {
     if (typeof text === 'string') {
       xmlInput.value = text
       fileError.value = ''
+      activeMock.value = null
+      comprobanteSource.value = 'upload'
+      const extracted = extractClaveAccesoFromXml(text)
+      if (extracted) {
+        claveAcceso.value = extracted
+      }
     }
   }
   reader.onerror = () => {
@@ -120,22 +167,37 @@ function clearXml() {
   xmlInput.value = ''
   claveAcceso.value = ''
   fileError.value = ''
+  activeMock.value = null
+  comprobanteSource.value = 'manual'
 }
 
 function handleClearClaveAcceso() {
-  claveAcceso.value = ''
-  xmlInput.value = ''
-  fileError.value = ''
+  clearXml()
 }
 
 watch(claveAcceso, (newVal, oldVal) => {
   if (oldVal && !newVal.trim() && xmlInput.value) {
-    xmlInput.value = ''
-    fileError.value = ''
+    clearXml()
+  }
+})
+
+watch(xmlInput, (newXml) => {
+  if (!newXml) {
+    activeMock.value = null
+    return
+  }
+  if (activeMock.value) {
+    const currentMockXml = mockConfigs[activeMock.value]?.getXml()
+    if (newXml !== currentMockXml) {
+      activeMock.value = null
+      comprobanteSource.value = 'manual'
+    }
   }
 })
 
 async function loadStoredComprobante(item: IStoredComprobante) {
+  activeMock.value = null
+  comprobanteSource.value = 'cache'
   claveAcceso.value = item.claveAcceso
   xmlInput.value = item.xml
   toast.add({
@@ -185,13 +247,17 @@ async function searchByClave() {
     return
   }
 
-  loading.value = true
-  fileError.value = ''
+ 
 
   try {
+     loading.value = true
+     fileError.value = ''
+     xmlInput.value=''
     // 1. Verificar si ya existe en la base de datos local (IndexedDB)
     const cached = await getComprobante(cleanClave)
     if (cached) {
+      activeMock.value = null
+      comprobanteSource.value = 'cache'
       xmlInput.value = cached.xml
       loading.value = false
       toast.add({
@@ -203,25 +269,16 @@ async function searchByClave() {
     }
 
     // 2. Si no está en caché, consultar al SRI
-    const response = await $fetch<{
-      success: boolean
-      estado: string
-      xml?: string
-      ambiente?: string
-      numeroAutorizacion?: string
-      fechaAutorizacion?: string
-      mensajes?: Array<{
-        identificador?: string
-        mensaje?: string
-        tipo?: string
-        informacionAdicional?: string
-      }>
-    }>('/api/sri', {
+    const response = await $fetch<ISriDebugResponse & { xml?: string }>('/api/sri', {
       method: 'POST',
       body: { claveAcceso: cleanClave }
     })
 
+    lastSriResponse.value = response
+
     if (response.success && response.xml) {
+      activeMock.value = null
+      comprobanteSource.value = 'sri'
       xmlInput.value = response.xml
       
       // 3. Guardar en IndexedDB para consultas futuras
@@ -240,7 +297,16 @@ async function searchByClave() {
       toast.add({
         title: 'Comprobante obtenido y guardado',
         description: `El comprobante se obtuvo del SRI (${response.ambiente}) y se guardó en la base de datos local.`,
-        color: 'success'
+        color: 'success',
+        actions: [
+          {
+            label: 'Ver respuesta SRI',
+            color: 'neutral',
+            onClick: () => {
+              isSriModalOpen.value = true
+            }
+          }
+        ]
       })
     } else {
       let errors = response.mensajes?.map((m: any) => `[${m.identificador || 'SRI'}] ${m.mensaje}`).join('\n') || 'No se pudo obtener el comprobante.'
@@ -256,20 +322,30 @@ async function searchByClave() {
 
       const isConnectionError = response.estado === 'ERROR_CONEXION' || response.estado === 'ERROR_SRI_CONEXION' || errors.includes('no respondió') || errors.includes('disponible') || errors.includes('reintente')
 
+      const toastActions: any[] = []
+      if (isConnectionError) {
+        toastActions.push({
+          label: 'Reintentar',
+          color: 'primary',
+          onClick: () => {
+            searchByClave()
+          }
+        })
+      }
+      toastActions.push({
+        label: 'Ver respuesta SRI',
+        color: 'neutral',
+        onClick: () => {
+          isSriModalOpen.value = true
+        }
+      })
+
       toast.add({
         title: `Error del SRI - ${response.estado}`,
         description: errors,
         color: 'error',
         duration: isConnectionError ? 12000 : 8000,
-        actions: isConnectionError ? [
-          {
-            label: 'Reintentar',
-            color: 'primary',
-            onClick: () => {
-              searchByClave()
-            }
-          }
-        ] : undefined
+        actions: toastActions
       })
     }
   } catch (error: any) {
@@ -291,20 +367,43 @@ async function searchByClave() {
 
     const isConnectionError = errMsg.includes('no respondió') || errMsg.includes('disponible') || errMsg.includes('reintente')
 
+    lastSriResponse.value = {
+      success: false,
+      estado: 'ERROR_RED',
+      claveAcceso: cleanClave,
+      numeroComprobantes: '0',
+      mensajes: [{
+        identificador: 'NET-ERR',
+        mensaje: errMsg,
+        tipo: 'ERROR'
+      }],
+      rawResponseData: error.data || error
+    }
+
+    const errorActions: any[] = []
+    if (isConnectionError) {
+      errorActions.push({
+        label: 'Reintentar',
+        color: 'primary',
+        onClick: () => {
+          searchByClave()
+        }
+      })
+    }
+    errorActions.push({
+      label: 'Ver respuesta SRI',
+      color: 'neutral',
+      onClick: () => {
+        isSriModalOpen.value = true
+      }
+    })
+
     toast.add({
       title: 'Error de red / API',
       description: errMsg,
       color: 'error',
       duration: isConnectionError ? 12000 : 8000,
-      actions: isConnectionError ? [
-        {
-          label: 'Reintentar',
-          color: 'primary',
-          onClick: () => {
-            searchByClave()
-          }
-        }
-      ] : undefined
+      actions: errorActions
     })
   } finally {
     loading.value = false
@@ -489,7 +588,7 @@ useHead({
         </h1>
       </header>
 
-      <main class=" max-w-7xl mx-auto  grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
+      <main class=" max-w-7xl mx-auto  lg:w-full grid grid-cols-1 lg:grid-cols-12 gap-2 items-start">
         <!-- Optional Presentation Parameters (Progressive Disclosure) -->
         <section class="lg:col-span-12 print:hidden">
           <UCollapsible
@@ -725,38 +824,52 @@ useHead({
 
           <!-- Mock Loader Buttons -->
           <div>
-            <p class="text-[10px] font-black text-dimmed uppercase tracking-wider mb-2">
-              Comprobantes de Ejemplo
-            </p>
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-[10px] font-black text-dimmed uppercase tracking-wider">
+                Comprobantes de Ejemplo
+              </p>
+              <UBadge
+                v-if="activeMock"
+                color="warning"
+                variant="subtle"
+                size="xs"
+              >
+                Ejemplo activo
+              </UBadge>
+            </div>
             <div class="grid grid-cols-2 gap-2">
               <UButton 
-                class="justify-center"
-                variant="outline"
-                color="neutral"
+                class="justify-center transition-all"
+                :variant="activeMock === 'factura' ? 'solid' : 'outline'"
+                :color="activeMock === 'factura' ? 'primary' : 'neutral'"
+                :icon="activeMock === 'factura' ? 'i-carbon-checkmark' : undefined"
                 @click="loadMock('factura')"
               >
                 📄 Factura
               </UButton>
               <UButton 
-                class="justify-center"
-                variant="outline"
-                color="neutral"
+                class="justify-center transition-all"
+                :variant="activeMock === 'liquidacionCompra' ? 'solid' : 'outline'"
+                :color="activeMock === 'liquidacionCompra' ? 'primary' : 'neutral'"
+                :icon="activeMock === 'liquidacionCompra' ? 'i-carbon-checkmark' : undefined"
                 @click="loadMock('liquidacionCompra')"
               >
                 📄 Liq. Compra
               </UButton>
               <UButton 
-                class="justify-center"
-                variant="outline"
-                color="neutral"
+                class="justify-center transition-all"
+                :variant="activeMock === 'notaCredito' ? 'solid' : 'outline'"
+                :color="activeMock === 'notaCredito' ? 'primary' : 'neutral'"
+                :icon="activeMock === 'notaCredito' ? 'i-carbon-checkmark' : undefined"
                 @click="loadMock('notaCredito')"
               >
                 📄 Nota de Crédito
               </UButton>
               <UButton 
-                class="justify-center"
-                variant="outline"
-                color="neutral"
+                class="justify-center transition-all"
+                :variant="activeMock === 'guiaRemision' ? 'solid' : 'outline'"
+                :color="activeMock === 'guiaRemision' ? 'primary' : 'neutral'"
+                :icon="activeMock === 'guiaRemision' ? 'i-carbon-checkmark' : undefined"
                 @click="loadMock('guiaRemision')"
               >
                 📄 Guía Remisión
@@ -809,10 +922,12 @@ useHead({
         <section class="lg:col-span-8 space-y-2 ">
           <!-- Toolbar (clave de acceso, buscar, acciones) -->
           <div class="flex justify-between bg-default print:hidden">
-            <div class="flex flex-1 lg:max-w-150  gap-1">
+            <div class="flex flex-1  w-full  gap-1">
               <UFieldGroup
                 class="w-full"
-                label="Email "
+                :ui="{
+                  base:'w-full'
+                }"
               >
                 <UTooltip
                   text="Ingresa la clave de acceso de 49 dígitos del comprobante para buscarlo en el SRI aplica tiempo de espera si el SRI no responde, reintentar la consulta."
@@ -823,15 +938,30 @@ useHead({
                     class="w-full"
                     :ui="{
                       base:'tabular-nums font-mono text-xs! h-full w-full',
+                      trailing: 'pe-1'
                     }"
                     icon="i-carbon-virtual-column-key" 
                     placeholder="0101010101010101010101010101010101010101 49 dígitos"
                     :disabled="loading"
                     @keydown.enter="searchByClave"
-                  />
+                  >
+                    <template
+                      v-if="claveAcceso.length > 0 && !loading"
+                      #trailing
+                    >
+                      <UButton
+                        color="neutral"
+                        variant="link"
+                        size="xs"
+                        icon="i-carbon-close"
+                        aria-label="Limpiar clave de acceso"
+                        @click="handleClearClaveAcceso"
+                      />
+                    </template>
+                  </UInput>
                 </UTooltip>
                 <UTooltip
-                  v-if="claveAcceso.length > 0 && !loading"
+                  v-if="claveAcceso.length > 0 "
                   text="Buscar comprobante en el SRI por clave de acceso (49 dígitos) solo si fue emitido antes de 30 dias"
                   placement="bottom"
                 >
@@ -846,12 +976,11 @@ useHead({
                   />
                 </UTooltip> 
                 <UTooltip
-                  v-if="claveAcceso.length > 0 && !loading"
+                  v-if="xmlInput"
                   text="Descargar Archivo XML"
                   placement="bottom"
                 >
                   <UButton 
-                    v-if="xmlInput" 
                     icon="i-carbon-arrow-shift-down"
                     variant="solid"
                     label="XML"
@@ -861,9 +990,12 @@ useHead({
                 </UTooltip>
               </UFieldGroup>
 
-              <div class="flex gap-1">
+              <div
+                v-if="claveAcceso.length > 0 && !loading"
+                class="flex gap-1"
+              >
                 <UTooltip
-                  v-if="claveAcceso.length > 0 && !loading"
+                 
                   text="Limpiar campo de clave de acceso"
                   placement="bottom"
                 >
@@ -895,6 +1027,19 @@ useHead({
                   @clear="handleClearAll"
                 />
                 <UTooltip
+                  v-if="lastSriResponse"
+                  text="Ver respuesta técnica del SRI de la última consulta"
+                  placement="bottom"
+                >
+                  <UButton
+                    icon="i-carbon-debug"
+                    :color="lastSriResponse.success ? 'neutral' : 'warning'"
+                    variant="outline"
+                    aria-label="Ver respuesta técnica del SRI"
+                    @click="isSriModalOpen = true"
+                  />
+                </UTooltip>
+                <UTooltip
                   text="Cargar o quitar logo de la empresa"
                   placement="bottom"
                 >
@@ -919,36 +1064,107 @@ useHead({
           </div>
           <div
             v-if="!xmlInput"
-            class="bg-default border border-default rounded-xl p-10 text-center print:hidden"
+            class="space-y-4 print:hidden"
           >
-            <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                class="w-8 h-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            <!-- Banner diagnóstico cuando la consulta al SRI no retorna comprobante autorizado -->
+            <div
+              v-if="lastSriResponse && !lastSriResponse.success"
+              class="bg-default border border-warning/30 rounded-xl p-8 text-center space-y-4 shadow-xs"
+            >
+              <div class="w-14 h-14 bg-warning/10 text-warning rounded-full flex items-center justify-center mx-auto">
+                <UIcon
+                  name="i-carbon-warning-alt"
+                  class="w-7 h-7"
                 />
-              </svg>
+              </div>
+              <div class="space-y-1.5">
+                <h3 class="text-base sm:text-lg font-black text-highlighted">
+                  El SRI no retornó un comprobante autorizado
+                </h3>
+                <p class="text-xs text-muted max-w-lg mx-auto leading-relaxed">
+                  La consulta finalizó con estado <span class="font-mono font-bold text-highlighted">«{{ lastSriResponse.estado }}»</span>. Puedes revisar la respuesta XML completa, los códigos de validación y los motivos devueltos por el servidor del SRI.
+                </p>
+              </div>
+              <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <UButton
+                  icon="i-carbon-debug"
+                  color="warning"
+                  variant="solid"
+                  size="sm"
+                  label="Ver respuesta completa del SRI"
+                  @click="isSriModalOpen = true"
+                />
+                <UButton
+                  icon="i-carbon-renew"
+                  color="neutral"
+                  variant="outline"
+                  size="sm"
+                  label="Reintentar consulta"
+                  :loading="loading"
+                  @click="searchByClave"
+                />
+              </div>
             </div>
-            <h3 class="text-lg font-black text-highlighted mb-2">
-              Visor Listo
-            </h3>
-            <p class="text-sm text-muted max-w-md mx-auto">
-              Por favor, pega el contenido XML de un comprobante en el panel de la izquierda o carga un archivo XML para visualizarlo de forma estructurada.
-            </p>
+
+            <!-- Visor Listo normal -->
+            <div
+              v-else
+              class="bg-default border border-default rounded-xl p-10 text-center"
+            >
+              <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg
+                  class="w-8 h-8"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
+                </svg>
+              </div>
+              <h3 class="text-lg font-black text-highlighted mb-2">
+                Visor Listo
+              </h3>
+              <p class="text-sm text-muted max-w-md mx-auto">
+                Por favor, pega el contenido XML de un comprobante en el panel de la izquierda o carga un archivo XML para visualizarlo de forma estructurada.
+              </p>
+            </div>
           </div>
 
           <!-- Render SRI XML Component -->
           <div
             v-else
-            class="sri-xml-viewer bg-default border border-default rounded-xl   overflow-hidden"
+            class="sri-xml-viewer bg-default border border-default rounded-xl overflow-hidden"
           >
+            <!-- Banner informativo si el comprobante visualizado es un MOCK de ejemplo -->
+            <div
+              v-if="activeMock"
+              class="bg-warning/10 border-b border-warning/20 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 print:hidden"
+            >
+              <div class="flex items-center gap-2 min-w-0">
+                <UIcon
+                  name="i-carbon-information"
+                  class="w-4 h-4 text-warning shrink-0"
+                />
+                <p class="text-xs text-highlighted">
+                  <span class="font-bold">Comprobante de Ejemplo ({{ mockConfigs[activeMock]?.label }}):</span>
+                  <span class="text-muted ml-1">Datos de prueba con fines ilustrativos. No corresponde a una consulta real del SRI.</span>
+                </p>
+              </div>
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="warning"
+                icon="i-carbon-close"
+                label="Quitar ejemplo"
+                @click="clearXml"
+              />
+            </div>
+
             <div class="p-6 overflow-x-auto w-full">
               <div class="min-w-[800px] lg:min-w-0 print:min-w-0">
                 <VisorXml
@@ -974,6 +1190,13 @@ useHead({
           </ULink>  con Nuxt 4, Nuxt UI y Tailwind CSS.
         </p>
       </footer>
+
+      <ClientOnly>
+        <SriResponseModal
+          v-model:open="isSriModalOpen"
+          :response="lastSriResponse"
+        />
+      </ClientOnly>
     </div>
   </UApp>
 </template>
