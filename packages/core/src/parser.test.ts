@@ -831,5 +831,47 @@ describe('SRI XML Parser core tests', () => {
     const data = getFullInvoiceDataFromXml(duplicateDeclXml)
     expect(data.accessKey).toBe('1106202601179001124800120010010000001231234567818')
   })
+
+  it('should handle XML with extra content or multiple root elements at the end of the document', () => {
+    const xmlWithExtra = `${mockXml}\n<autorizacion><estado>AUTORIZADO</estado></autorizacion>`
+    const data = getFullInvoiceDataFromXml(xmlWithExtra)
+    expect(data.accessKey).toBe('1106202601179001124800120010010000001231234567818')
+  })
+
+  it('should handle XML with non-XML trailing garbage after the closing root tag', () => {
+    const xmlWithGarbage = `${mockXml}\nTrailing non-XML text and corrupted bytes at the end of file`
+    const data = getFullInvoiceDataFromXml(xmlWithGarbage)
+    expect(data.accessKey).toBe('1106202601179001124800120010010000001231234567818')
+  })
+
+  it('should handle direct voucher XML followed by detached or trailing signature element', () => {
+    const voucherWithTrailingSig = `<?xml version="1.0" encoding="utf-8"?>
+<factura id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>ALMACENES EL AHORRO S.A.</razonSocial>
+    <ruc>1790011248001</ruc>
+    <claveAcceso>1106202601179001124800120010010000001231234567818</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000123</secuencial>
+    <dirMatriz>Av. 10 de Agosto</dirMatriz>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>11/06/2026</fechaEmision>
+    <totalSinImpuestos>100.00</totalSinImpuestos>
+    <importeTotal>100.00</importeTotal>
+  </infoFactura>
+</factura>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+  <ds:SignatureValue>MIIJIDCCBwigAwIBAgIIavjwz6s1+rYwDQYJKoZIhvcNAQELBQAwgbgxCzAJBgNVBAYTAkVTMUQw</ds:SignatureValue>
+</ds:Signature>`
+
+    const data = getFullInvoiceDataFromXml(voucherWithTrailingSig)
+    expect(data.accessKey).toBe('1106202601179001124800120010010000001231234567818')
+    expect(data.typeDoc).toBe('01')
+  })
 })
 

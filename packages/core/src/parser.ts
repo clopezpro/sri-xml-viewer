@@ -52,20 +52,54 @@ export function sanitizeXmlString(xml: string): string {
   return cleanXml
 }
 
+function parseFromStringSafe(parser: any, cleanXml: string): Document {
+  const doc = parser.parseFromString(cleanXml, 'text/xml')
+  const errorElements = doc.getElementsByTagName('parsererror')
+  if (errorElements.length === 0) {
+    return doc
+  }
+
+  const errText = errorElements[0]?.textContent || ''
+  const isMultiRootOrExtraContent = /extra content at the end of the document|only one root|outside of root node|junk after document element/i.test(errText)
+
+  if (isMultiRootOrExtraContent) {
+    // Intento 1: Envolver en un contenedor raíz <sriContainer> (p. ej. múltiples <autorizacion> o comprobantes concatenados)
+    const xmlDeclMatch = cleanXml.match(/^<\?xml\b[\s\S]*?\?>/i)
+    const xmlDecl = xmlDeclMatch ? xmlDeclMatch[0] : ''
+    const bodyWithoutDecl = xmlDecl ? cleanXml.slice(xmlDecl.length) : cleanXml
+    const wrapped = `${xmlDecl}\n<sriContainer>${bodyWithoutDecl}</sriContainer>`
+
+    const wrappedDoc = parser.parseFromString(wrapped, 'text/xml')
+    if (wrappedDoc.getElementsByTagName('parsererror').length === 0) {
+      return wrappedDoc
+    }
+
+    // Intento 2: Extraer el primer bloque de comprobante o autorización completo ignorando basura al final
+    const rootMatch = cleanXml.match(
+      /<((?:\w+:)?(?:autorizacion|autorizaciones|Envelope|factura|notaCredito|notaDebito|comprobanteRetencion|guiaRemision|liquidacionCompra))\b[^>]*>[\s\S]*?<\/\1>/i
+    )
+    if (rootMatch) {
+      const singleDoc = `${xmlDecl}\n${rootMatch[0]}`
+      const singleDocParsed = parser.parseFromString(singleDoc, 'text/xml')
+      if (singleDocParsed.getElementsByTagName('parsererror').length === 0) {
+        return singleDocParsed
+      }
+    }
+  }
+
+  throw new Error(errText || 'Error de parseo de XML')
+}
+
 export function parseXmlString(xml: string): Document {
   const cleanXml = sanitizeXmlString(xml)
   if (isBrowser) {
     const parser = new DOMParser()
-    const doc = parser.parseFromString(cleanXml, 'text/xml')
-    if (doc.getElementsByTagName('parsererror').length > 0) {
-      throw new Error(doc.getElementsByTagName('parsererror')[0]?.textContent || 'Error de parseo de XML')
-    }
-    return doc
+    return parseFromStringSafe(parser, cleanXml)
   } else {
     const GlobalDOMParser = (globalThis as any).DOMParser
     if (GlobalDOMParser) {
       const parser = new GlobalDOMParser()
-      return parser.parseFromString(cleanXml, 'text/xml')
+      return parseFromStringSafe(parser, cleanXml)
     }
     throw new Error('DOMParser no está disponible globalmente. Para entornos SSR / Node.js, por favor define globalThis.DOMParser usando una librería como @xmldom/xmldom.')
   }
