@@ -29,10 +29,15 @@ interface IAutorizarComprobanteResponse {
   }
 }
 
+interface IDocumentAuthResult {
+  result: IAutorizarComprobanteResponse
+  rawResponse: string
+}
+
 function documentAuthorization(
   accessKey: string,
   authorizationUrl: string
-): Promise<IAutorizarComprobanteResponse> {
+): Promise<IDocumentAuthResult> {
   const params = { claveAccesoComprobante: accessKey }
 
   return new Promise((resolve, reject) => {
@@ -42,12 +47,13 @@ function documentAuthorization(
         return
       }
 
-      client.autorizacionComprobante(params, (err: any, result: IAutorizarComprobanteResponse) => {
+      client.autorizacionComprobante(params, (err: any, result: IAutorizarComprobanteResponse, rawResponse: string) => {
+        const rawXml = rawResponse || client?.lastResponse || ''
         if (err) {
-          reject(err)
+          reject(Object.assign(err, { rawResponse: rawXml }))
           return
         }
-        resolve(result)
+        resolve({ result, rawResponse: rawXml })
       })
     })
   })
@@ -73,12 +79,16 @@ export default defineEventHandler(async (event) => {
     : 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'
 
   try {
-    const resp = await documentAuthorization(claveAcceso, endpoint)
+    const { result: resp, rawResponse: rawXml } = await documentAuthorization(claveAcceso, endpoint)
 
     if (!resp || !resp.RespuestaAutorizacionComprobante) {
       return {
         success: false,
         estado: 'ERROR_SRI_CONEXION',
+        claveAcceso,
+        numeroComprobantes: '0',
+        rawXml,
+        rawResponseData: resp || null,
         mensajes: [{
           identificador: 'SRI-EMPTY',
           mensaje: 'El SRI devolvió una respuesta vacía o no respondió. Por favor, reintente la consulta.',
@@ -92,6 +102,10 @@ export default defineEventHandler(async (event) => {
       return {
         success: false,
         estado: 'NO REGISTRADO',
+        claveAcceso,
+        numeroComprobantes: resp.RespuestaAutorizacionComprobante.numeroComprobantes || '0',
+        rawXml,
+        rawResponseData: resp.RespuestaAutorizacionComprobante,
         mensajes: [{
           identificador: 'SRI-404',
           mensaje: 'El comprobante no se encuentra registrado en el SRI o el tiempo límite para su consulta ha expirado.',
@@ -102,6 +116,22 @@ export default defineEventHandler(async (event) => {
 
     const authList = Array.isArray(autorizaciones) ? autorizaciones : [autorizaciones]
     const auth = authList.find(a => a.estado === 'AUTORIZADO') || authList[0]
+
+    if (!auth) {
+      return {
+        success: false,
+        estado: 'SIN_AUTORIZACION',
+        claveAcceso,
+        numeroComprobantes: resp.RespuestaAutorizacionComprobante.numeroComprobantes || '0',
+        rawXml,
+        rawResponseData: resp.RespuestaAutorizacionComprobante,
+        mensajes: [{
+          identificador: 'SRI-EMPTY-AUTH',
+          mensaje: 'El SRI devolvió una lista de autorizaciones vacía.',
+          tipo: 'ERROR'
+        }]
+      }
+    }
 
     const estado = typeof auth.estado === 'string' ? auth.estado.trim() : String(auth.estado || '')
     const numeroAutorizacion = typeof auth.numeroAutorizacion === 'string' ? auth.numeroAutorizacion.trim() : String(auth.numeroAutorizacion || '')
@@ -147,10 +177,19 @@ export default defineEventHandler(async (event) => {
       }
     }
 
+    const ambienteName = auth.ambiente || (isProd ? 'PRODUCCIÓN' : 'PRUEBAS')
+
     if (estado !== 'AUTORIZADO') {
       return {
         success: false,
         estado,
+        claveAcceso,
+        numeroComprobantes: resp.RespuestaAutorizacionComprobante.numeroComprobantes || '1',
+        numeroAutorizacion,
+        fechaAutorizacion,
+        ambiente: ambienteName,
+        rawXml,
+        rawResponseData: resp.RespuestaAutorizacionComprobante,
         mensajes: mensajes.length > 0 ? mensajes : [{
           identificador: 'SRI-NO-AUT',
           mensaje: `El comprobante está en estado: ${estado}.`,
@@ -158,8 +197,6 @@ export default defineEventHandler(async (event) => {
         }]
       }
     }
-
-    const ambienteName = auth.ambiente || (isProd ? 'PRODUCCIÓN' : 'PRUEBAS')
 
     // Reconstruir el XML en el formato exacto del SRI
     const rebuiltXml = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -177,7 +214,12 @@ export default defineEventHandler(async (event) => {
       numeroAutorizacion,
       fechaAutorizacion,
       ambiente: ambienteName,
-      xml: rebuiltXml
+      claveAcceso,
+      numeroComprobantes: resp.RespuestaAutorizacionComprobante?.numeroComprobantes || '1',
+      xml: rebuiltXml,
+      rawXml,
+      rawResponseData: resp.RespuestaAutorizacionComprobante,
+      mensajes
     }
 
   } catch (error: any) {
@@ -198,6 +240,10 @@ export default defineEventHandler(async (event) => {
     return {
       success: false,
       estado: 'ERROR_CONEXION',
+      claveAcceso,
+      numeroComprobantes: '0',
+      rawXml: error?.rawResponse || '',
+      rawResponseData: error?.message || null,
       mensajes: [{
         identificador: 'CONN-500',
         mensaje,
