@@ -970,7 +970,7 @@ useHead({
                     variant="solid"
                     color="primary"
                     aria-label="Buscar"
-                    label="Buscar"
+                    :label="loading?'Buscando...':'Buscar'"
                     :loading="loading"
                     @click="searchByClave"
                   />
