@@ -3,12 +3,57 @@ import type { IDataKey, Detail, Taxes, Tax, AdditionalDetails, Payment, IFullInv
 
 const isBrowser = typeof window !== 'undefined' && typeof window.document !== 'undefined'
 
-export function parseXmlString(xml: string): Document {
+export function sanitizeXmlString(xml: string): string {
   let cleanXml = (xml || '').trim()
   const firstLT = cleanXml.indexOf('<')
   if (firstLT > 0) {
     cleanXml = cleanXml.substring(firstLT)
   }
+
+  // 1. Si <comprobante> contiene una declaración <?xml ...?> no envuelta en CDATA,
+  // la especificación W3C XML prohíbe <?xml fuera del inicio del documento (causando
+  // "Invalid processing instruction: <?xml"). Se envuelve el contenido en CDATA.
+  cleanXml = cleanXml.replace(
+    /<((?:\w+:)?comprobante)\b([^>]*)>([\s\S]*?)<\/\1>/gi,
+    (fullMatch, tag, attrs, inner) => {
+      const trimmedInner = inner.trim()
+      if (trimmedInner.includes('<?xml') && !trimmedInner.startsWith('<![CDATA[')) {
+        return `<${tag}${attrs}><![CDATA[${trimmedInner}]]></${tag}>`
+      }
+      return fullMatch
+    }
+  )
+
+  // 2. Si existen declaraciones <?xml ...?> secundarias fuera de bloques CDATA,
+  // removerlas para evitar que el parser del navegador aborte el procesamiento.
+  const cdataRegex = /<!\[CDATA\[[\s\S]*?\]\]>/gi
+  const cdataBlocks: string[] = []
+  const placeholderPrefix = '___SRI_CDATA_BLOCK_'
+  const withPlaceholders = cleanXml.replace(cdataRegex, (match) => {
+    const idx = cdataBlocks.length
+    cdataBlocks.push(match)
+    return `${placeholderPrefix}${idx}___`
+  })
+
+  let isFirstXmlDecl = true
+  const sanitized = withPlaceholders.replace(/<\?xml\b[\s\S]*?\?>/gi, (match) => {
+    if (isFirstXmlDecl) {
+      isFirstXmlDecl = false
+      return match
+    }
+    return ''
+  })
+
+  cleanXml = sanitized.replace(new RegExp(`${placeholderPrefix}(\\d+)___`, 'g'), (_, idxStr) => {
+    const idx = Number.parseInt(idxStr, 10)
+    return cdataBlocks[idx] ?? ''
+  })
+
+  return cleanXml
+}
+
+export function parseXmlString(xml: string): Document {
+  const cleanXml = sanitizeXmlString(xml)
   if (isBrowser) {
     const parser = new DOMParser()
     const doc = parser.parseFromString(cleanXml, 'text/xml')

@@ -715,4 +715,121 @@ describe('SRI XML Parser core tests', () => {
     expect(data.payments[0]?.total).toBe('15.71')
     expect(data.totals).toContainEqual({ name: 'VALOR TOTAL', valor: 15.71 })
   })
+
+  it('should successfully parse XML when comprobante contains unescaped <?xml declaration without CDATA wrapper', () => {
+    const unescapedXml = `<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1106202601179001124800120010010000001231234567818</numeroAutorizacion>
+  <fechaAutorizacion>11/06/2026 12:45:30</fechaAutorizacion>
+  <ambiente>PRODUCCION</ambiente>
+  <comprobante><?xml version="1.0" encoding="utf-8"?>
+<factura id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>ALMACENES EL AHORRO S.A.</razonSocial>
+    <nombreComercial>EL AHORRO DE ECUADOR</nombreComercial>
+    <ruc>1790011248001</ruc>
+    <claveAcceso>1106202601179001124800120010010000001231234567818</claveAcceso>
+    <codDoc>01</codDoc>
+    <estab>001</estab>
+    <ptoEmi>001</ptoEmi>
+    <secuencial>000000123</secuencial>
+    <dirMatriz>Av. 10 de Agosto N34-12 y Rumipamba</dirMatriz>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>11/06/2026</fechaEmision>
+    <dirEstablecimiento>Av. de los Shyris N38-45 y Holanda</dirEstablecimiento>
+    <obligadoContabilidad>SI</obligadoContabilidad>
+    <tipoIdentificacionComprador>04</tipoIdentificacionComprador>
+    <razonSocialComprador>JUAN PEREZ SANDOVAL</razonSocialComprador>
+    <identificacionComprador>1712345678001</identificacionComprador>
+    <totalSinImpuestos>120.00</totalSinImpuestos>
+    <totalDescuento>10.00</totalDescuento>
+    <totalConImpuestos>
+      <totalImpuesto>
+        <codigo>2</codigo>
+        <codigoPorcentaje>2</codigoPorcentaje>
+        <baseImponible>110.00</baseImponible>
+        <tarifa>12.00</tarifa>
+        <valor>13.20</valor>
+      </totalImpuesto>
+    </totalConImpuestos>
+    <propina>0.00</propina>
+    <importeTotal>123.20</importeTotal>
+    <moneda>DOLAR</moneda>
+    <pagos>
+      <pago>
+        <formaPago>20</formaPago>
+        <total>123.20</total>
+      </pago>
+    </pagos>
+  </infoFactura>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>PROD001</codigoPrincipal>
+      <descripcion>Laptop Pro 15 pulgadas Intel i7 16GB RAM</descripcion>
+      <cantidad>1.000000</cantidad>
+      <precioUnitario>100.00</precioUnitario>
+      <precioTotalSinImpuesto>90.00</precioTotalSinImpuesto>
+      <impuestos>
+        <impuesto>
+          <codigo>2</codigo>
+          <codigoPorcentaje>2</codigoPorcentaje>
+          <tarifa>12.00</tarifa>
+          <baseImponible>90.00</baseImponible>
+          <valor>10.80</valor>
+        </impuesto>
+      </impuestos>
+    </detalle>
+  </detalles>
+</factura></comprobante>
+</autorizacion>`
+
+    const data = getFullInvoiceDataFromXml(unescapedXml)
+    expect(data.accessKey).toBe('1106202601179001124800120010010000001231234567818')
+    expect(data.typeDoc).toBe('01')
+    expect(data.numberDocument).toBe('001-001-000000123')
+  })
+
+  it('should successfully parse XML with duplicate <?xml ...?> declarations at the root level', () => {
+    const duplicateDeclXml = `<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
+<autorizacion>
+  <estado>AUTORIZADO</estado>
+  <numeroAutorizacion>1106202601179001124800120010010000001231234567818</numeroAutorizacion>
+  <fechaAutorizacion>11/06/2026 12:45:30</fechaAutorizacion>
+  <ambiente>PRODUCCION</ambiente>
+  <comprobante><![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<factura id="comprobante" version="1.1.0">
+  <infoTributaria>
+    <ambiente>1</ambiente>
+    <tipoEmision>1</tipoEmision>
+    <razonSocial>ALMACENES EL AHORRO S.A.</razonSocial>
+    <ruc>1790011248001</ruc>
+    <claveAcceso>1106202601179001124800120010010000001231234567818</claveAcceso>
+    <codDoc>01</codDoc>
+  </infoTributaria>
+  <infoFactura>
+    <fechaEmision>11/06/2026</fechaEmision>
+    <totalSinImpuestos>100.00</totalSinImpuestos>
+    <importeTotal>100.00</importeTotal>
+  </infoFactura>
+  <detalles>
+    <detalle>
+      <codigoPrincipal>PROD001</codigoPrincipal>
+      <descripcion>Producto 1</descripcion>
+      <cantidad>1.000000</cantidad>
+      <precioUnitario>100.00</precioUnitario>
+      <precioTotalSinImpuesto>100.00</precioTotalSinImpuesto>
+    </detalle>
+  </detalles>
+</factura>]]></comprobante>
+</autorizacion>`
+
+    const data = getFullInvoiceDataFromXml(duplicateDeclXml)
+    expect(data.accessKey).toBe('1106202601179001124800120010010000001231234567818')
+  })
 })
+
