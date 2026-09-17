@@ -23,6 +23,24 @@ export function showDateFormat(dateStr: any, format?: string): string {
 }
 export function showAuthorizationDate(datStr: string | undefined | null) {
   if (!datStr) return undefined
+
+  // Si la fecha viene explícitamente en UTC (termina en 'Z'), adaptar a hora de Ecuador (UTC-5)
+  if (typeof datStr === 'string' && datStr.endsWith('Z')) {
+    const d = new Date(datStr)
+    if (!isNaN(d.getTime())) {
+      const ecMs = d.getTime() - (5 * 60 * 60 * 1000)
+      const ecDate = new Date(ecMs)
+      const pad = (n: number) => String(n).padStart(2, '0')
+      const day = pad(ecDate.getUTCDate())
+      const month = pad(ecDate.getUTCMonth() + 1)
+      const year = ecDate.getUTCFullYear()
+      const hour = pad(ecDate.getUTCHours())
+      const minute = pad(ecDate.getUTCMinutes())
+      const second = pad(ecDate.getUTCSeconds())
+      return `${day}/${month}/${year} ${hour}:${minute}:${second} EC`
+    }
+  }
+
   /* check format */
   const match = datStr.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
   if (match) {

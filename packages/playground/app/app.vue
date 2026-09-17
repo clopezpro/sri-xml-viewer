@@ -288,7 +288,7 @@ async function searchByClave() {
         xml: response.xml,
         ambiente: response.ambiente || 'PRODUCCIÓN',
         numeroAutorizacion: response.numeroAutorizacion || cleanClave,
-        fechaAutorizacion: response.fechaAutorizacion || new Date().toISOString(),
+        fechaAutorizacion: response.fechaAutorizacion || '',
         tipoComprobante: tipoCode,
         createdAt: Date.now()
       })

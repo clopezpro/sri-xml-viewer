@@ -34,14 +34,49 @@ interface IDocumentAuthResult {
   rawResponse: string
 }
 
+function extractRawFechaAutorizacion(rawXml: string, numeroAutorizacion?: string, estado?: string): string | null {
+  if (!rawXml) return null
+  try {
+    const authBlocks = rawXml.match(/<(?:\w+:)?autorizacion[\s>][\s\S]*?<\/(?:\w+:)?autorizacion>/gi)
+    if (authBlocks && authBlocks.length > 0) {
+      let targetBlock = authBlocks[0]
+      if (numeroAutorizacion) {
+        const found = authBlocks.find(b => b.includes(numeroAutorizacion))
+        if (found) targetBlock = found
+      } else if (estado) {
+        const found = authBlocks.find(b => b.toLowerCase().includes(`<estado>${estado.toLowerCase()}</estado>`))
+        if (found) targetBlock = found
+      }
+      const match = targetBlock.match(/<(?:\w+:)?fechaAutorizacion[^>]*>([^<]+)<\/(?:\w+:)?fechaAutorizacion>/i)
+      if (match && match[1]?.trim()) {
+        return match[1].trim()
+      }
+    }
+
+    const fallbackMatch = rawXml.match(/<(?:\w+:)?fechaAutorizacion[^>]*>([^<]+)<\/(?:\w+:)?fechaAutorizacion>/i)
+    if (fallbackMatch && fallbackMatch[1]?.trim()) {
+      return fallbackMatch[1].trim()
+    }
+  } catch {
+    // ignorar error de parsing regex
+  }
+  return null
+}
+
 function documentAuthorization(
   accessKey: string,
   authorizationUrl: string
 ): Promise<IDocumentAuthResult> {
   const params = { claveAccesoComprobante: accessKey }
+  const options = {
+    customDeserializer: {
+      dateTime: (text: string) => text,
+      date: (text: string) => text,
+    },
+  }
 
   return new Promise((resolve, reject) => {
-    createClient(authorizationUrl, (err: any, client: any) => {
+    createClient(authorizationUrl, options, (err: any, client: any) => {
       if (err) {
         reject(err)
         return
@@ -136,14 +171,30 @@ export default defineEventHandler(async (event) => {
     const estado = typeof auth.estado === 'string' ? auth.estado.trim() : String(auth.estado || '')
     const numeroAutorizacion = typeof auth.numeroAutorizacion === 'string' ? auth.numeroAutorizacion.trim() : String(auth.numeroAutorizacion || '')
     
+    const rawFecha = extractRawFechaAutorizacion(rawXml, numeroAutorizacion, estado)
+    
     let fechaAutorizacion = ''
-    if (auth.fechaAutorizacion) {
+    if (rawFecha) {
+      // Prioridad 1: valor exacto recibido en el XML original del SRI
+      fechaAutorizacion = rawFecha
+    } else if (auth.fechaAutorizacion) {
       if (typeof auth.fechaAutorizacion === 'string') {
         fechaAutorizacion = auth.fechaAutorizacion.trim()
       } else if (auth.fechaAutorizacion instanceof Date) {
-        fechaAutorizacion = auth.fechaAutorizacion.toISOString()
+        // En caso de que se haya parseado como Date, no alterarlo a UTC con toISOString() (.000Z)
+        // Se preserva la hora de Ecuador (UTC-5)
+        const pad = (n: number) => String(n).padStart(2, '0')
+        const ecMs = auth.fechaAutorizacion.getTime() - (5 * 60 * 60 * 1000)
+        const ecDate = new Date(ecMs)
+        const y = ecDate.getUTCFullYear()
+        const m = pad(ecDate.getUTCMonth() + 1)
+        const d = pad(ecDate.getUTCDate())
+        const h = pad(ecDate.getUTCHours())
+        const min = pad(ecDate.getUTCMinutes())
+        const s = pad(ecDate.getUTCSeconds())
+        fechaAutorizacion = `${y}-${m}-${d}T${h}:${min}:${s}-05:00`
       } else {
-        fechaAutorizacion = String(auth.fechaAutorizacion)
+        fechaAutorizacion = String(auth.fechaAutorizacion).trim()
       }
     }
 
